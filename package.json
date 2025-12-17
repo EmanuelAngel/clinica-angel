@@ -1,0 +1,23 @@
+{
+  "name": "clinica-angel",
+  "version": "0.0.0",
+  "description": "Clinic appointment scheduler for University",
+  "homepage": "https://github.com/EmanuelAngel/clinica-angel#readme",
+  "bugs": {
+    "url": "https://github.com/EmanuelAngel/clinica-angel/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EmanuelAngel/clinica-angel.git"
+  },
+  "license": "ISC",
+  "author": "Angel Emanuel",
+  "type": "module",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "dotenv": "17.2.3"
+  }
+}
