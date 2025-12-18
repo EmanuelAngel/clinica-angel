@@ -32,4 +32,4 @@ jobs:
         run: pnpm run lint
 
       - name: Run Tests with Coverage
-        run: pnpm test:cov
+        run: pnpm test
