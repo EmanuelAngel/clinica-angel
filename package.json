@@ -27,7 +27,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "dotenv": "17.2.3"
+    "dotenv": "17.2.3",
+    "zod": "4.2.1"
   },
   "devDependencies": {
     "@commitlint/cli": "20.2.0",
