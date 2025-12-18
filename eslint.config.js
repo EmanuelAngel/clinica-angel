@@ -49,7 +49,15 @@ export default [
     languageOptions: {
       globals: {
         ...globals.jest,
+        ...globals.node,
       },
+    },
+    rules: {
+      ...jestPlugin.configs["flat/recommended"].rules,
+      "jsdoc/require-jsdoc": "off",
+      "jsdoc/require-description": "off",
+      "jsdoc/require-param": "off",
+      "jsdoc/require-returns": "off",
     },
   },
   eslintPluginPrettierRecommended,
