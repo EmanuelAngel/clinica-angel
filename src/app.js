@@ -1,5 +1,6 @@
 import express from "express";
 import nunjucks from "nunjucks";
+import morgan from "morgan";
 
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,6 +8,12 @@ import { fileURLToPath } from "node:url";
 import { env } from "./_shared/infrastructure/env-variables.js";
 
 const app = express();
+
+app.use(
+  morgan(env.NODE_ENV === "production" ? "combined" : "dev", {
+    skip: (req) => req.url.startsWith("/health") || req.url.includes("."),
+  })
+);
 
 app.set("view engine", "njk");
 
