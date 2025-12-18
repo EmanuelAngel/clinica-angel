@@ -1,0 +1,56 @@
+import js from "@eslint/js";
+import globals from "globals";
+import jsdoc from "eslint-plugin-jsdoc";
+import jestPlugin from "eslint-plugin-jest";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+
+export default [
+  js.configs.recommended,
+  {
+    files: ["**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-console": "warn",
+    },
+  },
+  {
+    files: ["src/assets/**/*.{js,mjs,cjs}", "public/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+  jsdoc.configs["flat/recommended-typescript-flavor"],
+  {
+    files: ["**/*.{js,mjs,cjs}"],
+    plugins: { jsdoc },
+    rules: {
+      "jsdoc/require-description": "warn",
+      "jsdoc/require-description-complete-sentence": "warn",
+      "jsdoc/require-param": "error",
+      "jsdoc/require-param-type": "error",
+      "jsdoc/require-param-description": "warn",
+      "jsdoc/require-returns": "error",
+      "jsdoc/require-returns-type": "error",
+      "jsdoc/require-returns-check": "error",
+    },
+  },
+  {
+    files: ["**/*.test.js", "**/*.spec.js"],
+    ...jestPlugin.configs["flat/recommended"],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+  },
+  eslintPluginPrettierRecommended,
+];
