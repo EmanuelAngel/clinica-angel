@@ -1,0 +1,22 @@
+{% extends "layout/base.njk" %}
+
+{% block scripts %}
+  <script type="module">
+    const $homeBtn = document.querySelector('#home-btn');
+
+    $homeBtn.addEventListener('click', () => {
+      alert('Script block working');
+    });
+
+    alert('Hello World');
+  </script>
+{% endblock %}
+
+{% block content %}
+  <hgroup>
+    <h1>Hello World</h1>
+    <p>This is a paragraph</p>
+  </hgroup>
+
+  <button id="home-btn" class="btn btn-primary">Click me</button>
+{% endblock %}

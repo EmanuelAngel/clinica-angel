@@ -1,0 +1,12 @@
+<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+  <div class="mx-2 flex-1 px-2">{{ title }}</div>
+<ul class="menu bg-base-200 min-h-full w-80 p-4">
+  {% for link in links %}
+    <li>
+      <a href="{{ link.url }}">
+        <i data-lucide="{{ link.icon }}"></i>
+        {{ link.displayName }}
+      </a>
+    </li>
+  {% endfor %}  
+</ul>

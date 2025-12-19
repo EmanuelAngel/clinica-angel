@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="drawer">
+  <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+  <div class="drawer-content flex flex-col">
+    {% include "layout/nav-bar.njk" %}
+    
+    {% block content %}{% endblock %}
+  </div>
+
+  <div class="drawer-side">
+    {% include "layout/side-nav.njk" %}
+  </div>
+</div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+  {% block scripts %}
+  {% endblock %}
+</body>
+</html>
