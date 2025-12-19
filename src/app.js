@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 
 import { env } from "./_shared/infrastructure/env-variables.js";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const app = express();
 
 app.use(
@@ -15,9 +17,9 @@ app.use(
   })
 );
 
-app.set("view engine", "njk");
+app.use(express.static(join(__dirname, "./_assets")));
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+app.set("view engine", "njk");
 
 const viewPaths = [
   join(__dirname, "./example/views"),
