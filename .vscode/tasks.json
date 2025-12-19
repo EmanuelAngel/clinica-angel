@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "css:watch",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "Tailwind Watch Autostart",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "watchers"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}
