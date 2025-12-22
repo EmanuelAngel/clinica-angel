@@ -32,7 +32,7 @@ export default [
     },
   },
   {
-    files: ["src/assets/**/*.{js,mjs,cjs}", "public/**/*.{js,mjs,cjs}"],
+    files: ["src/_assets/**/*.{js,mjs,cjs}", "public/**/*.{js,mjs,cjs}"],
     languageOptions: {
       globals: {
         ...globals.browser,
