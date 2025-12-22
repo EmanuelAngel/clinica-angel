@@ -21,6 +21,26 @@ const envSchema = z.object({
     .string()
     .url()
     .startsWith("mysql://", "Debe ser una URL de MySQL"),
+
+  MYSQL_DATABASE_HOST: z
+    .string()
+    .min(1, "El host de la base de datos es requerido")
+    .default("localhost"),
+
+  MYSQL_DATABASE_USER: z
+    .string()
+    .min(1, "El usuario de la base de datos es requerido"),
+
+  MYSQL_DATABASE_PASSWORD: z.string().default(""),
+
+  MYSQL_DATABASE_NAME: z
+    .string()
+    .min(1, "El nombre de la base de datos es requerido"),
+
+  MYSQL_DATABASE_CONNECTION_LIMIT: z.coerce
+    .number()
+    .positive("El límite de conexiones debe ser positivo")
+    .default(4),
 });
 
 const result = envSchema.safeParse(process.env);
