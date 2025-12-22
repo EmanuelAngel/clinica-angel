@@ -1,0 +1,6 @@
+{
+  "material-icon-theme.files.associations": {
+    "prisma.js": "prisma",
+    "prisma.config.mjs": "prisma"
+  }
+}

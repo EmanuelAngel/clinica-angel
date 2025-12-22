@@ -16,6 +16,11 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_EXPIRES: ${{ secrets.JWT_EXPIRES }}
       MYSQL_CONNECTION_STRING: ${{ secrets.MYSQL_CONNECTION_STRING }}
+      MYSQL_DATABASE_HOST: ${{ secrets.MYSQL_DATABASE_HOST }}
+      MYSQL_DATABASE_USER: ${{ secrets.MYSQL_DATABASE_USER }}
+      MYSQL_DATABASE_PASSWORD: ${{ secrets.MYSQL_DATABASE_PASSWORD }}
+      MYSQL_DATABASE_NAME: ${{ secrets.MYSQL_DATABASE_NAME }}
+      MYSQL_DATABASE_CONNECTION_LIMIT: ${{ secrets.MYSQL_DATABASE_CONNECTION_LIMIT }}
 
     steps:
       - name: Checkout repository

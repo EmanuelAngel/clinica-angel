@@ -1,0 +1,211 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  SECRETARY
+  PROFESSIONAL
+  PATIENT
+}
+
+enum SlotStatus {
+  FREE
+  PROPOSED
+  BOOKED
+  CANCELLED
+  NO_SHOW     @map("NO-SHOW")
+  ARRIVED
+  IN_PROGRESS @map("IN-PROGRESS")
+  FULFILLED
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model User {
+  id                 Int       @id @default(autoincrement()) @map("user_id")
+  email              String    @unique
+  passwordHash       String    @map("password_hash")
+  role               Role
+  nationalId         String    @map("national_id")
+  firstNames         String    @map("first_names")
+  lastNames          String    @map("last_names")
+  phone              String
+  address            String
+  nationalIdImageUrl String?   @map("national_id_image_url")
+  registeredAt       DateTime  @default(now()) @map("registered_at")
+  deletedAt          DateTime? @map("deleted_at")
+
+  patientInsurances       PatientHealthInsurance[]
+  professionalCredentials ProfessionalSpecialty[]
+  requestedSlots          Slot[]                   @relation("PatientSlots")
+  waitlistRequests        WaitingList[]            @relation("PatientWaitlist")
+  professionalWaitlists   WaitingList[]            @relation("ProfessionalWaitlist")
+
+  @@unique([nationalId, role], name: "unique_user_identity")
+  @@map("users")
+}
+
+model HealthInsurance {
+  id        Int       @id @default(autoincrement()) @map("insurance_id")
+  name      String    @unique
+  deletedAt DateTime? @map("deleted_at")
+
+  members PatientHealthInsurance[]
+
+  @@map("health_insurances")
+}
+
+model PatientHealthInsurance {
+  userId       Int    @map("user_id")
+  insuranceId  Int    @map("insurance_id")
+  memberNumber String @map("member_number")
+
+  user      User            @relation(fields: [userId], references: [id])
+  insurance HealthInsurance @relation(fields: [insuranceId], references: [id])
+
+  @@id([userId, insuranceId])
+  @@map("patient_health_insurance")
+}
+
+model Specialty {
+  id        Int       @id @default(autoincrement()) @map("specialty_id")
+  name      String    @unique
+  deletedAt DateTime? @map("deleted_at")
+
+  professionals ProfessionalSpecialty[]
+  waitingLists  WaitingList[]
+
+  @@map("specialties")
+}
+
+model ProfessionalSpecialty {
+  licenseNumber String @id @map("license_number")
+  userId        Int    @map("user_id")
+  specialtyId   Int    @map("specialty_id")
+
+  user      User      @relation(fields: [userId], references: [id])
+  specialty Specialty @relation(fields: [specialtyId], references: [id])
+
+  schedules Schedule[]
+
+  @@map("professional_specialty")
+}
+
+model Location {
+  id        Int       @id @default(autoincrement()) @map("location_id")
+  name      String
+  address   String
+  phone     String?
+  deletedAt DateTime? @map("deleted_at")
+
+  schedules Schedule[]
+
+  @@map("locations")
+}
+
+model Classification {
+  id   Int    @id @default(autoincrement()) @map("classification_id")
+  name String @unique
+
+  schedules Schedule[]
+
+  @@map("classifications")
+}
+
+model Schedule {
+  id                  Int       @id @default(autoincrement()) @map("schedule_id")
+  professionalLicense String    @map("professional_license")
+  locationId          Int       @map("location_id")
+  classificationId    Int       @map("classification_id")
+  slotDuration        Int       @map("slot_duration_minutes")
+  maxOverbooksPerDay  Int       @default(12) @map("max_overbooks_per_day")
+  maxOverbooksPerSlot Int       @default(1) @map("max_overbooks_per_slot")
+  isPaused            Boolean   @default(false) @map("is_paused")
+  deletedAt           DateTime? @map("deleted_at")
+
+  professional   ProfessionalSpecialty @relation(fields: [professionalLicense], references: [licenseNumber])
+  location       Location              @relation(fields: [locationId], references: [id])
+  classification Classification        @relation(fields: [classificationId], references: [id])
+
+  configs ScheduleConfig[]
+  blocks  ScheduleBlock[]
+  slots   Slot[]
+
+  @@map("schedules")
+}
+
+model ScheduleConfig {
+  id         Int       @id @default(autoincrement()) @map("config_id")
+  scheduleId Int       @map("schedule_id")
+  dayOfWeek  DayOfWeek @map("day_of_week")
+  startTime  DateTime  @db.Time
+  endTime    DateTime  @db.Time
+  validFrom  DateTime  @map("valid_from") @db.Date
+  validUntil DateTime  @map("valid_until") @db.Date
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+
+  @@map("schedule_configs")
+}
+
+model ScheduleBlock {
+  id         Int      @id @default(autoincrement()) @map("block_id")
+  scheduleId Int?     @map("schedule_id")
+  startDate  DateTime @map("start_date") @db.Date
+  endDate    DateTime @map("end_date") @db.Date
+  reason     String   @db.Text
+
+  schedule Schedule? @relation(fields: [scheduleId], references: [id])
+
+  @@map("schedule_blocks")
+}
+
+model Slot {
+  id                 Int        @id @default(autoincrement()) @map("slot_id")
+  scheduleId         Int        @map("schedule_id")
+  patientId          Int?       @map("patient_id")
+  startsAt           DateTime   @map("starts_at")
+  status             SlotStatus @default(FREE)
+  isOverbook         Boolean    @default(false) @map("is_overbook")
+  consultationReason String?    @map("consultation_reason") @db.Text
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+  patient  User?    @relation("PatientSlots", fields: [patientId], references: [id])
+
+  @@map("slots")
+}
+
+model WaitingList {
+  id             Int      @id @default(autoincrement()) @map("waitlist_id")
+  patientId      Int      @map("patient_id")
+  specialtyId    Int?     @map("specialty_id")
+  professionalId Int?     @map("professional_id")
+  requestDate    DateTime @default(now()) @map("request_date")
+  status         String
+
+  patient      User       @relation("PatientWaitlist", fields: [patientId], references: [id])
+  specialty    Specialty? @relation(fields: [specialtyId], references: [id])
+  professional User?      @relation("ProfessionalWaitlist", fields: [professionalId], references: [id])
+
+  @@map("waiting_list")
+}

@@ -5,6 +5,17 @@ import jestPlugin from "eslint-plugin-jest";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 
 export default [
+  {
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      "generated/**",
+      "*.config.js",
+      "src/_assets/css/output.css",
+    ],
+  },
   js.configs.recommended,
   {
     files: ["**/*.{js,mjs,cjs}"],
