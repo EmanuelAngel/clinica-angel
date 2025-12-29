@@ -1,0 +1,18 @@
+<div class="dropdown dropdown-end">
+  <div tabindex="0" role="button" class="btn btn-ghost rounded-field">
+    <i data-lucide="user-circle"></i>
+    Mi perfil
+  </div>
+  <ul
+    tabindex="-1"
+    class="menu dropdown-content bg-base-200 rounded-box z-1 mt-4 w-52 p-2 shadow-sm">
+    <li>
+      <a href="/profile" class="link link-primary">Ir a mi perfil</a>
+    </li>
+    <li>
+      <form action="/auth/logout" method="post">
+        <button type="submit" class="link link-error">Cerrar sesión</button>
+      </form>
+    </li>
+  </ul>
+</div>

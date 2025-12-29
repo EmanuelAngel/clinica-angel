@@ -1,0 +1,7 @@
+{% macro badge(isActive) %}
+  {% if isActive %}
+    <div class="badge badge-secondary">Activo</div>
+  {% else %}
+    <div class="badge badge-ghost">Inactivo</div>
+  {% endif %}
+{% endmacro %}

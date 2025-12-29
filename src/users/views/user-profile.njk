@@ -1,0 +1,22 @@
+{% extends "layout/base.njk" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription(user.fullName, "Viendo el perfil de " + user.fullName + " [" + user.role + "].") }}
+{% endblock %}
+
+{% block content %}
+  <div class="w-full max-w-3xl mx-auto space-y-8">
+    <div class="card bg-base-200 shadow-md">
+      <div class="card-body">
+        <h2 class="card-title">Información Personal</h2>
+        <p><strong>Nombres:</strong> {{ user.firstNames }}</p>
+        <p><strong>Apellidos:</strong> {{ user.lastNames }}</p>
+        <p><strong>DNI:</strong> {{ user.nationalId }}</p>
+        <p><strong>Correo Electrónico:</strong> {{ user.email }}</p>
+        <p><strong>Teléfono:</strong> {{ user.phoneNumber }}</p>
+        <p><strong>Dirección:</strong> {{ user.address }}</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}
