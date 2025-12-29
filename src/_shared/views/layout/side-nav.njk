@@ -1,12 +1,74 @@
 <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-  <div class="mx-2 flex-1 px-2">{{ title }}</div>
-<ul class="menu bg-base-200 min-h-full w-80 p-4">
-  {% for link in links %}
-    <li>
-      <a href="{{ link.url }}">
-        <i data-lucide="{{ link.icon }}"></i>
-        {{ link.displayName }}
-      </a>
-    </li>
-  {% endfor %}  
-</ul>
+<div class="flex h-full flex-col bg-base-200">
+  <!-- Header -->
+  <div class="mx-2 flex-none border-b border-base-300 px-2 py-4">{{ title }}</div>
+
+  <!-- Links Section -->
+  <div class="flex-1 overflow-y-auto">
+    <ul class="menu w-full p-4">
+      {% for link in links %}
+        {% if link.title %}
+          <li>
+            <details>
+              <summary class="btn btn-ghost rounded-field">
+                <i data-lucide="user-circle"></i>
+                {{ link.title }}
+              </summary>
+              <ul class="bg-base-200 p-2">
+                {% for link in link.links %}
+                  <li>
+                    <a href="{{ link.url }}">
+                      <i data-lucide="{{ link.icon }}"></i>
+                      {{ link.displayName }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </details>
+          </li>
+        {% else %}
+          <li>
+            <a href="{{ link.url }}">
+              <i data-lucide="{{ link.icon }}"></i>
+              {{ link.displayName }}
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Bottom Section: Profile Actions and Theme Controller -->
+  <div class="flex-none border-t border-base-300 p-4">
+    <ul class="menu w-full flex-col gap-2">
+      <!-- Profile Actions -->
+      {% if user %}
+        {% include "layout/profile-actions.njk" %}
+      {% endif %}
+      
+      <!-- Theme Controller -->
+      {# <li>
+        {% include "partials/theme-controller.njk" %}
+      </li> #}
+
+      <!-- Auth Button -->
+      {% if user %}
+        <li>
+          <form action="/auth/logout" method="post" class="w-full">
+            <button type="submit" class="btn btn-soft btn-error w-full justify-start">
+              <i data-lucide="log-out"></i>
+              Cerrar sesión
+            </button>
+          </form>
+        </li>
+      {% else %}
+        <li>
+          <a href="/auth/login" class="btn btn-primary w-full justify-start">
+            <i data-lucide="log-in"></i>
+            Iniciar sesión
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+</div>

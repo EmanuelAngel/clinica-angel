@@ -17,17 +17,62 @@
       </svg>
     </label>
   </div>
-  <div class="mx-2 flex-1 px-2">{{ title }}</div>
-  <div class="hidden flex-none lg:block">
-    <ul class="menu menu-horizontal">
+
+
+
+  <!-- Links Section (Right side) -->
+  <div class="hidden flex-1 lg:block">
+    <ul class="menu menu-horizontal justify-end">
       {% for link in links %}
+        {% if link.title %}
+          <li>
+            <div class="dropdown dropdown-center p-0">
+              <div tabindex="0" role="button" class="btn btn-ghost rounded-field">
+                <i data-lucide="user-circle"></i>
+                {{ link.title }}
+              </div>
+              <ul
+                tabindex="-1"
+                class="menu dropdown-content bg-base-200 rounded-box z-1 w-52 p-2 shadow-sm">
+                {% for link in link.links %}
+                  <li>
+                    <a href="{{ link.url }}">
+                      <i data-lucide="{{ link.icon }}"></i>
+                      {{ link.displayName }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </li>
+        {% else %}
+          <li>
+            <a href="{{ link.url }}">
+              <i data-lucide="{{ link.icon }}"></i>
+              {{ link.displayName }}
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+
+    <!-- Profile Actions and Theme Controller (Left side) -->
+  <div class="hidden flex-none lg:flex">
+    <ul class="menu menu-horizontal gap-2">
+      {% if user %}
+        {% include "layout/profile-actions.njk" %}
+      {% else %}
         <li>
-          <a href="{{ link.url }}">
-            <i data-lucide="{{ link.icon }}"></i>
-            {{ link.displayName }}
-          </a>
+          <a href="/auth/login" class="btn btn-primary">
+            <i data-lucide="log-in"></i>
+            Iniciar sesión
+            </a>
         </li>
-      {% endfor %}  
+      {% endif %}
+      {# <li>
+        {% include "partials/theme-controller.njk" %}
+      </li> #}
     </ul>
   </div>
 </div>

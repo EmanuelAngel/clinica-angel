@@ -1,0 +1,30 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+<div class="space-y-8" style="max-width: 800px; margin: 50px auto; padding: 20px; text-align: center;">
+  <h1 class="font-bold text-5xl text-neutral">
+    ¡Ups! Algo salió mal
+  </h1>
+
+  <p>
+    {{ error.message }}
+  </p>
+
+  <a href="/" class="btn btn-primary">
+    Volver al Inicio
+  </a>
+
+  {% if error.isDev %}
+    <div class="overflow-x-auto text-left">
+      <h3 class="font-semibold text-xl">
+        <i data-lucide="bug"></i>
+        Debug Info
+      </h3>
+      <p><strong>Status:</strong> {{ error.statusCode }}</p>
+      <p><strong>Stack Trace:</strong></p>
+      <pre>{{ error.stack }}</pre>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
