@@ -29,12 +29,18 @@ importers:
       dotenv:
         specifier: 17.2.3
         version: 17.2.3
+      express-async-errors:
+        specifier: 3.1.1
+        version: 3.1.1(express@4.22.1)
       jsonwebtoken:
         specifier: 9.0.3
         version: 9.0.3
       morgan:
         specifier: 1.10.1
         version: 1.10.1
+      ms:
+        specifier: 2.1.3
+        version: 2.1.3
       tailwindcss:
         specifier: 4.1.18
         version: 4.1.18
@@ -57,6 +63,9 @@ importers:
       '@eslint/json':
         specifier: 0.14.0
         version: 0.14.0
+      '@types/cookie-parser':
+        specifier: 1.4.10
+        version: 1.4.10(@types/express@4.17.25)
       '@types/express':
         specifier: ^4.17.25
         version: 4.17.25
@@ -870,6 +879,11 @@ packages:
 
   '@types/conventional-commits-parser@5.0.2':
     resolution: {integrity: sha512-BgT2szDXnVypgpNxOK8aL5SGjUdaQbC++WZNjF1Qge3Og2+zhHj+RWhmehLhYyvQwqAmvezruVfOf8+3m74W+g==}
+
+  '@types/cookie-parser@1.4.10':
+    resolution: {integrity: sha512-B4xqkqfZ8Wek+rCOeRxsjMS9OgvzebEzzLYw7NHYuvzb7IdxOkI0ZHGgeEBX4PUM7QGVvNSK60T3OvWj3YfBRg==}
+    peerDependencies:
+      '@types/express': '*'
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -1706,6 +1720,11 @@ packages:
   expect@30.2.0:
     resolution: {integrity: sha512-u/feCi0GPsI+988gU2FLcsHyAHTU0MX1Wg68NhAnN7z/+C5wqG+CY8J53N9ioe8RXgaoz0nBR/TYMf3AycUuPw==}
     engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
+
+  express-async-errors@3.1.1:
+    resolution: {integrity: sha512-h6aK1da4tpqWSbyCa3FxB/V6Ehd4EEB15zyQq9qe75OZBp0krinNKuH4rAY+S/U/2I36vdLAUFSjQJ+TFmODng==}
+    peerDependencies:
+      express: ^4.16.2
 
   express@4.22.1:
     resolution: {integrity: sha512-F2X8g9P1X7uCPZMA3MVf9wcTqlyNp7IhH5qPCI0izhaOIYXaW9L535tGA3qmjRzpH+bZczqq7hVKxTR4NWnu+g==}
@@ -4179,6 +4198,10 @@ snapshots:
     dependencies:
       '@types/node': 25.0.3
 
+  '@types/cookie-parser@1.4.10(@types/express@4.17.25)':
+    dependencies:
+      '@types/express': 4.17.25
+
   '@types/estree@1.0.8': {}
 
   '@types/express-serve-static-core@4.19.7':
@@ -5005,6 +5028,10 @@ snapshots:
       jest-message-util: 30.2.0
       jest-mock: 30.2.0
       jest-util: 30.2.0
+
+  express-async-errors@3.1.1(express@4.22.1):
+    dependencies:
+      express: 4.22.1
 
   express@4.22.1:
     dependencies:
