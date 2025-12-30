@@ -14,7 +14,12 @@ import { env } from "../../_shared/infrastructure/env-variables.js";
  * @returns {string} The JWT token.
  */
 export function generateToken(payload, options) {
-  return jwt.sign(payload, env.JWT_SECRET, options);
+  const opts = {
+    expiresIn: env.JWT_EXPIRES,
+    ...options,
+  };
+
+  return jwt.sign(payload, env.JWT_SECRET, opts);
 }
 
 /**
