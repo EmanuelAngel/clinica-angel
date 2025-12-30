@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "../../_shared/infrastructure/env-variables.js";
+import { CustomError } from "../../_shared/domain/custom-error.js";
 
 /**
  * @typedef {object} UserPayload
@@ -28,8 +29,12 @@ export function generateToken(payload, options) {
  * @returns {UserPayload} The decoded token.
  */
 export function verifyToken(token) {
-  const decoded = jwt.verify(token, env.JWT_SECRET);
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET);
 
-  // eslint-disable-next-line
-  return /** @type {any} */ (decoded);
+    // eslint-disable-next-line
+    return /** @type {any} */ (decoded);
+  } catch {
+    throw new CustomError("Sesión inválida o expirada.", 401);
+  }
 }
