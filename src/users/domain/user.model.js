@@ -32,7 +32,13 @@ export class User {
   }) {
     this.id = id;
     this.email = email;
-    this.passwordHash = passwordHash;
+    // Make passwordHash non-enumerable to prevent accidental exposure
+    Object.defineProperty(this, "passwordHash", {
+      value: passwordHash,
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    });
     this.role = role;
     this.firstNames = firstNames;
     this.lastNames = lastNames;
@@ -60,5 +66,34 @@ export class User {
    */
   get fullName() {
     return `${this.firstNames} ${this.lastNames}`;
+  }
+
+  /**
+   * Returns a safe representation of the user without the password hash.
+   * Useful for JSON serialization and external API responses.
+   * @returns {object} A plain object with all user properties except passwordHash.
+   */
+  toSafeObject() {
+    return {
+      id: this.id,
+      email: this.email,
+      role: this.role,
+      firstNames: this.firstNames,
+      lastNames: this.lastNames,
+      nationalId: this.nationalId,
+      phone: this.phone,
+      address: this.address,
+      registeredAt: this.registeredAt,
+      deletedAt: this.deletedAt,
+    };
+  }
+
+  /**
+   * Custom JSON serialization that excludes the password hash.
+   * This is automatically called by JSON.stringify().
+   * @returns {object} A safe representation of the user.
+   */
+  toJSON() {
+    return this.toSafeObject();
   }
 }
