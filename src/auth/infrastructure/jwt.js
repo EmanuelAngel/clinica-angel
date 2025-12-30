@@ -14,7 +14,7 @@ import { CustomError } from "../../_shared/domain/custom-error.js";
  * @param {jwt.SignOptions} options
  * @returns {string} The JWT token.
  */
-export function generateToken(payload, options) {
+export function generateToken(payload, options = {}) {
   const opts = {
     expiresIn: env.JWT_EXPIRES,
     ...options,

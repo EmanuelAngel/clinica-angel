@@ -13,6 +13,7 @@ const config = {
     "!**/vendor/**",
   ],
   verbose: true,
+  setupFilesAfterEnv: ["<rootDir>/tests/jest.setup.js"],
 };
 
 export default config;

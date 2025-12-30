@@ -55,7 +55,13 @@ export default [
     },
   },
   {
-    files: ["**/*.test.js", "**/*.spec.js"],
+    files: [
+      "**/*.test.js",
+      "**/*.spec.js",
+      "tests/**/*.js",
+      ".2e2.js",
+      "**/*.integration.js",
+    ],
     ...jestPlugin.configs["flat/recommended"],
     languageOptions: {
       globals: {
