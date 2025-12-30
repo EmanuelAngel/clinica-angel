@@ -52,6 +52,10 @@ const envSchema = z
 
     const milliseconds = ms(expiresValue);
 
+    if (milliseconds === undefined) {
+      throw new Error(`Valor inválido para JWT_EXPIRES: ${data.JWT_EXPIRES}`);
+    }
+
     return {
       ...data,
       JWT_EXPIRES: expiresValue,
