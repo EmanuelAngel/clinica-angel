@@ -10,10 +10,10 @@ import bcrypt from "bcrypt";
 export class BcryptPasswordHasher {
   /**
    * @param {number} saltRounds The number of rounds for the salt.
-   * Defaults to 4. Higher values increase security but also increase
+   * Defaults to 10. Higher values increase security but also increase
    * computation time.
    */
-  constructor(saltRounds = 4) {
+  constructor(saltRounds = 10) {
     this.saltRounds = saltRounds;
   }
 

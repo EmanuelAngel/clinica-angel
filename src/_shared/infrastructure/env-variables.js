@@ -43,7 +43,7 @@ const envSchema = z
       .number()
       .positive("El límite de conexiones debe ser positivo")
       .default(4),
-    SALT_ROUNDS: z.coerce.number().positive().default(4),
+    SALT_ROUNDS: z.coerce.number().positive().default(10),
   })
   .transform((data) => {
     /** @type {import('ms').StringValue} */
