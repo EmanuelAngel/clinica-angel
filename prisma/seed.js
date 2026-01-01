@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
-import { PrismaClient } from "../generated/prisma/client.js";
+import { prisma } from "../src/_shared/infrastructure/prisma.js";
 import { users } from "./seeders/users.seed.js";
-
-const prisma = new PrismaClient();
 
 /**
  * Seeds the database with initial data.
