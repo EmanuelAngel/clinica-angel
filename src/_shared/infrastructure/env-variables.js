@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 
-import "dotenv/config";
 import ms from "ms";
 import { z } from "zod";
 
