@@ -1,4 +1,8 @@
-import prisma, { cleanDatabase } from "./setup.js";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.test" });
+
+import { prisma } from "../src/_shared/infrastructure/prisma.js";
+import { cleanDatabase } from "./setup.js";
 
 beforeEach(async () => {
   await cleanDatabase();
