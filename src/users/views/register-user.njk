@@ -1,0 +1,183 @@
+{% extends "layout/base.njk" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Registro de Usuario", "Registra tu cuenta.") }}
+{% endblock %}
+
+{% block content %}
+  <form action="/users" method="POST" class="w-full max-w-3xl mx-auto space-y-12">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Datos personales</legend>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Nombres (requerido)</label>
+          <input type="text"
+                 name="firstNames"
+                 value="{{ values.firstNames }}"
+                 class="input validator {{ 'input-error' if errors.properties.firstNames }}"
+                 required
+                 minlength="2"
+                 maxlength="100"
+                 pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
+                 title="Solo letras, espacios, guiones o apóstrofes." 
+                 placeholder="Nombre completo" />
+          {% if errors.properties.firstNames %}
+            <div class="text-error">{{ errors.properties.firstNames[0] }}</div>
+          {% endif %}
+          <div class="validator-hint">
+            Ingrese nombres válidos.
+            <br /> Solo letras, espacios, guiones o apóstrofes.
+            <br /> Mínimo 2 caracteres.
+            <br /> Máximo 100 caracteres.
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Apellido (requerido)</label>
+          <input type="text"
+                 name="lastNames"
+                 value="{{ values.lastNames }}"
+                 class="input validator {{ 'input-error' if errors.properties.lastNames }}"
+                 required
+                 minlength="2"
+                 maxlength="100"
+                 pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
+                 title="Solo letras, espacios, guiones o apóstrofes."
+                 placeholder="Apellido" />
+          {% if errors.properties.lastNames %}
+            <div class="text-error">{{ errors.properties.lastNames[0] }}</div>
+          {% endif %}
+          <div class="validator-hint">
+            Ingrese apellidos válidos.
+            <br /> Solo letras, espacios, guiones o apóstrofes.
+            <br /> Mínimo 2 caracteres.
+            <br /> Máximo 100 caracteres.
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Número de DNI (requerido)</label>
+          <input type="text"
+                name="nationalId"
+                value="{{ values.nationalId }}"
+                class="input validator {{ 'input-error' if errors.properties.nationalId }}"
+                required
+                minlength="7"
+                maxlength="9"
+                pattern="[0-9]{7,9}"
+                title="El DNI debe tener entre 7 y 9 números sin puntos ni letras."
+                placeholder="Número de DNI" />
+            {% if errors.properties.nationalId %}
+              <div class="text-error">{{ errors.properties.nationalId[0] }}</div>
+            {% endif %}
+          <div class="validator-hint">
+            Ingrese un número de DNI válido
+            <br /> El DNI debe tener entre 7 y 9 números sin puntos ni letras.
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Datos de cuenta</legend>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Rol (requerido)</label>
+          <select name="role"
+                  class="select validator {{ 'input-error' if errors.properties.role }}"
+                  required>
+            <option value="" disabled selected>Seleccione un rol</option>
+            <option value="{{ Roles.SECRETARY }}">Secretaría</option>
+            <option value="{{ Roles.ADMIN }}">Administrador</option>
+          </select>
+          {% if errors.properties.role %}
+            <div class="text-error">{{ errors.properties.role[0] }}</div>
+          {% endif %}
+          <div class="validator-hint">
+            Seleccione un rol válido
+        </div>
+
+        <div>
+          <label class="label">Email (requerido)</label>
+          <input type="email"
+                 name="email"
+                 value="{{ values.email }}"
+                 class="input validator {{ 'input-error' if errors.properties.email }}"
+                 required
+                 placeholder="correoelectronico@sitio.com" />
+          {% if errors.properties.email %}
+            <div class="text-error">{{ errors.properties.email[0] }}</div>
+          {% endif %}
+          <div class="validator-hint">
+            Ingrese un email válido
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Contraseña (requerido)</label>
+          <input type="password"
+                 name="password"
+                 class="input validator {{ 'input-error' if errors.properties.password }}"
+                 required
+                 minlength="8"
+                 maxlength="100"
+                 placeholder="Contraseña" />
+          {% if errors.properties.password %}
+            <div class="text-error">{{ errors.properties.password[0] }}</div>
+          {% endif %}
+          <div class="validator-hint">
+            Ingrese una contraseña válida
+            <br /> Mínimo 8 caracteres.
+            <br /> Máximo 100 caracteres.
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Datos de contacto</legend>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Teléfono (requerido)</label>
+          <input type="tel"
+                 name="phone"
+                 value="{{ values.phone }}"
+                 class="input validator {{ 'input-error' if errors.properties.phone }}"
+                 required
+                 placeholder="Número de teléfono" />
+            {% if errors.properties.phone %}
+              <div class="text-error">{{ errors.properties.phone[0] }}</div>
+            {% endif %}
+          <div class="validator-hint">Ingrese un número de teléfono válido</div>
+        </div>
+
+        <div>
+          <label class="label">Dirección (requerido)</label>
+          <input type="text"
+                 name="address"
+                 value="{{ values.address }}"
+                 class="input validator {{ 'input-error' if errors.properties.address }}"
+                 required
+                 minlength="5"
+                 maxlength="180"
+                 placeholder="Dirección" />
+            {% if errors.properties.address %}
+              <div class="text-error">{{ errors.properties.address[0] }}</div>
+            {% endif %}
+          <div class="validator-hint">Ingrese una dirección válida</div>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="mt-8 flex flex-col lg:flex-row gap-4">
+      <button type="submit" class="btn btn-primary flex-1">
+        Registrar
+      </button>
+      <button type="reset" class="btn btn-neutral flex-1">
+        Limpiar formulario
+      </button>
+    </div>
+  </form>
+{% endblock %}

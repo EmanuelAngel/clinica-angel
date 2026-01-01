@@ -1,24 +1,47 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="clinic-dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }}</title>
 
-  <link href="./css/output.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/theme-change@2.0.2/index.js"></script>
+
+  <link href="/css/output.css" rel="stylesheet" type="text/css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
   {% block head %}{% endblock %}
 </head>
-<body>
+<body class="font-serif">
 
 <div class="drawer">
   <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content flex flex-col">
     {% include "layout/nav-bar.njk" %}
     
-    {% block content %}{% endblock %}
+    <div class="w-full px-2 py-4 sm:px-4 sm:py-8">
+
+      {% block pageInfo %}{% endblock %}
+
+      <section class="max-w-fit mx-auto">
+        {% include "partials/result-alert.njk" %}
+      </section>
+
+      {% block content %}{% endblock %}
+
+      {% if isDev %}
+        <div class="fixed bottom-0 right-0 p-4 bg-base-100 text-sm text-base-content/70">
+          <a href="/error" class="link link-warning">
+            <i data-lucide="bug"></i>
+          </a>
+        </div>
+      {% endif %}
+    </div>
   </div>
 
   <div class="drawer-side">

@@ -1,0 +1,111 @@
+{% extends "layout/base.njk" %}
+
+{% block head %}
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css"
+        rel="stylesheet"
+        type="text/css">
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"
+          type="text/javascript"></script>
+{% endblock %}
+
+{% block scripts %}
+  <script type="module">
+  const dataTable = new simpleDatatables.DataTable("#users-table", {
+    // Opciones generales (paginación, búsqueda, etc.)
+    searchable: true,
+    paging: true,
+    perPage: 10,
+    perPageSelect: [5, 10, 20, 50],
+
+    // Clases personalizadas para que todo se vea con daisyUI
+    classes: {
+      // Contenedor principal
+      wrapper: "datatable-wrapper",
+
+      // Input de búsqueda
+      input: "input input-bordered input-sm w-full max-w-xs",
+
+      // Select de filas por página
+      dropdown: "select select-bordered select-sm",
+
+      // Contenedor superior (search + perPage)
+      top: "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4",
+
+      // Paginación
+      pagination: "join",  // daisyUI tiene "btn-group" o "join" para botones unidos
+      paginationButton: "join-item btn btn-sm",
+      paginationButtonActive: "btn-active",
+      paginationButtonPrev: "join-item btn btn-sm",
+      paginationButtonNext: "join-item btn btn-sm",
+
+      // Info (ej: "Mostrando 1 a 10 de 50 entradas")
+      info: "text-sm opacity-70",
+    },
+
+    // Opcional: etiquetas personalizadas
+    labels: {
+      placeholder: "Buscar...",
+      perPage: "filas por página",
+      noRows: "No hay datos",
+      info: "Mostrando {start} a {end} de {rows} entradas",
+    }
+  });
+  </script>
+{% endblock %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Usuarios", "Lista de todos los usuarios registrados en el sistema.") }}
+
+  <a href="/users/register" class="btn btn-primary mb-4">
+    <i data-lucide="user-plus"></i>
+    Registrar nuevo usuario
+  </a>
+
+  <div class="overflow-x-auto">
+    <table id="users-table" class="table table-zebra">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Nombre Completo</th>
+          <th>DNI</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.email }}</td>
+            <td>
+              {% import "partials/role-badge.njk" as RoleBadge %}
+              {{ RoleBadge.badge(user.role) }}
+            </td>
+            <td>{{ user.fullName }}</td>
+            <td>{{ user.nationalId }}</td>
+            <td>
+              {% import "partials/user-status-badge.njk" as UserStatus %}
+              {{ UserStatus.badge(user.isActive) }}
+            </td>
+            <td>
+              {% if user.role === Roles.PROFESSIONAL %}
+                <a href="/professionals/{{ user.id }}" class="link link-primary">
+                  Ir al perfil
+                </a>                
+              {% elif user.role === Roles.PATIENT %}
+                <a href="/patients/{{ user.id }}" class="link link-primary">
+                  Ir al perfil
+                </a>
+              {% else %}
+                <a href="/users/{{ user.id }}" class="link link-primary">
+                  Ir al perfil
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "layout/base.njk" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Iniciar Sesión", "Inicia sesión para acceder a tu cuenta.") }}
+{% endblock %}
+
+{% block content %}
+  <form action="/auth/login" method="post" class="mx-auto max-w-fit">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+      <legend class="fieldset-legend">Credenciales</legend>
+      <label class="label">Email</label>
+      <input type="email"
+             name="email"
+             value="{{ values.email }}"
+             class="input validator {{ 'input-error' if errors.properties.email }}"
+             required
+             placeholder="correoelectronico@sitio.com" />
+      {% if errors.email %}
+        <div class="text-error">{{ errors.properties.email[0] }}</div>
+      {% endif %}
+      <div class="validator-hint">Ingrese un email válido</div>
+      <label class="label">Contraseña</label>
+      <input type="password"
+             name="password"
+             class="input {{ 'input-error' if errors.properties.password }}"
+             placeholder="Contraseña" />
+      <div class="validator-hint">Ingrese una contraseña válida</div>
+      {% if errors.properties.password %}
+        <div class="text-error mt-1">{{ errors.properties.password.errors[0] }}</div>
+      {% endif %}
+
+      <p>
+        ¿Aún no tienes cuenta?
+        <a href="/register" class="link link-primary">Registrarse</a>
+      </p>
+
+      <button class="btn btn-primary mt-4">Iniciar Sesión</button>
+    </fieldset>
+  </form>
+{% endblock %}

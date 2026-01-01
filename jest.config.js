@@ -2,7 +2,7 @@
 const config = {
   testEnvironment: "node",
   transform: {},
-  collectCoverage: true,
+  collectCoverage: false,
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   collectCoverageFrom: [
@@ -17,6 +17,8 @@ const config = {
     "!**/vendor/**",
   ],
   verbose: true,
+  setupFilesAfterEnv: ["<rootDir>/tests/jest.setup.js"],
+  maxWorkers: 1,
 };
 
 export default config;

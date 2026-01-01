@@ -1,11 +1,19 @@
 import express from "express";
+import "express-async-errors";
+
 import nunjucks from "nunjucks";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { env } from "./_shared/infrastructure/env-variables.js";
+import { viewsRouter } from "./views.routes.js";
+import { apiV1Router } from "./api-v1.routes.js";
+import { Roles } from "./auth/domain/roles.js";
+import { links } from "./_shared/infrastructure/links.js";
+import { globalErrorHandler } from "./_shared/infrastructure/global-error-handler.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -19,11 +27,17 @@ app.use(
 
 app.use(express.static(join(__dirname, "./_assets")));
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieParser());
+
 app.set("view engine", "njk");
 
 const viewPaths = [
   join(__dirname, "./example/views"),
   join(__dirname, "./_shared/views"),
+  join(__dirname, "./users/views"),
+  join(__dirname, "./auth/views"),
 ];
 
 const njkEnv = nunjucks.configure(viewPaths, {
@@ -34,13 +48,17 @@ const njkEnv = nunjucks.configure(viewPaths, {
 });
 
 njkEnv.addGlobal("title", "Clinica Angel");
+njkEnv.addGlobal("Roles", Roles);
+njkEnv.addGlobal("links", links);
+njkEnv.addGlobal("isDev", env.NODE_ENV === "development");
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+app.use("/", viewsRouter);
+app.use("/api/v1", apiV1Router);
+
+app.get("/error", () => {
+  throw new Error("Error de prueba");
 });
 
-app.get("/example", (req, res) => {
-  res.render("example");
-});
+app.use(globalErrorHandler);
 
 export default app;
