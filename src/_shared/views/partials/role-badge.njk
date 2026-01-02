@@ -1,17 +1,17 @@
 {% macro badge(role) %}
   {% if role === Roles.ADMIN %}
-    <div class="badge badge-soft badge-accent">Administrador</div>
+    <div class="badge badge-accent">Administrador</div>
   {% endif %}
 
   {% if role === Roles.SECRETARY %}
-    <div class="badge badge-soft badge-info">Secretaria</div>
+    <div class="badge badge-info">Secretaria</div>
   {% endif %}
 
   {% if role === Roles.PROFESSIONAL %}
-    <div class="badge badge-soft badge-primary">Profesional</div>
+    <div class="badge badge-primary">Profesional</div>
   {% endif %}
 
   {% if role === Roles.PATIENT %}
-    <div class="badge badge-soft badge-neutral">Paciente</div>
+    <div class="badge badge-neutral">Paciente</div>
   {% endif %}
 {% endmacro %}
