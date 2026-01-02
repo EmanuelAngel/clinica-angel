@@ -1,5 +1,8 @@
 /* eslint-disable no-console */
+import "dotenv/config";
+
 import { prisma } from "../src/_shared/infrastructure/prisma.js";
+import { healthInsurances } from "./seeders/health-insurances.seed.js";
 import { users } from "./seeders/users.seed.js";
 
 /**
@@ -10,6 +13,11 @@ async function main() {
 
   await prisma.user.createMany({
     data: users,
+    skipDuplicates: true,
+  });
+
+  await prisma.healthInsurance.createMany({
+    data: healthInsurances,
     skipDuplicates: true,
   });
 
