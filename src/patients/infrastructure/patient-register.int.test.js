@@ -28,9 +28,9 @@ describe("Patient register integration", () => {
     return pngHeader;
   }
 
-  // Helper to create a large buffer (> 2MB)
+  // Helper to create a large buffer (> 5MB)
   function createLargeBuffer() {
-    return Buffer.alloc(2 * 1024 * 1024 + 1); // 2MB + 1 byte
+    return Buffer.alloc(5 * 1024 * 1024 + 1); // 5MB + 1 byte
   }
 
   // Helper to create an invalid file buffer (PDF-like)
@@ -98,7 +98,7 @@ describe("Patient register integration", () => {
     expect(response.status).toBe(422);
   });
 
-  test("returns 422 when file size exceeds 2MB", async () => {
+  test("returns 422 when file size exceeds 5MB", async () => {
     const largeBuffer = createLargeBuffer();
 
     const response = await request(app)

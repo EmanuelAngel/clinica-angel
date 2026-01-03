@@ -15,8 +15,8 @@ export const patientRegistrationSchema = commonUserFields
         "La imagen es requerida"
       )
       .refine(
-        (file) => file?.size <= 2 * 1024 * 1024,
-        "El archivo no debe pesar más de 2MB"
+        (file) => file?.size <= 5 * 1024 * 1024,
+        "El archivo no debe pesar más de 5MB"
       )
       .refine(
         (file) =>
