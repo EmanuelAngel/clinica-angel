@@ -2,6 +2,8 @@ import request from "supertest";
 import app from "../../app.js";
 import { prisma } from "../../_shared/infrastructure/prisma.js";
 import { Roles } from "../../auth/domain/roles.js";
+import { unlink } from "node:fs/promises";
+import { join } from "node:path";
 
 describe("Patient register integration", () => {
   const validPayload = {
@@ -13,6 +15,36 @@ describe("Patient register integration", () => {
     phone: "1234567890",
     address: "123 Main Street",
   };
+
+  // Track test emails to find and clean up associated files
+  const testEmails = new Set([validPayload.email, "existing@example.com"]);
+
+  afterEach(async () => {
+    // Database will be cleaned by global beforeEach before the next test,
+    // but we need to clean up files from the filesystem.
+    // Find patients created during this test to get their file paths
+    const testPatients = await prisma.user.findMany({
+      where: {
+        email: {
+          in: Array.from(testEmails),
+        },
+      },
+    });
+
+    // Delete associated files from filesystem
+    for (const patient of testPatients) {
+      if (patient.nationalIdImageUrl) {
+        // Convert /uploads/filename to actual file path
+        const filename = patient.nationalIdImageUrl.replace(/^\/uploads\//, "");
+        const filePath = join("src", "_assets", "uploads", filename);
+        try {
+          await unlink(filePath);
+        } catch {
+          // File might already be deleted or not exist, ignore
+        }
+      }
+    }
+  });
 
   // Helper to create a valid image buffer (small PNG)
   function createValidImageBuffer() {
