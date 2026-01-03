@@ -3,6 +3,7 @@ import { env } from "../../_shared/infrastructure/env-variables.js";
 import { services } from "../../_shared/infrastructure/services-container.js";
 import { validateLogin } from "./auth.schemas.js";
 import { generateToken } from "./jwt.js";
+import { Roles } from "../domain/roles.js";
 
 export class AuthController {
   /**
@@ -50,7 +51,12 @@ export class AuthController {
       maxAge: env.COOKIE_MAX_AGE,
     });
 
-    res.redirect("/users");
+    // Redirect based on user role
+    if (user.role === Roles.PATIENT) {
+      res.redirect(`/patients/${user.id}`);
+    } else {
+      res.redirect("/users");
+    }
   }
 
   /**

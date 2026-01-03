@@ -10,46 +10,7 @@
 
 {% block scripts %}
   <script type="module">
-  const dataTable = new simpleDatatables.DataTable("#users-table", {
-    // Opciones generales (paginación, búsqueda, etc.)
-    searchable: true,
-    paging: true,
-    perPage: 10,
-    perPageSelect: [5, 10, 20, 50],
-
-    // Clases personalizadas para que todo se vea con daisyUI
-    classes: {
-      // Contenedor principal
-      wrapper: "datatable-wrapper",
-
-      // Input de búsqueda
-      input: "input input-bordered input-sm w-full max-w-xs",
-
-      // Select de filas por página
-      dropdown: "select select-bordered select-sm",
-
-      // Contenedor superior (search + perPage)
-      top: "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4",
-
-      // Paginación
-      pagination: "join",  // daisyUI tiene "btn-group" o "join" para botones unidos
-      paginationButton: "join-item btn btn-sm",
-      paginationButtonActive: "btn-active",
-      paginationButtonPrev: "join-item btn btn-sm",
-      paginationButtonNext: "join-item btn btn-sm",
-
-      // Info (ej: "Mostrando 1 a 10 de 50 entradas")
-      info: "text-sm opacity-70",
-    },
-
-    // Opcional: etiquetas personalizadas
-    labels: {
-      placeholder: "Buscar...",
-      perPage: "filas por página",
-      noRows: "No hay datos",
-      info: "Mostrando {start} a {end} de {rows} entradas",
-    }
-  });
+  const dataTable = new simpleDatatables.DataTable("#users-table");
   </script>
 {% endblock %}
 

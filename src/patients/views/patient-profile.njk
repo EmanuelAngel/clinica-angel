@@ -1,0 +1,39 @@
+{% extends "layout/base.njk" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription(patient.fullName, "Viendo el perfil de " + patient.fullName + " [" + patient.role + "].") }}
+{% endblock %}
+
+{% block content %}
+  <div class="w-full max-w-3xl mx-auto space-y-8">
+    <div class="card bg-base-200 shadow-md">
+      <div class="card-body">
+        <h2 class="card-title">Información Personal</h2>
+        <p><strong>Nombres:</strong> {{ patient.firstNames }}</p>
+        <p><strong>Apellidos:</strong> {{ patient.lastNames }}</p>
+        <p><strong>DNI:</strong> {{ patient.nationalId }}</p>
+        <p><strong>Correo Electrónico:</strong> {{ patient.email }}</p>
+        <p><strong>Teléfono:</strong> {{ patient.phone }}</p>
+        <p><strong>Dirección:</strong> {{ patient.address }}</p>
+        <p>
+          <strong>Obras Sociales:</strong>
+          {% if patient.healthInsurances.length < 1 %}
+            No hay obras sociales vinculadas.
+          {% else %}
+            {% for healthInsurance in patient.healthInsurances %}
+              <span class="badge badge-soft">
+              {{ healthInsurance.insuranceName }}
+              -
+              {{ healthInsurance.memberNumber }}
+              </span>
+            {% endfor %}
+          {% endif %}
+        </p>
+        <p><strong>Imagen del DNI:</strong></p>
+        <img src="{{ patient.nationalIdImageUrl }}"
+             alt="Imagen del DNI del paciente {{ patient.fullName }}">
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "layout/base.njk" %}
+{% block head %}
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
+  {% endblock %}
+  {% block scripts %}
+    <script type="module">
+      const dataTable = new simpleDatatables.DataTable("#patients-table");
+    </script>
+  {% endblock %}
+  {% block content %}
+    {% import "partials/page-info.njk" as PageInfo %}
+    {{ PageInfo.titleAndDescription("Usuarios", "Lista de todos los pacientes registrados en el sistema.") }}
+    <a href="/patients/register" class="btn btn-primary mb-4">
+      <i data-lucide="user-plus"></i>
+      Registrar nuevo paciente
+    </a>
+    <div class="overflow-x-auto">
+      <table id="patients-table" class="table table-zebra">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Nombre Completo</th>
+            <th>DNI</th>
+            <th>Obras Sociales</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for patient in patients %}
+            <tr>
+              <td>{{ patient.email }}</td>
+              <td>{{ patient.fullName }}</td>
+              <td>{{ patient.nationalId }}</td>
+              <td>
+                {% if patient.healthInsurances.length < 1 %}
+                  Sin obras sociales vinculadas.
+                {% else %}
+                  {% for insurance in patient.healthInsurances %}
+                    <span class="badge badge-soft">{{ insurance.insuranceName }}</span>
+                  {% endfor %}
+                {% endif %} 
+              </td>
+              <td>
+                {% import "partials/user-status-badge.njk" as UserStatus %}
+                {{ UserStatus.badge(patient.isActive) }}
+              </td>
+              <td>
+                <a href="/patients/{{ patient.id }}" class="link link-primary">
+                  Ir al perfil
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endblock %}

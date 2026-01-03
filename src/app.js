@@ -38,6 +38,7 @@ const viewPaths = [
   join(__dirname, "./_shared/views"),
   join(__dirname, "./users/views"),
   join(__dirname, "./auth/views"),
+  join(__dirname, "./patients/views"),
 ];
 
 const njkEnv = nunjucks.configure(viewPaths, {

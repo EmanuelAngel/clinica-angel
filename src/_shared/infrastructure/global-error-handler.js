@@ -9,10 +9,11 @@ import { env } from "./env-variables.js";
  */
 export function globalErrorHandler(err, req, res, next) {
   const isDev = env.NODE_ENV === "development";
+  const isTest = env.NODE_ENV === "test";
   // @ts-ignore
   const statusCode = err.statusCode || 500;
 
-  if (isDev) {
+  if (isDev || isTest) {
     // eslint-disable-next-line no-console
     console.error(`[ERROR - ${statusCode}]: ${err.stack}`);
   }
@@ -40,6 +41,7 @@ export function globalErrorHandler(err, req, res, next) {
         type: resultType,
       },
       values: req.body,
+      ...res.locals.commonData,
     });
 
     return;

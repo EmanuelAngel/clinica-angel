@@ -3,6 +3,7 @@ import { userRouter } from "./users/infrastructure/user.routes.js";
 import { authRouter } from "./auth/infrastructure/auth.routes.js";
 import { auth } from "./auth/infrastructure/auth.middleware.js";
 import { Roles } from "./auth/domain/roles.js";
+import { patientRouter } from "./patients/infrastructure/patient.routes.js";
 
 export const viewsRouter = Router();
 
@@ -20,3 +21,4 @@ viewsRouter.get("/", (req, res) => {
 
 viewsRouter.use("/users", auth(Roles.ADMIN), userRouter);
 viewsRouter.use("/auth", authRouter);
+viewsRouter.use("/patients", patientRouter);

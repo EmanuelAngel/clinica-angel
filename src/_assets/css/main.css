@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@view-transition {
+  navigation: auto;
+}
+
 @plugin "daisyui" {
   themes:
     clinic-light --default,
