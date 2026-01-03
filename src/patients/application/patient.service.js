@@ -6,6 +6,7 @@ import { Patient, PatientHealthInsurance } from "../domain/patient.model.js";
  * @typedef {import("../domain/patient.repository.js").PatientRepository} PatientRepository
  * @typedef {import("../../health-insurances/domain/health-insurance.repository.js").HealthInsuranceRepository} HealthInsuranceRepository
  * @typedef {import("../../users/domain/user.repository.js").UserRepository} UserRepository
+ * @typedef {import("../../users/domain/password-hasher.model.js").PasswordHasher} PasswordHasher
  */
 
 export class PatientService {
@@ -13,11 +14,18 @@ export class PatientService {
    * @param {PatientRepository} patientRepository
    * @param {HealthInsuranceRepository} healthInsuranceRepository
    * @param {UserRepository} userRepository
+   * @param {PasswordHasher} passwordHasher
    */
-  constructor(patientRepository, healthInsuranceRepository, userRepository) {
+  constructor(
+    patientRepository,
+    healthInsuranceRepository,
+    userRepository,
+    passwordHasher
+  ) {
     this.patientRepository = patientRepository;
     this.healthInsuranceRepository = healthInsuranceRepository;
     this.userRepository = userRepository;
+    this.passwordHasher = passwordHasher;
   }
 
   /**
@@ -80,10 +88,12 @@ export class PatientService {
       })
     );
 
+    const hashedPassword = await this.passwordHasher.hash(data.password);
+
     const patient = new Patient({
       id: 0,
       role: Roles.PATIENT,
-      passwordHash: data.password,
+      passwordHash: hashedPassword,
       ...data,
       nationalIdImageUrl: data.nationalIdImageUrl,
       healthInsurances: patientHealthInsurances,

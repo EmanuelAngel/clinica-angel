@@ -23,7 +23,8 @@ const prismaHealthInsuranceRepository = new PrismaHealthInsuranceRepository(
 const patientService = new PatientService(
   prismaPatientRepository,
   prismaHealthInsuranceRepository,
-  prismaUserRepository
+  prismaUserRepository,
+  bcryptPasswordHasher
 );
 
 const healthInsuranceService = new HealthInsuranceService(
