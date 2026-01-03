@@ -21,60 +21,69 @@ export class PatientController {
    * @param {import("express").Response} res
    */
   async register(req, res) {
-    res.locals.view = "register-patient";
+    try {
+      res.locals.view = "register-patient";
 
-    const allHealthInsurances = await services.healthInsuranceService.findAll();
+      const allHealthInsurances =
+        await services.healthInsuranceService.findAll();
 
-    res.locals.commonData = {
-      healthInsurances: allHealthInsurances,
-    };
-
-    const { healthInsuranceId, memberNumber, ...restOfBody } = req.body;
-
-    const healthInsurances =
-      healthInsuranceId || memberNumber
-        ? [
-            {
-              insuranceId:
-                healthInsuranceId === "" ? undefined : healthInsuranceId,
-              memberNumber: memberNumber,
-            },
-          ]
-        : [];
-
-    const result = await validatePatientRegistration({
-      ...restOfBody,
-      healthInsurances,
-      nationalIdImage: req.file,
-    });
-
-    if (!result.success) {
-      if (req.file) {
-        await unlink(req.file.path);
-      }
-
-      res.status(422).render(res.locals.view, {
-        errors: z.treeifyError(result.error),
-        values: req.body,
+      res.locals.commonData = {
         healthInsurances: allHealthInsurances,
-        result: {
-          type: "failure",
-          message: "Revise el formulario e intente nuevamente.",
-        },
+      };
+
+      const { healthInsuranceId, memberNumber, ...restOfBody } = req.body;
+
+      const healthInsurances =
+        healthInsuranceId || memberNumber
+          ? [
+              {
+                insuranceId:
+                  healthInsuranceId === "" ? undefined : healthInsuranceId,
+                memberNumber: memberNumber,
+              },
+            ]
+          : [];
+
+      const result = await validatePatientRegistration({
+        ...restOfBody,
+        healthInsurances,
+        nationalIdImage: req.file,
       });
 
-      return;
+      if (!result.success) {
+        if (req.file) {
+          await unlink(req.file.path);
+        }
+
+        res.status(422).render(res.locals.view, {
+          errors: z.treeifyError(result.error),
+          values: req.body,
+          healthInsurances: allHealthInsurances,
+          result: {
+            type: "failure",
+            message: "Revise el formulario e intente nuevamente.",
+          },
+        });
+
+        return;
+      }
+
+      await services.patientService.register(result.data);
+
+      res.status(201).render(res.locals.view, {
+        result: {
+          type: "success",
+          message: "Paciente creado correctamente.",
+        },
+        healthInsurances: allHealthInsurances,
+      });
+    } catch (error) {
+      if (req.file) {
+        await unlink(req.file.path).catch(() => {});
+      }
+
+      throw error;
     }
-
-    await services.patientService.register(result.data);
-
-    res.status(201).render(res.locals.view, {
-      result: {
-        type: "success",
-        message: "Paciente creado correctamente.",
-      },
-      healthInsurances: allHealthInsurances,
-    });
 
     return;
   }
