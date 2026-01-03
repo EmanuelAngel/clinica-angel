@@ -1,6 +1,13 @@
+import { ok, err } from "neverthrow";
 import { CustomError } from "../../_shared/domain/custom-error.js";
 import { Roles } from "../../auth/domain/roles.js";
 import { Patient, PatientHealthInsurance } from "../domain/patient.model.js";
+import {
+  EmailAlreadyInUseError,
+  NationalIdAlreadyInUseError,
+  HealthInsuranceNotFoundError,
+  MemberNumberDuplicateError,
+} from "../domain/patient.errors.js";
 
 /**
  * @typedef {import("../domain/patient.repository.js").PatientRepository} PatientRepository
@@ -29,16 +36,31 @@ export class PatientService {
   }
 
   /**
-   * @param {import("../infrastructure/patient.schemas.js").PatientRegistrationDTO} data
-   * @throws {CustomError} When the patient already exists.
-   * @throws {CustomError} When any of the insurances does not exist.
-   * @throws {CustomError} When any of the insurances name does not match.
+   * @typedef {import("../infrastructure/patient.schemas.js").PatientRegistrationDTO} PatientRegistrationDTO
+   * @param {PatientRegistrationDTO} data The validated patient registration data.
+   * @returns {Promise<import("neverthrow").Result<
+   *   void,
+   *   EmailAlreadyInUseError |
+   *   NationalIdAlreadyInUseError |
+   *   HealthInsuranceNotFoundError |
+   *   MemberNumberDuplicateError>
+   * >}
+   * Returns void when the patient is successfully registered.
+   *
+   * Returns specific errors when something goes wrong:
+   * - `EmailAlreadyInUseError` The patient already exists.
+   * - `NationalIdAlreadyInUseError` The patient already exists with the same
+   *   national ID and role.
+   * - `HealthInsuranceNotFoundError` Any of the provided health insurance does
+   *   not exist.
+   * - `MemberNumberDuplicateError` Any of the provided health insurances member
+   *   numbers already exists.
    */
   async register(data) {
     const patientExists = await this.patientRepository.findByEmail(data.email);
 
     if (patientExists) {
-      throw new CustomError(`El email ${data.email} ya está en uso.`, 409);
+      return err(new EmailAlreadyInUseError(data.email));
     }
 
     const foundWithNationalIdAndRole =
@@ -48,45 +70,44 @@ export class PatientService {
       );
 
     if (foundWithNationalIdAndRole) {
-      throw new CustomError(
-        `El DNI ${data.nationalId} está en uso por otro usuario con el rol
-      ${foundWithNationalIdAndRole.role}.`,
-        409
+      return err(
+        new NationalIdAlreadyInUseError(
+          data.nationalId,
+          foundWithNationalIdAndRole.role
+        )
       );
     }
 
-    const patientHealthInsurances = await Promise.all(
-      (data.healthInsurances || []).map(async (insurance) => {
-        const insuranceFound = await this.healthInsuranceRepository.findById(
-          insurance.insuranceId
+    /** @type {PatientHealthInsurance[]} */
+    const patientHealthInsurances = [];
+
+    for (const insurance of data.healthInsurances || []) {
+      const insuranceFound = await this.healthInsuranceRepository.findById(
+        insurance.insuranceId
+      );
+
+      if (!insuranceFound) {
+        return err(new HealthInsuranceNotFoundError(insurance.insuranceId));
+      }
+
+      const isDuplicate = await this.patientRepository.existsMemberNumber(
+        insurance.insuranceId,
+        insurance.memberNumber
+      );
+
+      if (isDuplicate) {
+        return err(
+          new MemberNumberDuplicateError(
+            insurance.memberNumber,
+            insuranceFound.name
+          )
         );
+      }
 
-        if (!insuranceFound) {
-          throw new CustomError(
-            `La obra social (ID: ${insurance.insuranceId}) no existe`,
-            404
-          );
-        }
-
-        const isDuplicate = await this.patientRepository.existsMemberNumber(
-          insurance.insuranceId,
-          insurance.memberNumber
-        );
-
-        if (isDuplicate) {
-          throw new CustomError(
-            `El número de afiliado ${insurance.memberNumber} ya está registrado
-            para ${insuranceFound.name}`,
-            409
-          );
-        }
-
-        return new PatientHealthInsurance(
-          insuranceFound,
-          insurance.memberNumber
-        );
-      })
-    );
+      patientHealthInsurances.push(
+        new PatientHealthInsurance(insuranceFound, insurance.memberNumber)
+      );
+    }
 
     const hashedPassword = await this.passwordHasher.hash(data.password);
 
@@ -100,6 +121,7 @@ export class PatientService {
     });
 
     await this.patientRepository.register(patient);
+    return ok(undefined);
   }
 
   /**
