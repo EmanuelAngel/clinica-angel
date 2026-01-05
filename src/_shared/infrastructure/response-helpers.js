@@ -12,8 +12,10 @@ export function sendNotFound(req, res, message) {
 
   if (responseType === "json") {
     res.status(404).json({
-      status: "fail",
-      message: message,
+      result: {
+        type: "failure",
+        message,
+      },
     });
 
     return;
