@@ -2,12 +2,8 @@ import z from "zod";
 import { services } from "../../_shared/infrastructure/services-container.js";
 import { validatePatientRegistration } from "./patient.schemas.js";
 import { unlink } from "node:fs/promises";
-import {
-  EmailAlreadyInUseError,
-  NationalIdAlreadyInUseError,
-  HealthInsuranceNotFoundError,
-  MemberNumberDuplicateError,
-} from "../domain/patient.errors.js";
+
+import { sendNotFound } from "../../_shared/infrastructure/response-helpers.js";
 
 export class PatientController {
   /**
@@ -99,13 +95,27 @@ export class PatientController {
   /**
    * @param {import("express").Request} req
    * @param {import("express").Response} res
+   * @param {import("express").NextFunction} next
    */
-  async profileView(req, res) {
+  async profileView(req, res, next) {
     const userId = req.params.id;
 
-    const patient = await services.patientService.getProfile(userId);
+    const result = await services.patientService.getProfile(userId);
 
-    res.render("patient-profile.njk", { patient });
+    result.match(
+      (patient) => {
+        res.render("patient-profile.njk", { patient });
+      },
+      (error) => {
+        // If it's a 404, let the not-found-handler handle it.
+        if (error.statusCode == 404) {
+          sendNotFound(req, res, error.message);
+          return;
+        }
+
+        next(error);
+      }
+    );
   }
 
   /**

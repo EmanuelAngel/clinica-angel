@@ -61,3 +61,16 @@ export class MemberNumberDuplicateError extends CustomError {
     this.insuranceName = insuranceName;
   }
 }
+
+/**
+ * Error thrown when a patient is not found.
+ */
+export class PatientNotFoundError extends CustomError {
+  /**
+   * @param {string} patientId - The ID of the patient that was not found.
+   */
+  constructor(patientId) {
+    super(`No se encontró el paciente (ID: ${patientId}).`, 404);
+    this.patientId = patientId;
+  }
+}

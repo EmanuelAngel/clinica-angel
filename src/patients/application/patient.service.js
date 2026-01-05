@@ -1,5 +1,4 @@
 import { ok, err } from "neverthrow";
-import { CustomError } from "../../_shared/domain/custom-error.js";
 import { Roles } from "../../auth/domain/roles.js";
 import { Patient, PatientHealthInsurance } from "../domain/patient.model.js";
 import {
@@ -7,6 +6,7 @@ import {
   NationalIdAlreadyInUseError,
   HealthInsuranceNotFoundError,
   MemberNumberDuplicateError,
+  PatientNotFoundError,
 } from "../domain/patient.errors.js";
 
 /**
@@ -126,17 +126,16 @@ export class PatientService {
 
   /**
    * @param {string} userId
-   * @returns {Promise<Patient>} The patient profile.
-   * @throws {CustomError} When the patient does not exist.
+   * @returns {Promise<import("neverthrow").Result<Patient, PatientNotFoundError>>} The patient profile.
    */
   async getProfile(userId) {
     const patient = await this.patientRepository.findById(userId);
 
     if (!patient) {
-      throw new CustomError("No se encontró el paciente", 404);
+      return err(new PatientNotFoundError(userId));
     }
 
-    return patient;
+    return ok(patient);
   }
 
   /**
