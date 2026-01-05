@@ -10,11 +10,10 @@ import { negotiateResponse } from "./negotiate-response.js";
  */
 export function globalErrorHandler(err, req, res, _next) {
   const isDev = env.NODE_ENV === "development";
-  const isTest = env.NODE_ENV === "test";
   // @ts-ignore
   const statusCode = err.statusCode || 500;
 
-  if (isDev || isTest) {
+  if (isDev) {
     // eslint-disable-next-line no-console
     console.error(`[ERROR - ${statusCode}]: ${err.stack}`);
   }
