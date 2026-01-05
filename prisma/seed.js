@@ -23,7 +23,7 @@ async function main() {
   });
 
   // Patients
-  await prisma.user.create({
+  await prisma.user.createMany({
     data: patients,
     skipDuplicates: true,
   });
