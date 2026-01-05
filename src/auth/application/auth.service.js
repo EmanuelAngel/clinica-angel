@@ -1,4 +1,5 @@
-import { CustomError } from "../../_shared/domain/custom-error.js";
+import { ok, err } from "neverthrow";
+import { InvalidCredentialsError } from "../domain/auth.errors.js";
 
 export class AuthService {
   /**
@@ -13,14 +14,14 @@ export class AuthService {
   /**
    * Authenticate a user.
    * @param {import("../infrastructure/auth.schemas.js").LoginDTO} data User credentials.
-   * @returns {Promise<import("../../users/domain/user.model.js").User>}
+   * @returns {Promise<import("neverthrow").Result<import("../../users/domain/user.model.js").User, InvalidCredentialsError>>}
    * Authenticated user.
    */
   async authenticate({ email, password }) {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
-      throw new CustomError("El email y/o la contraseña son incorrectos.", 401);
+      return err(new InvalidCredentialsError());
     }
 
     const credentialsMatch = await this.passwordHasher.compare(
@@ -29,9 +30,9 @@ export class AuthService {
     );
 
     if (!credentialsMatch) {
-      throw new CustomError("El email y/o la contraseña son incorrectos.", 401);
+      return err(new InvalidCredentialsError());
     }
 
-    return user;
+    return ok(user);
   }
 }

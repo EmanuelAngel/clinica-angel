@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import { err, ok } from "neverthrow";
 import { env } from "../../_shared/infrastructure/env-variables.js";
-import { CustomError } from "../../_shared/domain/custom-error.js";
+import { SessionInvalidError } from "../domain/auth.errors.js";
 
 /**
  * @typedef {object} UserPayload
@@ -26,15 +27,15 @@ export function generateToken(payload, options = {}) {
 /**
  * Verifies a JWT token.
  * @param {string} token
- * @returns {UserPayload} The decoded token.
+ * @returns {import("neverthrow").Result<UserPayload, SessionInvalidError>} The decoded token or an error.
  */
 export function verifyToken(token) {
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET);
 
     // eslint-disable-next-line
-    return /** @type {any} */ (decoded);
+    return ok(/** @type {any} */ (decoded));
   } catch {
-    throw new CustomError("Sesión inválida o expirada.", 401);
+    return err(new SessionInvalidError());
   }
 }
