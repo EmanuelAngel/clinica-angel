@@ -1,6 +1,7 @@
 import z from "zod";
 import { services } from "../../_shared/infrastructure/services-container.js";
 import { validateBaseUserRegistration } from "./user.schemas.js";
+import { sendNotFound } from "../../_shared/infrastructure/response-helpers.js";
 
 export class UserController {
   /**
@@ -29,14 +30,24 @@ export class UserController {
       return;
     }
 
-    await services.userService.register(result.data);
+    const registerResult = await services.userService.register(result.data);
 
-    res.status(201).render(res.locals.view, {
-      result: {
-        message: "Usuario registrado correctamente.",
-        type: "success",
+    registerResult.match(
+      () => {
+        res.status(201).render(res.locals.view, {
+          result: {
+            message: "Usuario registrado correctamente.",
+            type: "success",
+          },
+        });
       },
-    });
+      (error) => {
+        res.status(error.statusCode).render(res.locals.view, {
+          result: { type: "failure", message: error.message },
+          values: req.body,
+        });
+      }
+    );
   }
 
   /**
@@ -52,10 +63,24 @@ export class UserController {
   /**
    * @param {import("express").Request} req
    * @param {import("express").Response} res
+   * @param {import("express").NextFunction} next
    */
-  async show(req, res) {
-    const user = await services.userService.getProfile(+req.params.id);
+  async show(req, res, next) {
+    const result = await services.userService.getProfile(+req.params.id);
 
-    res.render("user-profile", { user });
+    result.match(
+      (user) => {
+        res.render("user-profile", { user });
+      },
+      (error) => {
+        // If it's a 404, let the not-found-handler handle it.
+        if (error.statusCode == 404) {
+          sendNotFound(req, res, error.message);
+          return;
+        }
+
+        next(error);
+      }
+    );
   }
 }
