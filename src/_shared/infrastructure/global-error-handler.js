@@ -1,13 +1,14 @@
 import { CustomError } from "../domain/custom-error.js";
 import { env } from "./env-variables.js";
+import { negotiateResponse } from "./negotiate-response.js";
 
 /**
  * @param {CustomError | Error} err
  * @param {import("express").Request} req
  * @param {import("express").Response} res
- * @param {import("express").NextFunction} next
+ * @param {import("express").NextFunction} _next
  */
-export function globalErrorHandler(err, req, res, next) {
+export function globalErrorHandler(err, req, res, _next) {
   const isDev = env.NODE_ENV === "development";
   const isTest = env.NODE_ENV === "test";
   // @ts-ignore
@@ -18,11 +19,13 @@ export function globalErrorHandler(err, req, res, next) {
     console.error(`[ERROR - ${statusCode}]: ${err.stack}`);
   }
 
-  let resultMessage =
+  const resultMessage =
     err instanceof CustomError ? err.message : "Algo salió mal";
-  let resultType = "failure";
+  const resultType = "failure";
 
-  if (req.path.startsWith("/api")) {
+  const responseType = negotiateResponse(req);
+
+  if (responseType === "json") {
     res.status(statusCode).json({
       result: {
         message: resultMessage,

@@ -14,6 +14,7 @@ import { apiV1Router } from "./api-v1.routes.js";
 import { Roles } from "./auth/domain/roles.js";
 import { links } from "./_shared/infrastructure/links.js";
 import { globalErrorHandler } from "./_shared/infrastructure/global-error-handler.js";
+import { notFoundHandler } from "./_shared/infrastructure/not-found.middleware.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -60,6 +61,7 @@ app.get("/error", () => {
   throw new Error("Error de prueba");
 });
 
+app.use(notFoundHandler);
 app.use(globalErrorHandler);
 
 export default app;

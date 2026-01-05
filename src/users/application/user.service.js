@@ -3,8 +3,13 @@
  * @typedef {import("../domain/password-hasher.model.js").PasswordHasher} PasswordHasher
  */
 
-import { CustomError } from "../../_shared/domain/custom-error.js";
+import { ok, err } from "neverthrow";
 import { User } from "../domain/user.model.js";
+import {
+  EmailAlreadyInUseError,
+  NationalIdAlreadyInUseError,
+  UserNotFoundError,
+} from "../domain/user.errors.js";
 
 export class UserService {
   /**
@@ -18,12 +23,22 @@ export class UserService {
 
   /**
    * @param {import("../infrastructure/user.schemas.js").BaseUserRegistrationDTO} data
+   * @returns {Promise<import("neverthrow").Result<
+   *   void,
+   *   EmailAlreadyInUseError |
+   *   NationalIdAlreadyInUseError>
+   * >}
+   * Returns void when the user is successfully registered.
+   * Returns specific errors when something goes wrong:
+   * - `EmailAlreadyInUseError` The user already exists.
+   * - `NationalIdAlreadyInUseError` The user already exists with the same
+   *   national ID and role.
    */
   async register(data) {
     const userExists = await this.userRepository.findByEmail(data.email);
 
     if (userExists) {
-      throw new CustomError(`El email ${data.email} ya está en uso.`, 409);
+      return err(new EmailAlreadyInUseError(data.email));
     }
 
     const foundWithNationalIdAndRole =
@@ -33,10 +48,11 @@ export class UserService {
       );
 
     if (foundWithNationalIdAndRole) {
-      throw new CustomError(
-        `El DNI ${data.nationalId} está en uso por otro usuario con el rol
-        ${foundWithNationalIdAndRole.role}.`,
-        409
+      return err(
+        new NationalIdAlreadyInUseError(
+          data.nationalId,
+          foundWithNationalIdAndRole.role
+        )
       );
     }
 
@@ -49,6 +65,7 @@ export class UserService {
     });
 
     await this.userRepository.register(user);
+    return ok(undefined);
   }
 
   /**
@@ -63,15 +80,15 @@ export class UserService {
   /**
    * Get a user profile.
    * @param {number} id User ID.
-   * @returns {Promise<User>} User profile.
+   * @returns {Promise<import("neverthrow").Result<User, UserNotFoundError>>} User profile.
    */
   async getProfile(id) {
     const user = await this.userRepository.findById(id);
 
     if (!user) {
-      throw new CustomError(`El usuario que solicita no existe.`, 404);
+      return err(new UserNotFoundError(id));
     }
 
-    return user;
+    return ok(user);
   }
 }

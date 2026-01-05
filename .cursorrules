@@ -1,0 +1,4 @@
+When generating commit messages:
+
+- Body's lines must not be longer than 100 characters. If you need to write
+longer lines, consider breaking lines.

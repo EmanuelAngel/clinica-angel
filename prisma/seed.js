@@ -4,6 +4,7 @@ import "dotenv/config";
 import { prisma } from "../src/_shared/infrastructure/prisma.js";
 import { healthInsurances } from "./seeders/health-insurances.seed.js";
 import { users } from "./seeders/users.seed.js";
+import { patients } from "./seeders/patients.seed.js";
 
 /**
  * Seeds the database with initial data.
@@ -18,6 +19,12 @@ async function main() {
 
   await prisma.healthInsurance.createMany({
     data: healthInsurances,
+    skipDuplicates: true,
+  });
+
+  // Patients
+  await prisma.user.createMany({
+    data: patients,
     skipDuplicates: true,
   });
 

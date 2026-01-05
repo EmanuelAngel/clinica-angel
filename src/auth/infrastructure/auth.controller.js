@@ -32,31 +32,41 @@ export class AuthController {
       return;
     }
 
-    const user = await services.authService.authenticate(result.data);
+    const authResult = await services.authService.authenticate(result.data);
 
-    const token = generateToken(
-      {
-        sub: user.id,
-        role: /** @type {import("../domain/roles.js").Role} */ (user.role),
+    authResult.match(
+      (user) => {
+        const token = generateToken(
+          {
+            sub: user.id,
+            role: /** @type {import("../domain/roles.js").Role} */ (user.role),
+          },
+          {
+            expiresIn: env.JWT_EXPIRES,
+          }
+        );
+
+        res.cookie("access_token", token, {
+          httpOnly: true,
+          secure: env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: env.COOKIE_MAX_AGE,
+        });
+
+        // Redirect based on user role
+        if (user.role === Roles.PATIENT) {
+          res.redirect(`/patients/${user.id}`);
+        } else {
+          res.redirect("/users");
+        }
       },
-      {
-        expiresIn: env.JWT_EXPIRES,
+      (error) => {
+        res.status(error.statusCode).render("login", {
+          result: { type: "failure", message: error.message },
+          values: req.body,
+        });
       }
     );
-
-    res.cookie("access_token", token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: env.COOKIE_MAX_AGE,
-    });
-
-    // Redirect based on user role
-    if (user.role === Roles.PATIENT) {
-      res.redirect(`/patients/${user.id}`);
-    } else {
-      res.redirect("/users");
-    }
   }
 
   /**
