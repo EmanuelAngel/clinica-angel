@@ -12,6 +12,12 @@ import { PrismaHealthInsuranceRepository } from "../../health-insurances/infrast
 import { BcryptPasswordHasher } from "../../users/infrastructure/bcrypt-password-hasher.js";
 import { AuthService } from "../../auth/application/auth.service.js";
 
+import { PrismaSpecialtyRepository } from "../../specialties/infrastructure/prisma-specialty.repository.js";
+import { SpecialtyService } from "../../specialties/application/specialty.service.js";
+
+import { PrismaProfessionalRepository } from "../../professionals/infrastructure/prisma-professional.repository.js";
+import { ProfessionalService } from "../../professionals/application/professional.service.js";
+
 const prismaUserRepository = new PrismaUserRepository(prisma);
 const bcryptPasswordHasher = new BcryptPasswordHasher(env.SALT_ROUNDS);
 const userService = new UserService(prismaUserRepository, bcryptPasswordHasher);
@@ -33,9 +39,22 @@ const healthInsuranceService = new HealthInsuranceService(
 
 const authService = new AuthService(prismaUserRepository, bcryptPasswordHasher);
 
+const prismaSpecialtyRepository = new PrismaSpecialtyRepository(prisma);
+const specialtyService = new SpecialtyService(prismaSpecialtyRepository);
+
+const prismaProfessionalRepository = new PrismaProfessionalRepository(prisma);
+const professionalService = new ProfessionalService(
+  prismaProfessionalRepository,
+  prismaSpecialtyRepository,
+  prismaUserRepository,
+  bcryptPasswordHasher
+);
+
 export const services = {
   patientService,
   healthInsuranceService,
   userService,
   authService,
+  specialtyService,
+  professionalService,
 };

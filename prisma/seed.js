@@ -5,6 +5,8 @@ import { prisma } from "../src/_shared/infrastructure/prisma.js";
 import { healthInsurances } from "./seeders/health-insurances.seed.js";
 import { users } from "./seeders/users.seed.js";
 import { patients } from "./seeders/patients.seed.js";
+import { specialties } from "./seeders/specialties.seed.js";
+import { professionals } from "./seeders/professionals.seed.js";
 
 /**
  * Seeds the database with initial data.
@@ -27,6 +29,21 @@ async function main() {
     data: patients,
     skipDuplicates: true,
   });
+
+  // Specialties
+  await prisma.specialty.createMany({
+    data: specialties,
+    skipDuplicates: true,
+  });
+
+  // Professionals (Handle nested relations)
+  for (const prof of professionals) {
+    await prisma.user.upsert({
+      where: { email: prof.email },
+      update: {},
+      create: prof,
+    });
+  }
 
   console.log("✨ Seed completed!");
 }
