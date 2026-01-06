@@ -16,7 +16,7 @@ const config = {
     "!**/node_modules/**",
     "!**/vendor/**",
   ],
-  verbose: true,
+  verbose: false,
   setupFiles: ["<rootDir>/tests/test-env.js"],
   setupFilesAfterEnv: ["<rootDir>/tests/jest.setup.js"],
   maxWorkers: 1,
