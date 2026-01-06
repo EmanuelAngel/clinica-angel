@@ -1,0 +1,52 @@
+{% extends "layout/base.njk" %}
+
+{% block head %}
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css"
+        rel="stylesheet"
+        type="text/css">
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"
+          type="text/javascript"></script>
+{% endblock %}
+
+{% block scripts %}
+  <script type="module">
+  const dataTable = new simpleDatatables.DataTable("#specialties-table");
+  </script>
+{% endblock %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Especialidades", "Lista de especialidades médicas registradas.") }}
+
+  <a href="/specialties/create" class="btn btn-primary mb-4">
+    <i data-lucide="plus"></i>
+    Nueva especialidad
+  </a>
+
+  <div class="overflow-x-auto">
+    <table id="specialties-table" class="table table-zebra">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for specialty in specialties %}
+          <tr>
+            <td>{{ specialty.id }}</td>
+            <td>{{ specialty.name }}</td>
+            <td>
+              {% if specialty.isActive %}
+                <span class="badge badge-success">Activa</span>
+              {% else %}
+                <span class="badge badge-error">Inactiva</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
