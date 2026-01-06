@@ -18,6 +18,9 @@ import { SpecialtyService } from "../../specialties/application/specialty.servic
 import { PrismaProfessionalRepository } from "../../professionals/infrastructure/prisma-professional.repository.js";
 import { ProfessionalService } from "../../professionals/application/professional.service.js";
 
+import { PrismaClassificationRepository } from "../../classifications/infrastructure/prisma-classification.repository.js";
+import { ClassificationService } from "../../classifications/application/classification.service.js";
+
 const prismaUserRepository = new PrismaUserRepository(prisma);
 const bcryptPasswordHasher = new BcryptPasswordHasher(env.SALT_ROUNDS);
 const userService = new UserService(prismaUserRepository, bcryptPasswordHasher);
@@ -50,6 +53,13 @@ const professionalService = new ProfessionalService(
   bcryptPasswordHasher
 );
 
+const prismaClassificationRepository = new PrismaClassificationRepository(
+  prisma
+);
+const classificationService = new ClassificationService(
+  prismaClassificationRepository
+);
+
 export const services = {
   patientService,
   healthInsuranceService,
@@ -57,4 +67,5 @@ export const services = {
   authService,
   specialtyService,
   professionalService,
+  classificationService,
 };

@@ -34,6 +34,11 @@ export const links = [
     icon: "calendars",
   },
   {
+    displayName: "Clasificaciones",
+    url: "/classifications",
+    icon: "tag",
+  },
+  {
     displayName: "Sucursales",
     url: "/locations",
     icon: "hospital",
