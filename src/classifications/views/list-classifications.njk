@@ -1,0 +1,104 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Clasificaciones", "Etiquetas para clasificar consultas.") }}
+
+  <a href="/classifications/create" class="btn btn-primary mb-6">
+    <i data-lucide="plus"></i>
+    Nueva clasificación
+  </a>
+
+  {% if classifications.length > 0 %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
+      {% for classification in classifications %}
+        <div class="card bg-base-200 shadow-md hover:shadow-lg transition-shadow">
+          <div class="card-body p-4">
+            <h3 class="card-title text-sm font-semibold truncate" title="{{ classification.name }}">
+              {{ classification.name }}
+            </h3>
+            <div class="card-actions justify-end mt-2 gap-1">
+              <button type="button"
+                      class="btn btn-xs btn-secondary"
+                      title="Editar"
+                      onclick="edit_modal_{{ classification.id }}.showModal()">
+                <i data-lucide="edit" class="w-3 h-3"></i>
+              </button>
+              <button type="button"
+                      class="btn btn-xs btn-error"
+                      title="Eliminar"
+                      onclick="delete_modal_{{ classification.id }}.showModal()">
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {# Edit modal #}
+        <dialog id="edit_modal_{{ classification.id }}" class="modal">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg">Editar clasificación</h3>
+            <form action="/classifications/{{ classification.id }}" method="POST">
+              <div class="py-4">
+                <label class="label">
+                  <span class="label-text">Nombre</span>
+                </label>
+                <input type="text"
+                       name="name"
+                       value="{{ classification.name }}"
+                       class="input input-bordered w-full"
+                       required
+                       minlength="2"
+                       maxlength="100"
+                       placeholder="Ej: Primera vez" />
+                <div class="label">
+                  <span class="label-text-alt">Mínimo 2 caracteres, máximo 100</span>
+                </div>
+              </div>
+              <div class="modal-action">
+                <button type="button" class="btn btn-ghost" onclick="edit_modal_{{ classification.id }}.close()">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i data-lucide="save"></i>
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+          <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
+
+        {# Delete confirmation modal #}
+        <dialog id="delete_modal_{{ classification.id }}" class="modal">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg">Confirmar eliminación</h3>
+            <p class="py-4">¿Está seguro de eliminar la clasificación <strong>"{{ classification.name }}"</strong>?</p>
+            <p class="text-sm text-warning">Esta acción no se puede deshacer.</p>
+            <div class="modal-action">
+              <form method="dialog">
+                <button class="btn btn-ghost">Cancelar</button>
+              </form>
+              <form action="/classifications/{{ classification.id }}/delete" method="POST">
+                <button type="submit" class="btn btn-error">
+                  <i data-lucide="trash-2"></i>
+                  Eliminar
+                </button>
+              </form>
+            </div>
+          </div>
+          <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <i data-lucide="info"></i>
+      <span>No hay clasificaciones registradas. Crea una nueva clasificación para comenzar.</span>
+    </div>
+  {% endif %}
+{% endblock %}
