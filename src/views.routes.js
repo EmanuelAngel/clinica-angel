@@ -4,6 +4,8 @@ import { authRouter } from "./auth/infrastructure/auth.routes.js";
 import { auth } from "./auth/infrastructure/auth.middleware.js";
 import { Roles } from "./auth/domain/roles.js";
 import { patientRouter } from "./patients/infrastructure/patient.routes.js";
+import { specialtyRouter } from "./specialties/infrastructure/specialty.routes.js";
+import { professionalRouter } from "./professionals/infrastructure/professional.routes.js";
 
 export const viewsRouter = Router();
 
@@ -22,3 +24,5 @@ viewsRouter.get("/", (req, res) => {
 viewsRouter.use("/users", auth(Roles.ADMIN), userRouter);
 viewsRouter.use("/auth", authRouter);
 viewsRouter.use("/patients", patientRouter);
+viewsRouter.use("/specialties", auth(Roles.ADMIN), specialtyRouter);
+viewsRouter.use("/professionals", auth(Roles.ADMIN), professionalRouter);

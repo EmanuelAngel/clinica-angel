@@ -1,0 +1,43 @@
+{% extends "layout/base.njk" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Nueva Especialidad", "Registrar una nueva especialidad médica.") }}
+{% endblock %}
+
+{% block content %}
+  <form action="/specialties" method="POST" class="w-full max-w-xl mx-auto space-y-8">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Datos de la especialidad</legend>
+
+      <div>
+        <label class="label">Nombre (requerido)</label>
+        <input type="text"
+               name="name"
+               value="{{ values.name }}"
+               class="input validator w-full {{ 'input-error' if errors.properties.name }}"
+               required
+               minlength="2"
+               maxlength="100"
+               placeholder="Ej: Cardiología" />
+        {% if errors.properties.name %}
+          <div class="text-error">{{ errors.properties.name[0] }}</div>
+        {% endif %}
+        <div class="validator-hint">
+          Ingrese el nombre de la especialidad.
+          <br /> Mínimo 2 caracteres.
+          <br /> Máximo 100 caracteres.
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="mt-8 flex flex-col lg:flex-row gap-4">
+      <button type="submit" class="btn btn-primary flex-1">
+        Crear especialidad
+      </button>
+      <a href="/specialties" class="btn btn-neutral flex-1">
+        Cancelar
+      </a>
+    </div>
+  </form>
+{% endblock %}

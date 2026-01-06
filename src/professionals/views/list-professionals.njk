@@ -1,0 +1,70 @@
+{% extends "layout/base.njk" %}
+
+{% block head %}
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css"
+        rel="stylesheet"
+        type="text/css">
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"
+          type="text/javascript"></script>
+{% endblock %}
+
+{% block scripts %}
+  <script type="module">
+  const dataTable = new simpleDatatables.DataTable("#professionals-table");
+  </script>
+{% endblock %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Profesionales", "Lista de profesionales de la salud registrados.") }}
+
+  <a href="/professionals/create" class="btn btn-primary mb-4">
+    <i data-lucide="user-plus"></i>
+    Registrar profesional
+  </a>
+
+  <div class="overflow-x-auto">
+    <table id="professionals-table" class="table table-zebra">
+      <thead>
+        <tr>
+          <th>Nombre Completo</th>
+          <th>Email</th>
+          <th>DNI</th>
+          <th>Especialidades</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for professional in professionals %}
+          <tr>
+            <td>{{ professional.fullName }}</td>
+            <td>{{ professional.email }}</td>
+            <td>{{ professional.nationalId }}</td>
+            <td>
+              {% if professional.credentials.length > 0 %}
+                {% for cred in professional.credentials %}
+                  <span class="badge badge-outline mr-1">{{ cred.specialtyName }}</span>
+                {% endfor %}
+              {% else %}
+                <span class="text-base-content/50">Sin especialidades</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if professional.isActive %}
+                <span class="badge badge-success">Activo</span>
+              {% else %}
+                <span class="badge badge-error">Inactivo</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="/professionals/{{ professional.id }}" class="link link-primary">
+                Ver perfil
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
