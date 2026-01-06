@@ -20,11 +20,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
-app.use(
-  morgan(env.NODE_ENV === "production" ? "combined" : "dev", {
-    skip: (req) => req.url.startsWith("/health") || req.url.includes("."),
-  })
-);
+if (env.NODE_ENV !== "test") {
+  app.use(
+    morgan(env.NODE_ENV === "production" ? "combined" : "dev", {
+      skip: (req) => req.url.startsWith("/health") || req.url.includes("."),
+    })
+  );
+}
 
 app.use(express.static(join(__dirname, "./_assets")));
 
@@ -35,7 +37,6 @@ app.use(cookieParser());
 app.set("view engine", "njk");
 
 const viewPaths = [
-  join(__dirname, "./example/views"),
   join(__dirname, "./_shared/views"),
   join(__dirname, "./users/views"),
   join(__dirname, "./auth/views"),
