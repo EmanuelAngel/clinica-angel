@@ -1,0 +1,83 @@
+{% extends "layout/base.njk" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Perfil del Profesional", professional.fullName) }}
+{% endblock %}
+
+{% block content %}
+  <div class="w-full max-w-3xl mx-auto space-y-8">
+    <div class="card bg-base-200 shadow-md">
+      <div class="card-body">
+        <h2 class="card-title text-2xl">{{ professional.fullName }}</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div>
+            <span class="text-base-content/70 text-sm">Email</span>
+            <p class="font-medium">{{ professional.email }}</p>
+          </div>
+          <div>
+            <span class="text-base-content/70 text-sm">DNI</span>
+            <p class="font-medium">{{ professional.nationalId }}</p>
+          </div>
+          <div>
+            <span class="text-base-content/70 text-sm">Teléfono</span>
+            <p class="font-medium">{{ professional.phone }}</p>
+          </div>
+          <div>
+            <span class="text-base-content/70 text-sm">Dirección</span>
+            <p class="font-medium">{{ professional.address }}</p>
+          </div>
+          <div>
+            <span class="text-base-content/70 text-sm">Estado</span>
+            <p>
+              {% if professional.isActive %}
+                <span class="badge badge-success">Activo</span>
+              {% else %}
+                <span class="badge badge-error">Inactivo</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-200 shadow-md">
+      <div class="card-body">
+        <h3 class="card-title text-xl">Especialidades y Matrículas</h3>
+
+        {% if professional.credentials.length > 0 %}
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Especialidad</th>
+                  <th>Número de Matrícula</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cred in professional.credentials %}
+                  <tr>
+                    <td>
+                      <span class="badge badge-primary badge-outline">{{ cred.specialtyName }}</span>
+                    </td>
+                    <td>{{ cred.licenseNumber }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-base-content/50">Este profesional no tiene especialidades registradas.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="flex gap-4">
+      <a href="/professionals" class="btn btn-neutral">
+        <i data-lucide="arrow-left"></i>
+        Volver a la lista
+      </a>
+    </div>
+  </div>
+{% endblock %}
