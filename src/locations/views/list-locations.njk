@@ -1,0 +1,105 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Sedes", "Gestión de las sedes de la clínica.") }}
+
+  <a href="/locations/create" class="btn btn-primary mb-6">
+    <i data-lucide="plus"></i>
+    Nueva sede
+  </a>
+
+  {% if locations.length > 0 %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for location in locations %}
+        <div class="card bg-base-200 shadow-md hover:shadow-lg transition-shadow">
+          <div class="card-body p-4">
+            <h3 class="card-title text-lg font-bold" title="{{ location.name }}">
+              {{ location.name }}
+            </h3>
+            <p class="text-sm truncate" title="{{ location.address }}">
+              <span class="font-semibold">Dirección:</span> {{ location.address }}
+            </p>
+            {% if location.phone %}
+            <p class="text-sm">
+              <span class="font-semibold">Teléfono:</span> {{ location.phone }}
+            </p>
+            {% endif %}
+            
+            <div class="card-actions justify-end mt-4 gap-1">
+              <button type="button"
+                      class="btn btn-sm btn-secondary"
+                      title="Editar"
+                      onclick="edit_modal_{{ location.id }}.showModal()">
+                <i data-lucide="edit" class="w-4 h-4"></i>
+                Editar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {# Edit modal #}
+        <dialog id="edit_modal_{{ location.id }}" class="modal">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg">Editar sede</h3>
+            <form action="/locations/{{ location.id }}" method="POST">
+              <div class="py-4 space-y-4">
+                <div>
+                  <label class="label">
+                    <span class="label-text">Nombre (requerido)</span>
+                  </label>
+                  <input type="text"
+                         name="name"
+                         value="{{ location.name }}"
+                         class="input input-bordered w-full"
+                         required
+                         minlength="2"
+                         maxlength="100" />
+                </div>
+                <div>
+                  <label class="label">
+                    <span class="label-text">Dirección (requerido)</span>
+                  </label>
+                  <input type="text"
+                         name="address"
+                         value="{{ location.address }}"
+                         class="input input-bordered w-full"
+                         required
+                         minlength="5"
+                         maxlength="255" />
+                </div>
+                <div>
+                  <label class="label">
+                    <span class="label-text">Teléfono</span>
+                  </label>
+                  <input type="text"
+                         name="phone"
+                         value="{{ location.phone }}"
+                         class="input input-bordered w-full"
+                         maxlength="20" />
+                </div>
+              </div>
+              <div class="modal-action">
+                <button type="button" class="btn btn-ghost" onclick="edit_modal_{{ location.id }}.close()">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i data-lucide="save"></i>
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+          <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <i data-lucide="info"></i>
+      <span>No hay sedes registradas. Crea una nueva sede para comenzar.</span>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -60,6 +60,12 @@ const classificationService = new ClassificationService(
   prismaClassificationRepository
 );
 
+import { PrismaLocationRepository } from "../../locations/infrastructure/prisma-location.repository.js";
+import { LocationService } from "../../locations/application/location.service.js";
+
+const prismaLocationRepository = new PrismaLocationRepository(prisma);
+const locationService = new LocationService(prismaLocationRepository);
+
 export const services = {
   patientService,
   healthInsuranceService,
@@ -68,4 +74,5 @@ export const services = {
   specialtyService,
   professionalService,
   classificationService,
+  locationService,
 };
