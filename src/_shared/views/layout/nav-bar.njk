@@ -1,4 +1,4 @@
-<!-- Navbar -->
+{# Navbar #}
 <div class="navbar bg-base-300 w-full">
   <div class="flex-none lg:hidden">
     <label for="my-drawer-2" aria-label="open sidebar" class="btn btn-square btn-ghost">
@@ -20,7 +20,7 @@
 
 
 
-  <!-- Links Section (Right side) -->
+  {# Links Section (Right side) #}
   <div class="hidden flex-1 lg:block">
     <ul class="menu menu-horizontal justify-end">
       {% for link in links %}
@@ -57,7 +57,7 @@
     </ul>
   </div>
 
-    <!-- Profile Actions and Theme Controller (Left side) -->
+    {# Profile Actions and Theme Controller (Left side) #}
   <div class="hidden flex-none lg:flex">
     <ul class="menu menu-horizontal gap-2">
       {% if user %}
@@ -70,9 +70,7 @@
             </a>
         </li>
       {% endif %}
-      {# <li>
-        {% include "partials/theme-controller.njk" %}
-      </li> #}
+      {% include "partials/theme-controller.njk" %}
     </ul>
   </div>
 </div>
