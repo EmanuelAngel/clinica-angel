@@ -1,32 +1,50 @@
-<div class="dropdown">
-  <div tabindex="0" role="button" class="btn">
-    <i data-lucide="sun-moon"></i>
-    Cambiar tema
+<div class="dropdown dropdown-end">
+  <div tabindex="0" role="button" id="theme-dropdown-btn" class="btn btn-ghost rounded-btn">
+    <span id="theme-current-icon" class="flex items-center">
+      <i data-lucide="sun"></i>
+    </span>
+    <span class="ml-2">Tema</span>
+    <i data-lucide="chevron-down" class="h-4 w-4 ml-1"></i>
   </div>
-  <ul tabindex="-1" class="dropdown-content bg-base-300 rounded-box z-1 w-52 p-2 shadow-2xl">
+  <ul tabindex="-1" class="dropdown-content menu bg-base-200 rounded-box z-[1] w-52 p-2 shadow-sm">
     <li>
       <input
         type="radio"
         name="theme-dropdown"
-        class="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"
-        aria-label="Por defecto"
-        value="default" />
-    </li>
-    <li>
-      <input
-        type="radio"
-        name="theme-dropdown"
-        class="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"
+        class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
         aria-label="Claro"
-        value="clinic-light" />
+        value="clinic-light" 
+      />
+      <div class="flex items-center gap-2 pointer-events-none">
+        <i data-lucide="sun" class="h-4 w-4"></i>
+        <span>Claro</span>
+      </div>
     </li>
     <li>
       <input
         type="radio"
         name="theme-dropdown"
-        class="theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"
+        class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
         aria-label="Oscuro"
-        value="clinic-dark" />
+        value="clinic-dark" 
+      />
+      <div class="flex items-center gap-2 pointer-events-none">
+        <i data-lucide="moon" class="h-4 w-4"></i>
+        <span>Oscuro</span>
+      </div>
+    </li>
+    <li>
+      <input
+        type="radio"
+        name="theme-dropdown"
+        class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
+        aria-label="Sistema"
+        value="system" 
+      />
+      <div class="flex items-center gap-2 pointer-events-none">
+        <i data-lucide="monitor" class="h-4 w-4"></i>
+        <span>Sistema</span>
+      </div>
     </li>
   </ul>
 </div>
