@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="clinic-dark">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }}</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/theme-change@2.0.2/index.js"></script>
 
   <link href="/css/output.css" rel="stylesheet" type="text/css" />
 
@@ -14,6 +12,47 @@
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- Load shared theme configuration (must be before inline script) -->
+  <script src="/js/theme-config.js"></script>
+
+  <script>
+    // Apply theme IMMEDIATELY to prevent FOUC (Flash of Unstyled Content)
+    // This must run synchronously in the head before the page renders
+    (function() {
+      const config = window.ThemeConfig;
+      const savedPreference = config.getSavedPreference();
+      const themeToApply = config.resolveTheme(savedPreference);
+      config.applyTheme(themeToApply);
+    })();
+  </script>
+
+  <style>
+    /* Custom styles to handle radio button appearance within list items */
+    input[name="theme-dropdown"],
+    input[name="theme-dropdown-sidebar"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      z-index: 10;
+      margin: 0; /* Reset margins */
+      inset: 0; /* Cover parent li */
+    }
+    
+    /* Highlight selected option */
+    input[name="theme-dropdown"]:checked + div,
+    input[name="theme-dropdown-sidebar"]:checked + div {
+      font-weight: bold;
+      color: var(--color-primary);
+    }
+
+    /* ensure list item relative positioning */
+    .dropdown-content li {
+      position: relative;
+    }
+  </style>
 
   {% block head %}{% endblock %}
 </head>
@@ -52,6 +91,8 @@
   <script>
     lucide.createIcons();
   </script>
+
+  <script type="module" src="/js/main.js"></script>
 
   {% block scripts %}
   {% endblock %}
