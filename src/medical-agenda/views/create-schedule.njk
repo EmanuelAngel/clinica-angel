@@ -1,0 +1,404 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Nueva Agenda Médica", "Crear una nueva agenda para un profesional.") }}
+
+  {% if result and result.type == "failure" %}
+    <div class="alert alert-error mb-4">
+      <i data-lucide="alert-circle"></i>
+      <span>{{ result.message }}</span>
+    </div>
+  {% endif %}
+
+  <form action="/schedules" method="POST" class="space-y-6 max-w-4xl">
+    {# Schedule base data #}
+    <div class="card bg-base-200">
+      <div class="card-body">
+        <h2 class="card-title">Datos de la agenda</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="label">
+              <span class="label-text">Matrícula del profesional</span>
+            </label>
+            <select name="schedule[licenseNumber]" class="select select-bordered w-full" required>
+              <option value="">Seleccione una matrícula</option>
+              {% for professional in professionals %}
+                {% for credential in professional.credentials %}
+                  <option value="{{ credential.licenseNumber }}"
+                    {{ "selected" if values.schedule.licenseNumber == credential.licenseNumber }}>
+                    {{ credential.licenseNumber }} - {{ professional.fullName }} ({{ credential.specialtyName }})
+                  </option>
+                {% endfor %}
+              {% endfor %}
+            </select>
+            {% if errors and errors.children.schedule.children.licenseNumber %}
+              <span class="text-error text-sm">{{ errors.children.schedule.children.licenseNumber.message }}</span>
+            {% endif %}
+          </div>
+
+          <div>
+            <label class="label">
+              <span class="label-text">Sucursal</span>
+            </label>
+            <select name="schedule[locationId]" class="select select-bordered w-full" required>
+              <option value="">Seleccione una sucursal</option>
+              {% for location in locations %}
+                <option value="{{ location.id }}"
+                  {{ "selected" if values.schedule.locationId == location.id | string }}>
+                  {{ location.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="label">
+              <span class="label-text">Clasificación</span>
+            </label>
+            <select name="schedule[classificationId]" class="select select-bordered w-full" required>
+              <option value="">Seleccione una clasificación</option>
+              {% for classification in classifications %}
+                <option value="{{ classification.id }}"
+                  {{ "selected" if values.schedule.classificationId == classification.id | string }}>
+                  {{ classification.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="label">
+              <span class="label-text">Duración del turno (minutos)</span>
+            </label>
+            <select name="schedule[slotDurationMinutes]" class="select select-bordered w-full" required>
+              <option value="">Seleccione duración</option>
+              {% for duration in [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60] %}
+                <option value="{{ duration }}"
+                  {{ "selected" if values.schedule.slotDurationMinutes == duration | string }}>
+                  {{ duration }} minutos
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="label">
+              <span class="label-text">Sobreturnos máximos por día (0-20)</span>
+            </label>
+            <input type="number"
+                   name="schedule[maxOverbooksPerDay]"
+                   value="{{ values.schedule.maxOverbooksPerDay | default(12) }}"
+                   class="input input-bordered w-full"
+                   min="0"
+                   max="20"
+                   required />
+          </div>
+
+          <div>
+            <label class="label">
+              <span class="label-text">Sobreturnos máximos por horario (0-2)</span>
+            </label>
+            <input type="number"
+                   name="schedule[maxOverbooksPerSlot]"
+                   value="{{ values.schedule.maxOverbooksPerSlot | default(1) }}"
+                   class="input input-bordered w-full"
+                   min="0"
+                   max="2"
+                   required />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Validity period #}
+    <div class="card bg-base-200">
+      <div class="card-body">
+        <h2 class="card-title">Vigencia (máximo 3 meses)</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="label">
+              <span class="label-text">Fecha desde</span>
+            </label>
+            <input type="date"
+                   name="config[validity][from]"
+                   value="{{ values.config.validity.from if values.config }}"
+                   class="input input-bordered w-full"
+                   required />
+          </div>
+
+          <div>
+            <label class="label">
+              <span class="label-text">Fecha hasta</span>
+            </label>
+            <input type="date"
+                   name="config[validity][to]"
+                   value="{{ values.config.validity.to if values.config }}"
+                   class="input input-bordered w-full"
+                   required />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Weekly schedule - dynamic #}
+    <div class="card bg-base-200">
+      <div class="card-body">
+        <h2 class="card-title">Horarios semanales</h2>
+        <p class="text-sm text-base-content/70 mb-4">
+          Defina los días y horarios de atención. Puede agregar múltiples días con múltiples rangos horarios.
+        </p>
+
+        <div id="weeklyDaysContainer" class="space-y-4">
+          {# Initial entry #}
+          <div class="weekday-entry border border-base-300 rounded-lg p-4" data-day-index="0">
+            <div class="flex justify-between items-center mb-3">
+              <span class="font-medium">Día #1</span>
+              <button type="button" class="btn btn-ghost btn-sm text-error remove-day-btn hidden">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div>
+                <label class="label"><span class="label-text">Día</span></label>
+                <select name="config[weeklyDays][0][day]" class="select select-bordered w-full day-select" required>
+                  <option value="MONDAY">Lunes</option>
+                  <option value="TUESDAY">Martes</option>
+                  <option value="WEDNESDAY">Miércoles</option>
+                  <option value="THURSDAY">Jueves</option>
+                  <option value="FRIDAY">Viernes</option>
+                  <option value="SATURDAY">Sábado</option>
+                  <option value="SUNDAY">Domingo</option>
+                </select>
+              </div>
+              <div class="md:col-span-3">
+                <div class="ranges-container space-y-2">
+                  <div class="range-entry flex gap-2 items-end" data-range-index="0">
+                    <div class="flex-1">
+                      <label class="label"><span class="label-text">Hora inicio</span></label>
+                      <input type="time" name="config[weeklyDays][0][ranges][0][start]" value="09:00" class="input input-bordered w-full" min="08:00" max="22:00" required />
+                    </div>
+                    <div class="flex-1">
+                      <label class="label"><span class="label-text">Hora fin</span></label>
+                      <input type="time" name="config[weeklyDays][0][ranges][0][end]" value="12:00" class="input input-bordered w-full" min="08:00" max="22:00" required />
+                    </div>
+                    <button type="button" class="btn btn-ghost btn-sm text-error remove-range-btn hidden">
+                      <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm mt-2 add-range-btn">
+                  <i data-lucide="plus" class="w-4 h-4"></i> Agregar rango horario
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" id="addDayBtn" class="btn btn-outline btn-sm mt-4">
+          <i data-lucide="plus"></i> Agregar otro día
+        </button>
+      </div>
+    </div>
+
+    {# Blocks - dynamic #}
+    <div class="card bg-base-200">
+      <div class="card-body">
+        <h2 class="card-title">Bloqueos (opcional)</h2>
+        <p class="text-sm text-base-content/70 mb-4">
+          Defina períodos donde NO se generarán turnos (vacaciones, imprevistos, etc).
+        </p>
+
+        <div id="blocksContainer" class="space-y-4">
+          {# Blocks will be added here dynamically #}
+        </div>
+
+        <button type="button" id="addBlockBtn" class="btn btn-outline btn-sm mt-2">
+          <i data-lucide="plus"></i> Agregar bloqueo
+        </button>
+      </div>
+    </div>
+
+    {# Submit #}
+    <div class="flex justify-end gap-4">
+      <a href="/schedules" class="btn btn-ghost">Cancelar</a>
+      <button type="submit" class="btn btn-primary">
+        <i data-lucide="save"></i>
+        Crear agenda
+      </button>
+    </div>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let dayIndex = 1;
+      let blockIndex = 0;
+
+      const weeklyDaysContainer = document.getElementById('weeklyDaysContainer');
+      const blocksContainer = document.getElementById('blocksContainer');
+      const addDayBtn = document.getElementById('addDayBtn');
+      const addBlockBtn = document.getElementById('addBlockBtn');
+
+      // Add new day
+      addDayBtn.addEventListener('click', function() {
+        const dayHtml = `
+          <div class="weekday-entry border border-base-300 rounded-lg p-4" data-day-index="${dayIndex}">
+            <div class="flex justify-between items-center mb-3">
+              <span class="font-medium">Día #${dayIndex + 1}</span>
+              <button type="button" class="btn btn-ghost btn-sm text-error remove-day-btn">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div>
+                <label class="label"><span class="label-text">Día</span></label>
+                <select name="config[weeklyDays][${dayIndex}][day]" class="select select-bordered w-full day-select" required>
+                  <option value="MONDAY">Lunes</option>
+                  <option value="TUESDAY">Martes</option>
+                  <option value="WEDNESDAY">Miércoles</option>
+                  <option value="THURSDAY">Jueves</option>
+                  <option value="FRIDAY">Viernes</option>
+                  <option value="SATURDAY">Sábado</option>
+                  <option value="SUNDAY">Domingo</option>
+                </select>
+              </div>
+              <div class="md:col-span-3">
+                <div class="ranges-container space-y-2">
+                  <div class="range-entry flex gap-2 items-end" data-range-index="0">
+                    <div class="flex-1">
+                      <label class="label"><span class="label-text">Hora inicio</span></label>
+                      <input type="time" name="config[weeklyDays][${dayIndex}][ranges][0][start]" value="09:00" class="input input-bordered w-full" min="08:00" max="22:00" required />
+                    </div>
+                    <div class="flex-1">
+                      <label class="label"><span class="label-text">Hora fin</span></label>
+                      <input type="time" name="config[weeklyDays][${dayIndex}][ranges][0][end]" value="12:00" class="input input-bordered w-full" min="08:00" max="22:00" required />
+                    </div>
+                    <button type="button" class="btn btn-ghost btn-sm text-error remove-range-btn hidden">
+                      <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm mt-2 add-range-btn">
+                  <i data-lucide="plus" class="w-4 h-4"></i> Agregar rango horario
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        weeklyDaysContainer.insertAdjacentHTML('beforeend', dayHtml);
+        dayIndex++;
+        updateRemoveDayButtons();
+        lucide.createIcons();
+      });
+
+      // Add new block
+      addBlockBtn.addEventListener('click', function() {
+        const blockHtml = `
+          <div class="block-entry border border-base-300 rounded-lg p-4" data-block-index="${blockIndex}">
+            <div class="flex justify-between items-center mb-3">
+              <span class="font-medium">Bloqueo #${blockIndex + 1}</span>
+              <button type="button" class="btn btn-ghost btn-sm text-error remove-block-btn">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="label"><span class="label-text">Fecha desde</span></label>
+                <input type="date" name="blocks[${blockIndex}][start]" class="input input-bordered w-full" required />
+              </div>
+              <div>
+                <label class="label"><span class="label-text">Fecha hasta</span></label>
+                <input type="date" name="blocks[${blockIndex}][end]" class="input input-bordered w-full" required />
+              </div>
+              <div>
+                <label class="label"><span class="label-text">Motivo</span></label>
+                <input type="text" name="blocks[${blockIndex}][motive]" placeholder="Ej: Vacaciones" class="input input-bordered w-full" required />
+              </div>
+            </div>
+          </div>
+        `;
+        blocksContainer.insertAdjacentHTML('beforeend', blockHtml);
+        blockIndex++;
+        lucide.createIcons();
+      });
+
+      // Event delegation for remove buttons
+      document.addEventListener('click', function(e) {
+        // Remove day
+        if (e.target.closest('.remove-day-btn')) {
+          const dayEntry = e.target.closest('.weekday-entry');
+          dayEntry.remove();
+          updateRemoveDayButtons();
+        }
+
+        // Remove range
+        if (e.target.closest('.remove-range-btn')) {
+          const rangeEntry = e.target.closest('.range-entry');
+          const rangesContainer = rangeEntry.closest('.ranges-container');
+          rangeEntry.remove();
+          updateRemoveRangeButtons(rangesContainer);
+        }
+
+        // Add range
+        if (e.target.closest('.add-range-btn')) {
+          const btn = e.target.closest('.add-range-btn');
+          const dayEntry = btn.closest('.weekday-entry');
+          const dayIdx = dayEntry.dataset.dayIndex;
+          const rangesContainer = dayEntry.querySelector('.ranges-container');
+          const rangeCount = rangesContainer.querySelectorAll('.range-entry').length;
+
+          const rangeHtml = `
+            <div class="range-entry flex gap-2 items-end" data-range-index="${rangeCount}">
+              <div class="flex-1">
+                <label class="label"><span class="label-text">Hora inicio</span></label>
+                <input type="time" name="config[weeklyDays][${dayIdx}][ranges][${rangeCount}][start]" value="14:00" class="input input-bordered w-full" min="08:00" max="22:00" required />
+              </div>
+              <div class="flex-1">
+                <label class="label"><span class="label-text">Hora fin</span></label>
+                <input type="time" name="config[weeklyDays][${dayIdx}][ranges][${rangeCount}][end]" value="18:00" class="input input-bordered w-full" min="08:00" max="22:00" required />
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm text-error remove-range-btn">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          `;
+          rangesContainer.insertAdjacentHTML('beforeend', rangeHtml);
+          updateRemoveRangeButtons(rangesContainer);
+          lucide.createIcons();
+        }
+
+        // Remove block
+        if (e.target.closest('.remove-block-btn')) {
+          const blockEntry = e.target.closest('.block-entry');
+          blockEntry.remove();
+        }
+      });
+
+      function updateRemoveDayButtons() {
+        const days = weeklyDaysContainer.querySelectorAll('.weekday-entry');
+        days.forEach((day, i) => {
+          const removeBtn = day.querySelector('.remove-day-btn');
+          if (days.length > 1) {
+            removeBtn.classList.remove('hidden');
+          } else {
+            removeBtn.classList.add('hidden');
+          }
+        });
+      }
+
+      function updateRemoveRangeButtons(container) {
+        const ranges = container.querySelectorAll('.range-entry');
+        ranges.forEach((range, i) => {
+          const removeBtn = range.querySelector('.remove-range-btn');
+          if (ranges.length > 1) {
+            removeBtn.classList.remove('hidden');
+          } else {
+            removeBtn.classList.add('hidden');
+          }
+        });
+      }
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+
+  <div class="flex flex-col lg:flex-row gap-6">
+    {# Schedule Info Sidebar #}
+    <div class="lg:w-80 shrink-0">
+      <div class="card bg-base-200 sticky top-4">
+        <div class="card-body">
+          <h2 class="card-title text-lg">Información de la Agenda</h2>
+
+          <div class="space-y-3 text-sm">
+            <div>
+              <span class="font-semibold text-base-content/70">Profesional:</span>
+              <p class="font-medium">{{ schedule.professional.user.firstNames }} {{ schedule.professional.user.lastNames }}</p>
+            </div>
+            <div>
+              <span class="font-semibold text-base-content/70">Especialidad:</span>
+              <p>{{ schedule.professional.specialty.name }}</p>
+            </div>
+            <div>
+              <span class="font-semibold text-base-content/70">Sucursal:</span>
+              <p>{{ schedule.location.name }}</p>
+              <p class="text-xs text-base-content/60">{{ schedule.location.address }}</p>
+            </div>
+            <div>
+              <span class="font-semibold text-base-content/70">Clasificación:</span>
+              <span class="badge badge-primary badge-sm ml-1">{{ schedule.classification.name }}</span>
+            </div>
+            <div class="divider my-2"></div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <span class="font-semibold text-base-content/70">Duración turno:</span>
+                <p>{{ schedule.slotDuration }} min</p>
+              </div>
+              <div>
+                <span class="font-semibold text-base-content/70">Matrícula:</span>
+                <p>{{ schedule.professionalLicense }}</p>
+              </div>
+            </div>
+            <div>
+              <span class="font-semibold text-base-content/70">Estado:</span>
+              {% if schedule.isPaused %}
+                <span class="badge badge-warning badge-sm ml-1">Pausado</span>
+              {% else %}
+                <span class="badge badge-success badge-sm ml-1">Activo</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="card-actions mt-4">
+            <a href="/schedules" class="btn btn-ghost btn-sm">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              Volver
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Time Grid #}
+    <div class="flex-1 min-w-0">
+      {# View Mode Selector #}
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 class="text-xl font-bold">{{ viewLabel }}</h1>
+          <p class="text-sm text-base-content/70">
+            {% if dates | length == 1 %}
+              {{ dates[0].date | formatDate }}
+            {% else %}
+              {{ dates[0].date | formatDate }} - {{ dates[dates.length - 1].date | formatDate }}
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="btn-group">
+          <a href="?view=today" class="btn btn-sm {{ 'btn-active' if viewMode == 'today' }}">Hoy</a>
+          <a href="?view=3days" class="btn btn-sm {{ 'btn-active' if viewMode == '3days' }}">3 Días</a>
+          <a href="?view=week" class="btn btn-sm {{ 'btn-active' if viewMode == 'week' }}">Semana</a>
+        </div>
+      </div>
+
+      {# Grid Container #}
+      <div class="overflow-x-auto border border-base-300 rounded-lg bg-base-100">
+        <div class="grid" style="grid-template-columns: 60px repeat({{ dates.length }}, minmax(150px, 1fr));">
+          {# Header Row #}
+          <div class="sticky top-0 left-0 z-20 bg-base-200 border-b border-r border-base-300 p-2 font-semibold text-center">
+            Hora
+          </div>
+          {% for day in dates %}
+            <div class="sticky top-0 z-10 bg-base-200 border-b border-base-300 p-2 text-center">
+              <div class="font-semibold">{{ day.date | formatDayOfWeek }}</div>
+              <div class="text-sm text-base-content/70">{{ day.date | formatShortDate }}</div>
+            </div>
+          {% endfor %}
+
+          {# Time Rows #}
+          {% for hour in hours %}
+            {# Hour Label #}
+            <div class="sticky left-0 z-10 bg-base-100 border-r border-b border-base-300 p-2 text-center text-sm font-medium">
+              {{ hour | pad(2, '0') }}:00
+            </div>
+
+            {# Slots for each day at this hour #}
+            {% for day in dates %}
+              <div class="border-b border-base-300 p-1 min-h-[80px] bg-base-100 relative">
+                {% for slot in day.slots %}
+                  {% set slotHour = slot.startsAt.getUTCHours() %}
+                  {% if slotHour == hour %}
+                    {% set slotMinute = slot.startsAt.getUTCMinutes() %}
+                    <div class="slot-item mb-1 p-1 rounded text-xs cursor-pointer hover:shadow-md transition-shadow
+                      {% if slot.status == 'FREE' %}bg-emerald-100 text-emerald-800 border border-emerald-200
+                      {% elif slot.status == 'BOOKED' %}bg-blue-100 text-blue-800 border border-blue-200
+                      {% elif slot.status == 'CONFIRMED' %}bg-purple-100 text-purple-800 border border-purple-200
+                      {% elif slot.status == 'PROPOSED' %}bg-amber-100 text-amber-800 border border-amber-200
+                      {% elif slot.status == 'ARRIVED' %}bg-teal-100 text-teal-800 border border-teal-200
+                      {% elif slot.status == 'IN_PROGRESS' %}bg-orange-100 text-orange-800 border border-orange-200
+                      {% elif slot.status == 'FULFILLED' %}bg-green-100 text-green-800 border border-green-200
+                      {% elif slot.status == 'CANCELLED' %}bg-red-100 text-red-800 border border-red-200
+                      {% elif slot.status == 'NO_SHOW' %}bg-gray-100 text-gray-800 border border-gray-200
+                      {% else %}bg-gray-50 text-gray-600 border border-gray-200
+                      {% endif %}
+                      {% if slot.isOverbook %}border-dashed border-2{% endif %}
+                    ">
+                      <div class="font-medium">
+                        {{ hour | pad(2, '0') }}:{{ slotMinute | pad(2, '0') }}
+                      </div>
+                      <div class="truncate">
+                        {% if slot.status == 'FREE' %}Libre
+                        {% elif slot.status == 'BOOKED' %}Reservado
+                        {% elif slot.status == 'CONFIRMED' %}Confirmado
+                        {% elif slot.status == 'PROPOSED' %}Propuesto
+                        {% elif slot.status == 'ARRIVED' %}Presente
+                        {% elif slot.status == 'IN_PROGRESS' %}En consulta
+                        {% elif slot.status == 'FULFILLED' %}Atendido
+                        {% elif slot.status == 'CANCELLED' %}Cancelado
+                        {% elif slot.status == 'NO_SHOW' %}Ausente
+                        {% else %}{{ slot.status }}
+                        {% endif %}
+                      </div>
+                      {% if slot.patient %}
+                        <div class="truncate text-[10px] opacity-80">
+                          {{ slot.patient.firstNames }} {{ slot.patient.lastNames }}
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+
+      {# Legend #}
+      <div class="mt-4 flex flex-wrap gap-2 text-xs">
+        <div class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-emerald-100 border border-emerald-200"></span> Libre
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-blue-100 border border-blue-200"></span> Reservado
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-purple-100 border border-purple-200"></span> Confirmado
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-teal-100 border border-teal-200"></span> Presente
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-orange-100 border border-orange-200"></span> En consulta
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-green-100 border border-green-200"></span> Atendido
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-gray-100 border border-gray-200"></span> Ausente
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-red-100 border border-red-200"></span> Cancelado
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

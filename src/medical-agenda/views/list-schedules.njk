@@ -1,0 +1,57 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Agendas Médicas", "Gestión de agendas de profesionales.") }}
+
+  <a href="/schedules/create" class="btn btn-primary mb-6">
+    <i data-lucide="plus"></i>
+    Nueva agenda
+  </a>
+
+  {% if schedules.length > 0 %}
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th>Profesional</th>
+            <th>Especialidad</th>
+            <th>Sucursal</th>
+            <th>Clasificación</th>
+            <th>Duración turno</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for schedule in schedules %}
+            <tr class="hover cursor-pointer" onclick="window.location='/schedules/{{ schedule.id }}'">
+              <td>{{ schedule.professional.user.firstNames }} {{ schedule.professional.user.lastNames }}</td>
+              <td>{{ schedule.professional.specialty.name }}</td>
+              <td>{{ schedule.location.name }}</td>
+              <td>{{ schedule.classification.name }}</td>
+              <td>{{ schedule.slotDuration }} min</td>
+              <td>
+                {% if schedule.isPaused %}
+                  <span class="badge badge-warning">Pausado</span>
+                {% else %}
+                  <span class="badge badge-success">Activo</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="/schedules/{{ schedule.id }}" class="btn btn-ghost btn-sm">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <i data-lucide="info"></i>
+      <span>No hay agendas registradas. Crea una nueva agenda para comenzar.</span>
+    </div>
+  {% endif %}
+{% endblock %}
