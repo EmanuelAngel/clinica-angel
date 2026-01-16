@@ -21,6 +21,12 @@ import { ProfessionalService } from "../../professionals/application/professiona
 import { PrismaClassificationRepository } from "../../classifications/infrastructure/prisma-classification.repository.js";
 import { ClassificationService } from "../../classifications/application/classification.service.js";
 
+import { PrismaLocationRepository } from "../../locations/infrastructure/prisma-location.repository.js";
+import { LocationService } from "../../locations/application/location.service.js";
+
+import { PrismaScheduleRepository } from "../../schedules/infrastructure/prisma-schedule.repository.js";
+import { ScheduleService } from "../../schedules/application/schedule.service.js";
+
 const prismaUserRepository = new PrismaUserRepository(prisma);
 const bcryptPasswordHasher = new BcryptPasswordHasher(env.SALT_ROUNDS);
 const userService = new UserService(prismaUserRepository, bcryptPasswordHasher);
@@ -60,11 +66,11 @@ const classificationService = new ClassificationService(
   prismaClassificationRepository
 );
 
-import { PrismaLocationRepository } from "../../locations/infrastructure/prisma-location.repository.js";
-import { LocationService } from "../../locations/application/location.service.js";
-
 const prismaLocationRepository = new PrismaLocationRepository(prisma);
 const locationService = new LocationService(prismaLocationRepository);
+
+const prismaScheduleRepository = new PrismaScheduleRepository(prisma);
+const scheduleService = new ScheduleService(prismaScheduleRepository);
 
 export const services = {
   patientService,
@@ -75,4 +81,5 @@ export const services = {
   professionalService,
   classificationService,
   locationService,
+  scheduleService,
 };
