@@ -70,16 +70,20 @@ export class PrismaScheduleRepository {
       where: {
         professionalLicense: licenseNumber,
         deletedAt: null,
-        // FIX: validFrom and validUntil logic
-        validFrom: {
-          lt: toDate,
-        },
-        validUntil: {
-          gt: fromDate,
+        configs: {
+          some: {
+            validFrom: {
+              lt: toDate,
+            },
+            validUntil: {
+              gt: fromDate,
+            },
+          },
         },
       },
       include: {
         configs: true,
+        blocks: true,
       },
     });
 
