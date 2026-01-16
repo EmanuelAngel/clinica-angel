@@ -158,8 +158,8 @@ model ScheduleConfig {
   id         Int       @id @default(autoincrement()) @map("config_id")
   scheduleId Int       @map("schedule_id")
   dayOfWeek  DayOfWeek @map("day_of_week")
-  startTime  DateTime  @db.Time
-  endTime    DateTime  @db.Time
+  startTime  String    @map("start_time")
+  endTime    String    @map("end_time")
   validFrom  DateTime  @map("valid_from") @db.Date
   validUntil DateTime  @map("valid_until") @db.Date
 
