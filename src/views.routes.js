@@ -8,6 +8,7 @@ import { specialtyRouter } from "./specialties/infrastructure/specialty.routes.j
 import { professionalRouter } from "./professionals/infrastructure/professional.routes.js";
 import { classificationRouter } from "./classifications/infrastructure/classification.routes.js";
 import { locationRouter } from "./locations/infrastructure/location.routes.js";
+import { scheduleRouter } from "./schedules/infrastructure/schedule.routes.js";
 
 export const viewsRouter = Router();
 
@@ -30,3 +31,4 @@ viewsRouter.use("/specialties", auth(Roles.ADMIN), specialtyRouter);
 viewsRouter.use("/professionals", auth(Roles.ADMIN), professionalRouter);
 viewsRouter.use("/classifications", auth(Roles.ADMIN), classificationRouter);
 viewsRouter.use("/locations", auth(Roles.ADMIN), locationRouter);
+viewsRouter.use("/schedules", auth(Roles.ADMIN), scheduleRouter);

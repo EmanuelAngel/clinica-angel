@@ -57,6 +57,7 @@ export class ScheduleController {
     }
 
     if (newConfigurationResult.isOk()) {
+      // REFACTOR: Redirect to schedule list OR created schedule
       res.status(201).render(res.locals.view, {
         result: {
           type: "success",
@@ -66,5 +67,24 @@ export class ScheduleController {
 
       return;
     }
+  }
+
+  /**
+   * Renders the schedule creation form.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async showCreate(req, res) {
+    const [classifications, locations, professionals] = await Promise.all([
+      services.classificationService.findAll(),
+      services.locationService.findAll(),
+      services.professionalService.findAll(),
+    ]);
+
+    res.render("configure-schedule", {
+      classifications,
+      locations,
+      professionals,
+    });
   }
 }
