@@ -19,7 +19,26 @@ const DAYS_ENUM = [
   "SUNDAY",
 ];
 
-// Helper para comparar horas strings ("09:00" < "10:00")
+/**
+ * Helper to ensure a date string "YYYY-MM-DD" is treated as local midnight.
+ * @param {unknown} val - The value to parse.
+ * @returns {Date} The parsed local date.
+ */
+function parseLocalDate(val) {
+  if (val instanceof Date) return val;
+  if (typeof val === "number") return new Date(val);
+  if (typeof val !== "string") return new Date(String(val));
+
+  // If it matches YYYY-MM-DD, parse as local
+  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+    const [year, month, day] = val.split("-").map(Number);
+    // Month is 0-indexed in JS Date constructor
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
+  }
+
+  return new Date(val);
+}
+
 /**
  * @param {string} start
  * @param {string} end
@@ -28,6 +47,8 @@ const DAYS_ENUM = [
 function isTimeBefore(start, end) {
   return start < end;
 }
+
+// Helper para comparar horas strings ("09:00" < "10:00")
 
 // --- Sub-esquemas ---
 
@@ -52,12 +73,18 @@ const dayConfigSchema = z.object({
 
 const blockSchema = z
   .object({
-    start: z.coerce.date({
-      error: "Fecha de inicio inválida",
-    }),
-    end: z.coerce.date({
-      error: "Fecha de fin inválida",
-    }),
+    start: z.preprocess(
+      parseLocalDate,
+      z.date({
+        error: "Fecha de inicio inválida",
+      })
+    ),
+    end: z.preprocess(
+      parseLocalDate,
+      z.date({
+        error: "Fecha de fin inválida",
+      })
+    ),
     motive: z.string().min(3, "El motivo es requerido (mínimo 3 caracteres)"),
   })
   .refine((data) => data.end >= data.start, {
@@ -104,8 +131,14 @@ export const createScheduleSchema = z.object({
   config: z.object({
     validity: z
       .object({
-        from: z.coerce.date({ error: "Fecha desde es requerida" }),
-        to: z.coerce.date({ error: "Fecha hasta es requerida" }),
+        from: z.preprocess(
+          parseLocalDate,
+          z.date({ error: "Fecha desde es requerida" })
+        ),
+        to: z.preprocess(
+          parseLocalDate,
+          z.date({ error: "Fecha hasta es requerida" })
+        ),
       })
       .refine((data) => data.to > data.from, {
         message: "La fecha 'hasta' debe ser mayor a 'desde'",

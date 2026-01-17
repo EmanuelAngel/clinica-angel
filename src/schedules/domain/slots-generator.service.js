@@ -46,8 +46,10 @@ export class SlotsGeneratorService {
     }
 
     const slots = [];
+    // cursor is already a Date object (if it comes from our refined Zod schema)
+    // or it will be parsed here.
     const currentCursor = new Date(start);
-    // Seteamos el cursor a las 00:00:00 para iterar días completos
+    // Explicitly set to local midnight to ensure consistency across environments
     currentCursor.setHours(0, 0, 0, 0);
 
     // Mapeo para traducir getDay() (0-6) a tu Enum de strings
