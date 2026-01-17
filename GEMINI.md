@@ -58,7 +58,7 @@ The codebase is organized by **Feature Modules**:
 - **Dependency Injection:** Services receive their dependencies (repositories) via constructor injection.
 - **Error Handling & Result Pattern:** The project uses the **Result Pattern** (via `neverthrow`) for handling expected business logic errors in the application layer. Services return `Result<T, E>` instead of throwing. Controllers handle these results using `.match()`. `CustomError` (from `src/_shared/domain/custom-error.js`) is used as the base for these error types. Unexpected errors or infrastructure-level failures are still caught by `express-async-errors` and handled by the `globalErrorHandler`.
 - **Formatting:** Prettier and ESLint are enforced via Husky pre-commit hooks.
-- **Avoid `any` type**: Avoid using `any` **at all costs**. For typing (plus JSDoc) and modeling use classes, like DTOs to transfer type-safe data between layers.
+- **Avoid `any` and plain `object` type**: Avoid using `any` **at all costs**. For typing (plus JSDoc) and modeling use classes, like DTOs to transfer type-safe data between layers. When using `object`, also specify the shape of the object using JSDoc (and avoid using nested `any` or `object`).
 - **Separation of Concerns:** In the service layer, complex validations, pure calculations and mapping should be separated from the business logic. It's allowed to create Validators, Mappers and Generators classes in separate files.
 - **Factory Pattern:** Use the Factory pattern when creating objects that require complex initialization logic.
 
