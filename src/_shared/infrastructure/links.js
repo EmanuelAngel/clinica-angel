@@ -30,7 +30,7 @@
 export const links = [
   {
     displayName: "Agendas",
-    url: "/agendas",
+    url: "/schedules",
     icon: "calendars",
   },
   {
