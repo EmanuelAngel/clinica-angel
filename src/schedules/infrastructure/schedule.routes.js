@@ -8,3 +8,9 @@ const scheduleController = new ScheduleController();
 
 scheduleRouter.post("/", auth(Roles.ADMIN), scheduleController.create);
 scheduleRouter.get("/create", auth(Roles.ADMIN), scheduleController.showCreate);
+scheduleRouter.get("/list", auth(Roles.ADMIN), scheduleController.renderList);
+scheduleRouter.get(
+  "/details/:id",
+  auth(Roles.ADMIN),
+  scheduleController.showDetails
+);

@@ -41,3 +41,12 @@ export class SlotDurationCannotBeZeroError extends CustomError {
     super("La duración del turno debe ser mayor a 0 minutos.", 422);
   }
 }
+
+export class ScheduleNotFoundError extends CustomError {
+  /**
+   * @param {number} id
+   */
+  constructor(id) {
+    super(`No se encontró la agenda con ID ${id}.`, 404);
+  }
+}

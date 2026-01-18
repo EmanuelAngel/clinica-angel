@@ -1,0 +1,117 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- Columna 1: Información de la Agenda -->
+    <div class="lg:col-span-1">
+      <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body">
+          <div class="mb-4">
+            <h2 class="card-title text-2xl font-bold">{{ schedule.professionalName }}</h2>
+            <p class="text-sm text-base-content/60">{{ schedule.professionalLicense }}</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="badge badge-neutral">{{ schedule.specialtyName }}</span>
+              {% if schedule.isPaused %}
+                <span class="badge badge-primary">Pausada</span>
+              {% else %}
+                <span class="badge badge-warning">En servicio</span>
+              {% endif %}
+              
+              {% if not schedule.isDeleted %}
+                <span class="badge badge-success">Activa</span>
+              {% else %}
+                <span class="badge">Inactiva</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="space-y-4">
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Clasificación</p>
+              <p class="font-medium text-lg">{{ schedule.classificationName }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Sucursal</p>
+              <p class="font-medium text-lg">{{ schedule.locationName }}</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Duración</p>
+                <p class="font-medium">{{ schedule.slotDurationMinutes }} min</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Día/Sobret.</p>
+                <p class="font-medium">{{ schedule.maxOverbooksPerDay }}</p>
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Turno/Sobret.</p>
+              <p class="font-medium">{{ schedule.maxOverbooksPerSlot }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-2">Horarios de Atención</p>
+              <div class="space-y-1">
+                {% for config in schedule.configs %}
+                  <div class="flex justify-between text-sm">
+                    <span class="font-medium text-base-content/80">{{ config.dayOfWeek }}</span>
+                    <span>{{ config.startTime }} - {{ config.endTime }}</span>
+                  </div>
+                {% else %}
+                  <p class="text-sm text-base-content/40 italic">No hay horarios configurados.</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-2">Bloqueos (Días no disponibles)</p>
+              <div class="space-y-2">
+                {% for block in schedule.blocks %}
+                  <div class="bg-base-200 p-2 rounded text-xs">
+                    <p class="font-bold">{{ block.startDate | date("DD/MM/YYYY") }} - {{ block.endDate | date("DD/MM/YYYY") }}</p>
+                    <p class="italic mt-1 text-base-content/70">{{ block.reason }}</p>
+                  </div>
+                {% else %}
+                  <p class="text-sm text-base-content/40 italic">No hay bloqueos registrados.</p>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="card-actions mt-6">
+            <a href="/schedules/list" class="btn btn-ghost btn-block">Volver a la lista</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columnas 2, 3 y 4: Calendario (Placeholder) -->
+    <div class="lg:col-span-3">
+      <div class="bg-base-100 rounded-box shadow-xl border border-base-200 p-8 flex flex-col items-center justify-center min-h-[600px] text-center">
+        <div class="bg-primary/10 text-primary p-6 rounded-full mb-6">
+          <i data-lucide="calendar-days" class="w-16 h-16"></i>
+        </div>
+        <h3 class="text-3xl font-bold mb-4">Calendario de Turnos</h3>
+        <p class="text-lg text-base-content/60 max-w-md mx-auto">
+          Este espacio está reservado para la visualización interactiva de turnos y disponibilidad.
+        </p>
+        <div class="mt-8 grid grid-cols-7 gap-2 w-full max-w-2xl opacity-20 pointer-events-none select-none">
+          {% for i in range(0, 35) %}
+            <div class="aspect-square bg-base-300 rounded-lg"></div>
+          {% endfor %}
+        </div>
+        <div class="mt-8 badge badge-neutral badge-lg py-4 px-6">Próximamente: Gestión de Slots</div>
+        
+        {# Hidden data for future scripts #}
+        <script id="slots-data" type="application/json">
+          {{ schedule.slots | dump | safe }}
+        </script>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,5 +1,8 @@
-import { ScheduleAlreadyActiveError } from "../domain/schedule.errors.js";
 import { ok, err } from "neverthrow";
+import {
+  ScheduleAlreadyActiveError,
+  ScheduleNotFoundError,
+} from "../domain/schedule.errors.js";
 import { SlotsGeneratorService } from "../domain/slots-generator.service.js";
 import {
   Schedule,
@@ -8,6 +11,8 @@ import {
   Slot,
 } from "../domain/schedule.model.js";
 import { OverlapValidator } from "../domain/overlap-validator.service.js";
+import { ScheduleDetailsDTO } from "./schedule-details.dto.js";
+import { ScheduleListDTO } from "./schedule-list.dto.js";
 
 /**
  * @typedef {import("../domain/schedule.repository.js").ScheduleRepository} ScheduleRepository
@@ -128,5 +133,74 @@ export class ScheduleService {
     await this.scheduleRepository.createWithSlots(schedule, slots);
 
     return ok();
+  }
+
+  /**
+   * List all schedules with their details.
+   * @returns {Promise<ScheduleListDTO[]>} A list of schedules with nested
+   * professional, location and classification objects.
+   */
+  async listSchedules() {
+    const schedules = await this.scheduleRepository.findAll();
+
+    return schedules.map(
+      (s) =>
+        new ScheduleListDTO({
+          id: s.id,
+          professionalName: `${s.professional.user.firstNames} ${s.professional.user.lastNames}`,
+          specialtyName: s.professional.specialty.name,
+          locationName: s.location.name,
+          classificationName: s.classification.name,
+          slotDurationMinutes: s.slotDuration,
+          maxOverbooksPerDay: s.maxOverbooksPerDay,
+          isPaused: s.isPaused,
+          isDeleted: !!s.deletedAt,
+        })
+    );
+  }
+
+  /**
+   * Get schedule details by ID.
+   * @param {number} id
+   * @returns {Promise<import("neverthrow").Result<
+   * ScheduleDetailsDTO,
+   * ScheduleNotFoundError
+   * >>} The schedule details or an error.
+   */
+  async getScheduleDetails(id) {
+    const exists = await this.scheduleRepository.checkExist(id);
+
+    if (!exists) {
+      return err(new ScheduleNotFoundError(id));
+    }
+
+    const s = await this.scheduleRepository.findByIdWithDetails(id);
+
+    return ok(
+      new ScheduleDetailsDTO({
+        id: s.id,
+        professionalName: `${s.professional.user.firstNames} ${s.professional.user.lastNames}`,
+        professionalLicense: s.professionalLicense,
+        specialtyName: s.professional.specialty.name,
+        locationName: s.location.name,
+        classificationName: s.classification.name,
+        slotDurationMinutes: s.slotDuration,
+        maxOverbooksPerDay: s.maxOverbooksPerDay,
+        maxOverbooksPerSlot: s.maxOverbooksPerSlot,
+        isPaused: s.isPaused,
+        isDeleted: !!s.deletedAt,
+        configs: s.configs.map((c) => ({
+          dayOfWeek: c.dayOfWeek,
+          startTime: c.startTime,
+          endTime: c.endTime,
+        })),
+        blocks: s.blocks.map((b) => ({
+          startDate: b.startDate,
+          endDate: b.endDate,
+          reason: b.reason,
+        })),
+        slots: s.slots,
+      })
+    );
   }
 }

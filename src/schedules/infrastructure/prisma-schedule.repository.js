@@ -141,6 +141,57 @@ export class PrismaScheduleRepository {
     });
   }
 
+  async findAll() {
+    return await this.db.schedule.findMany({
+      include: {
+        configs: true,
+        blocks: true,
+        professional: {
+          include: {
+            user: true,
+            specialty: true,
+          },
+        },
+        location: true,
+        classification: true,
+      },
+    });
+  }
+
+  /**
+   * @param {number} id
+   */
+  async findByIdWithDetails(id) {
+    return await this.db.schedule.findUnique({
+      where: { id },
+      include: {
+        configs: true,
+        blocks: true,
+        professional: {
+          include: {
+            user: true,
+            specialty: true,
+          },
+        },
+        location: true,
+        classification: true,
+      },
+    });
+  }
+
+  /**
+   * @param {number} id
+   */
+  async checkExist(id) {
+    const count = await this.db.schedule.count({
+      where: {
+        id,
+      },
+    });
+
+    return count > 0;
+  }
+
   /**
    * Maps a Prisma object to a Domain Model.
    * @param {ScheduleWithConfigsAndBlocks} prismaSchedule
