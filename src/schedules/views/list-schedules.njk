@@ -1,0 +1,60 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Agendas", "Lista de agendas configuradas en el sistema.") }}
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for schedule in schedules %}
+      <a href="/schedules/details/{{ schedule.id }}" class="card bg-base-100 shadow-xl border border-base-200 hover:border-primary transition-colors">
+        <div class="card-body">
+          <div class="flex justify-between items-start mb-2">
+            <h2 class="card-title text-xl font-bold">{{ schedule.professionalName }}</h2>
+            <div class="flex flex-wrap gap-2 justify-end">
+              <span class="badge badge-soft">{{ schedule.specialtyName }}</span>
+              {% if schedule.isPaused %}
+                <span class="badge badge-soft badge-primary">Pausada</span>
+              {% else %}
+                <span class="badge badge-soft badge-warning">En servicio</span>
+              {% endif %}
+              
+              {% if schedule.isDeleted %}
+                <span class="badge">Inactiva</span>
+              {% else %}
+                <span class="badge badge-soft badge-success">Activa</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="space-y-3 mt-4">
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Tipo</p>
+              <p class="font-medium">{{ schedule.classificationName }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Ubicación</p>
+              <p class="font-medium">{{ schedule.locationName }}</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Duración de turno</p>
+                <p class="font-medium">{{ schedule.slotDurationMinutes }} minutos</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Sobreturnos</p>
+                <p class="font-medium">{{ schedule.maxOverbooksPerDay }} por día</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+    {% else %}
+      <div class="col-span-full py-12 text-center bg-base-200 rounded-box">
+        <p class="text-lg text-base-content/50">No hay agendas configuradas.</p>
+        <a href="/schedules/create" class="btn btn-primary mt-4">Configurar primera agenda</a>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

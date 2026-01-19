@@ -1,0 +1,545 @@
+{% extends "layout/base.njk" %}
+
+{% block head %}
+  <style>
+    .horario-card, .block-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-base-200);
+      border-radius: var(--radius-box);
+      margin-bottom: 0.5rem;
+    }
+
+    .day-btn {
+      transition: all 0.15s ease;
+    }
+    
+    .day-btn.selected {
+      background: var(--color-primary);
+      color: var(--color-primary-content);
+    }
+  </style>
+{% endblock %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Configurar Nueva Agenda", "Configure los horarios y disponibilidad del profesional.") }}
+{% endblock %}
+
+{% block content %}
+  <form id="schedule-form" class="w-full max-w-4xl mx-auto space-y-8">
+
+    {# ═══════════════════════════════════════════════════════════════════════════
+       VINCULACIONES
+    ═══════════════════════════════════════════════════════════════════════════ #}
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Vinculaciones</legend>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="label">Sucursal</label>
+          <select name="schedule[locationId]" class="select select-bordered w-full" required>
+            <option value="" disabled selected>Seleccione sucursal...</option>
+            {% for location in locations %}
+              <option value="{{ location.id }}" {{ 'selected' if values.schedule.locationId == location.id }}>
+                {{ location.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Matrícula</label>
+          <select name="schedule[licenseNumber]" class="select select-bordered w-full" required>
+            <option value="" disabled selected>Seleccione matrícula...</option>
+            {% for professional in professionals %}
+              {% for credential in professional.credentials %}
+                <option value="{{ credential.licenseNumber }}" {{ 'selected' if values.schedule.licenseNumber == credential.licenseNumber }}>
+                  {{ credential.licenseNumber }} - {{ professional.firstNames }} {{ professional.lastNames }} ({{ credential.specialtyName }})
+                </option>
+              {% endfor %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Clasificación</label>
+          <select name="schedule[classificationId]" class="select select-bordered w-full" required>
+            <option value="" disabled selected>Seleccione clasificación...</option>
+            {% for classification in classifications %}
+              <option value="{{ classification.id }}" {{ 'selected' if values.schedule.classificationId == classification.id }}>
+                {{ classification.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    {# ═══════════════════════════════════════════════════════════════════════════
+       VIGENCIA
+    ═══════════════════════════════════════════════════════════════════════════ #}
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Vigencia</legend>
+      <p class="text-sm text-base-content/70 mb-4">
+        Período de vigencia de la agenda. Máximo 3 meses.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Fecha desde</label>
+          <input type="date"
+                 id="validity-from"
+                 name="config[validity][from]"
+                 class="input input-bordered w-full"
+                 required />
+        </div>
+        <div>
+          <label class="label">Fecha hasta</label>
+          <input type="date"
+                 id="validity-to"
+                 name="config[validity][to]"
+                 class="input input-bordered w-full"
+                 required />
+          <p id="validity-error" class="text-error text-sm mt-1 hidden">
+            La vigencia no puede superar los 3 meses.
+          </p>
+        </div>
+      </div>
+    </fieldset>
+
+    {# ═══════════════════════════════════════════════════════════════════════════
+       SOBRETURNOS
+    ═══════════════════════════════════════════════════════════════════════════ #}
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Sobreturnos</legend>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Máximos por día</label>
+          <input type="number"
+                 name="schedule[maxOverbooksPerDay]"
+                 class="input input-bordered w-full"
+                 min="0"
+                 max="20"
+                 value="{{ values.schedule.maxOverbooksPerDay | default(0) }}"
+                 required />
+          <p class="text-sm text-base-content/70 mt-1">De 0 a 20</p>
+        </div>
+        <div>
+          <label class="label">Máximos por horario</label>
+          <input type="number"
+                 name="schedule[maxOverbooksPerSlot]"
+                 class="input input-bordered w-full"
+                 min="0"
+                 max="2"
+                 value="{{ values.schedule.maxOverbooksPerSlot | default(0) }}"
+                 required />
+          <p class="text-sm text-base-content/70 mt-1">De 0 a 2</p>
+        </div>
+      </div>
+    </fieldset>
+
+    {# ═══════════════════════════════════════════════════════════════════════════
+       DURACIÓN DE CADA HORARIO
+    ═══════════════════════════════════════════════════════════════════════════ #}
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Duración de cada horario</legend>
+      <p class="text-sm text-base-content/70 mb-4">
+        La duración en minutos que tendrá cada turno generado.
+      </p>
+      <select name="schedule[slotDurationMinutes]" class="select select-bordered w-full max-w-xs" required>
+        <option value="" disabled selected>Seleccione duración...</option>
+        {% for duration in [10, 15, 20, 25, 30, 35, 45, 50, 60] %}
+          <option value="{{ duration }}" {{ 'selected' if values.schedule.slotDurationMinutes == duration }}>
+            {{ duration }} minutos
+          </option>
+        {% endfor %}
+      </select>
+    </fieldset>
+
+    {# ═══════════════════════════════════════════════════════════════════════════
+       HORARIOS
+    ═══════════════════════════════════════════════════════════════════════════ #}
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Horarios</legend>
+      <p class="text-sm text-base-content/70 mb-4">
+        Los días y horarios en los que atenderá el profesional.
+      </p>
+
+      <button type="button" id="add-horario-btn" class="btn btn-primary btn-sm mb-4">
+        <i data-lucide="plus"></i>
+        Agregar Horario
+      </button>
+
+      <div id="horarios-container"></div>
+
+      <p id="horarios-error" class="text-error text-sm hidden">
+        Debe agregar al menos un horario.
+      </p>
+    </fieldset>
+
+    {# ═══════════════════════════════════════════════════════════════════════════
+       DÍAS NO DISPONIBLES
+    ═══════════════════════════════════════════════════════════════════════════ #}
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+      <legend>Días no Disponibles</legend>
+      <p class="text-sm text-base-content/70 mb-4">
+        Períodos en los que <strong>no</strong> se generarán turnos. (Opcional)
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
+        <div>
+          <label class="label">Fecha desde</label>
+          <input type="date" id="block-start" class="input input-bordered w-full" />
+        </div>
+        <div>
+          <label class="label">Fecha hasta</label>
+          <input type="date" id="block-end" class="input input-bordered w-full" />
+        </div>
+        <div>
+          <label class="label">Motivo</label>
+          <input type="text"
+                 id="block-motive"
+                 class="input input-bordered w-full"
+                 placeholder="Ej: Vacaciones" />
+        </div>
+        <div>
+          <button type="button" id="add-block-btn" class="btn btn-warning btn-sm w-full">
+            <i data-lucide="plus"></i>
+            Agregar período
+          </button>
+        </div>
+      </div>
+
+      <div id="blocks-container"></div>
+    </fieldset>
+
+    {# ═══════════════════════════════════════════════════════════════════════════
+       SUBMIT
+    ═══════════════════════════════════════════════════════════════════════════ #}
+    <div class="flex flex-col md:flex-row gap-4">
+      <button type="submit" id="submit-btn" class="btn btn-primary flex-1">
+        <i data-lucide="calendar-plus"></i>
+        Crear Agenda
+      </button>
+      <a href="/schedules" class="btn btn-neutral flex-1">
+        Cancelar
+      </a>
+    </div>
+  </form>
+
+  {# ═══════════════════════════════════════════════════════════════════════════
+     MODAL: AGREGAR HORARIO
+  ═══════════════════════════════════════════════════════════════════════════ #}
+  <dialog id="horario-modal" class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg mb-4">Agregar horario</h3>
+
+      <div class="mb-4">
+        <label class="label">Seleccione días de la semana a atender</label>
+        <div class="flex flex-wrap gap-2" id="day-buttons">
+          <button type="button" class="btn btn-sm btn-outline day-btn" data-day="MONDAY">Lunes</button>
+          <button type="button" class="btn btn-sm btn-outline day-btn" data-day="TUESDAY">Martes</button>
+          <button type="button" class="btn btn-sm btn-outline day-btn" data-day="WEDNESDAY">Miércoles</button>
+          <button type="button" class="btn btn-sm btn-outline day-btn" data-day="THURSDAY">Jueves</button>
+          <button type="button" class="btn btn-sm btn-outline day-btn" data-day="FRIDAY">Viernes</button>
+          <button type="button" class="btn btn-sm btn-outline day-btn" data-day="SATURDAY">Sábado</button>
+          <button type="button" class="btn btn-sm btn-outline day-btn" data-day="SUNDAY">Domingo</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="label">Hora desde</label>
+          <input type="time" id="modal-time-start" class="input input-bordered w-full" value="08:00" />
+        </div>
+        <div>
+          <label class="label">Hora hasta</label>
+          <input type="time" id="modal-time-end" class="input input-bordered w-full" value="12:00" />
+        </div>
+      </div>
+
+      <p class="text-sm text-base-content/70 mb-4">
+        Ej: 09:00 a 12:30
+      </p>
+
+      <div class="modal-action">
+        <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="modal-add-btn">
+          <i data-lucide="plus"></i>
+          Agregar
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+{% endblock %}
+
+{% block scripts %}
+  <script type="module">
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════════════════
+    const horarios = []; // Array of { days: string[], start: string, end: string }
+    const blocks = [];   // Array of { start: string, end: string, motive: string }
+
+    const DAY_NAMES = {
+      MONDAY: 'Lunes',
+      TUESDAY: 'Martes',
+      WEDNESDAY: 'Miércoles',
+      THURSDAY: 'Jueves',
+      FRIDAY: 'Viernes',
+      SATURDAY: 'Sábado',
+      SUNDAY: 'Domingo'
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // DOM ELEMENTS
+    // ═══════════════════════════════════════════════════════════════════════════
+    const form = document.getElementById('schedule-form');
+    const horariosContainer = document.getElementById('horarios-container');
+    const blocksContainer = document.getElementById('blocks-container');
+    const addHorarioBtn = document.getElementById('add-horario-btn');
+    const addBlockBtn = document.getElementById('add-block-btn');
+    const modal = document.getElementById('horario-modal');
+    const dayButtons = document.querySelectorAll('.day-btn');
+    const modalTimeStart = document.getElementById('modal-time-start');
+    const modalTimeEnd = document.getElementById('modal-time-end');
+    const modalAddBtn = document.getElementById('modal-add-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const validityFrom = document.getElementById('validity-from');
+    const validityTo = document.getElementById('validity-to');
+    const validityError = document.getElementById('validity-error');
+    const horariosError = document.getElementById('horarios-error');
+    const blockStart = document.getElementById('block-start');
+    const blockEnd = document.getElementById('block-end');
+    const blockMotive = document.getElementById('block-motive');
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // VALIDITY: 3-MONTH VALIDATION
+    // ═══════════════════════════════════════════════════════════════════════════
+    function validateValidity() {
+      const from = validityFrom.value ? new Date(validityFrom.value) : null;
+      const to = validityTo.value ? new Date(validityTo.value) : null;
+
+      if (from && to) {
+        const threeMonthsLater = new Date(from);
+        threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+        threeMonthsLater.setDate(threeMonthsLater.getDate() + 1);
+
+        if (to > threeMonthsLater) {
+          validityTo.classList.add('input-error');
+          validityError.classList.remove('hidden');
+          return false;
+        } else {
+          validityTo.classList.remove('input-error');
+          validityError.classList.add('hidden');
+          return true;
+        }
+      }
+      return true;
+    }
+
+    validityFrom.addEventListener('change', validateValidity);
+    validityTo.addEventListener('change', validateValidity);
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HORARIOS MODAL
+    // ═══════════════════════════════════════════════════════════════════════════
+    let selectedDays = [];
+
+    addHorarioBtn.addEventListener('click', () => {
+      selectedDays = [];
+      dayButtons.forEach(btn => btn.classList.remove('selected'));
+      modalTimeStart.value = '08:00';
+      modalTimeEnd.value = '12:00';
+      modal.showModal();
+    });
+
+    dayButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.dataset.day;
+        if (selectedDays.includes(day)) {
+          selectedDays = selectedDays.filter(d => d !== day);
+          btn.classList.remove('selected');
+        } else {
+          selectedDays.push(day);
+          btn.classList.add('selected');
+        }
+      });
+    });
+
+    modalCancelBtn.addEventListener('click', () => modal.close());
+
+    modalAddBtn.addEventListener('click', () => {
+      if (selectedDays.length === 0) {
+        alert('Seleccione al menos un día.');
+        return;
+      }
+
+      const start = modalTimeStart.value;
+      const end = modalTimeEnd.value;
+
+      if (start >= end) {
+        alert('La hora de fin debe ser posterior a la de inicio.');
+        return;
+      }
+
+      horarios.push({ days: [...selectedDays], start, end });
+      renderHorarios();
+      modal.close();
+      horariosError.classList.add('hidden');
+    });
+
+    function renderHorarios() {
+      horariosContainer.innerHTML = '';
+      horarios.forEach((h, index) => {
+        const dayNames = h.days.map(d => DAY_NAMES[d]).join(', ');
+        const card = document.createElement('div');
+        card.className = 'horario-card';
+        card.innerHTML = `
+          <span>${dayNames}. De ${h.start} a ${h.end}.</span>
+          <button type="button" class="btn btn-error btn-sm" data-index="${index}">
+            <i data-lucide="trash-2"></i>
+            Quitar
+          </button>
+        `;
+        card.querySelector('button').addEventListener('click', () => {
+          horarios.splice(index, 1);
+          renderHorarios();
+        });
+        horariosContainer.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BLOCKS (DÍAS NO DISPONIBLES)
+    // ═══════════════════════════════════════════════════════════════════════════
+    addBlockBtn.addEventListener('click', () => {
+      const start = blockStart.value;
+      const end = blockEnd.value;
+      const motive = blockMotive.value.trim();
+
+      if (!start || !end || !motive) {
+        alert('Complete todos los campos del período no disponible.');
+        return;
+      }
+
+      if (start > end) {
+        alert('La fecha de fin no puede ser anterior a la de inicio.');
+        return;
+      }
+
+      blocks.push({ start, end, motive });
+      renderBlocks();
+
+      blockStart.value = '';
+      blockEnd.value = '';
+      blockMotive.value = '';
+    });
+
+    function renderBlocks() {
+      blocksContainer.innerHTML = '';
+      blocks.forEach((b, index) => {
+        const startFormatted = new Date(b.start).toLocaleDateString('es-AR');
+        const endFormatted = new Date(b.end).toLocaleDateString('es-AR');
+        const card = document.createElement('div');
+        card.className = 'block-card';
+        card.innerHTML = `
+          <div>
+            <span>Del ${startFormatted} al ${endFormatted}.</span><br/>
+            <span class="text-sm text-base-content/70">Motivo: ${b.motive}</span>
+          </div>
+          <button type="button" class="btn btn-error btn-sm" data-index="${index}">
+            <i data-lucide="trash-2"></i>
+            Quitar
+          </button>
+        `;
+        card.querySelector('button').addEventListener('click', () => {
+          blocks.splice(index, 1);
+          renderBlocks();
+        });
+        blocksContainer.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FORM SUBMISSION
+    // ═══════════════════════════════════════════════════════════════════════════
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validate horarios
+      if (horarios.length === 0) {
+        horariosError.classList.remove('hidden');
+        return;
+      }
+
+      // Validate 3-month rule
+      if (!validateValidity()) {
+        return;
+      }
+
+      // Build weeklyDays structure
+      const weeklyDays = [];
+      horarios.forEach(h => {
+        h.days.forEach(day => {
+          // Check if day already exists
+          let dayConfig = weeklyDays.find(wd => wd.day === day);
+          if (!dayConfig) {
+            dayConfig = { day, ranges: [] };
+            weeklyDays.push(dayConfig);
+          }
+          dayConfig.ranges.push({ start: h.start, end: h.end });
+        });
+      });
+
+      // Build payload
+      const formData = new FormData(form);
+      const payload = {
+        schedule: {
+          licenseNumber: formData.get('schedule[licenseNumber]'),
+          locationId: formData.get('schedule[locationId]'),
+          classificationId: formData.get('schedule[classificationId]'),
+          slotDurationMinutes: formData.get('schedule[slotDurationMinutes]'),
+          maxOverbooksPerDay: formData.get('schedule[maxOverbooksPerDay]'),
+          maxOverbooksPerSlot: formData.get('schedule[maxOverbooksPerSlot]'),
+        },
+        config: {
+          validity: {
+            from: formData.get('config[validity][from]'),
+            to: formData.get('config[validity][to]'),
+          },
+          weeklyDays,
+        },
+        blocks: blocks.map(b => ({
+          start: b.start,
+          end: b.end,
+          motive: b.motive,
+        })),
+      };
+
+      try {
+        const response = await fetch('/schedules', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.status === 201) {
+          window.location.href = '/schedules/list';
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('Error al enviar el formulario. Intente nuevamente.');
+      }
+    });
+  </script>
+{% endblock %}

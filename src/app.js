@@ -45,6 +45,7 @@ const viewPaths = [
   join(__dirname, "./professionals/views"),
   join(__dirname, "./classifications/views"),
   join(__dirname, "./locations/views"),
+  join(__dirname, "./schedules/views"),
 ];
 
 const njkEnv = nunjucks.configure(viewPaths, {
@@ -58,6 +59,19 @@ njkEnv.addGlobal("title", "Clinica Angel");
 njkEnv.addGlobal("Roles", Roles);
 njkEnv.addGlobal("links", links);
 njkEnv.addGlobal("isDev", env.NODE_ENV === "development");
+
+njkEnv.addFilter("date", (date, format = "DD/MM/YYYY") => {
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
+
+  const day = d.getDate().toString().padStart(2, "0");
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const year = d.getFullYear();
+
+  if (format === "DD/MM/YYYY") return `${day}/${month}/${year}`;
+  return d.toLocaleDateString();
+});
 
 app.use("/", viewsRouter);
 app.use("/api/v1", apiV1Router);

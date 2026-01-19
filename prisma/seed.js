@@ -7,6 +7,8 @@ import { users } from "./seeders/users.seed.js";
 import { patients } from "./seeders/patients.seed.js";
 import { specialties } from "./seeders/specialties.seed.js";
 import { professionals } from "./seeders/professionals.seed.js";
+import { locations } from "./seeders/locations.seed.js";
+import { classifications } from "./seeders/classifications.seed.js";
 
 /**
  * Seeds the database with initial data.
@@ -44,6 +46,18 @@ async function main() {
       create: prof,
     });
   }
+
+  // Locations
+  await prisma.location.createMany({
+    data: locations,
+    skipDuplicates: true,
+  });
+
+  // Classifications
+  await prisma.classification.createMany({
+    data: classifications,
+    skipDuplicates: true,
+  });
 
   console.log("✨ Seed completed!");
 }
