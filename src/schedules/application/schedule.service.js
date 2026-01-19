@@ -144,17 +144,17 @@ export class ScheduleService {
     const schedules = await this.scheduleRepository.findAll();
 
     return schedules.map(
-      (s) =>
+      (schedule) =>
         new ScheduleListDTO({
-          id: s.id,
-          professionalName: `${s.professional.user.firstNames} ${s.professional.user.lastNames}`,
-          specialtyName: s.professional.specialty.name,
-          locationName: s.location.name,
-          classificationName: s.classification.name,
-          slotDurationMinutes: s.slotDuration,
-          maxOverbooksPerDay: s.maxOverbooksPerDay,
-          isPaused: s.isPaused,
-          isDeleted: !!s.deletedAt,
+          id: schedule.id,
+          professionalName: `${schedule.professional.user.firstNames} ${schedule.professional.user.lastNames}`,
+          specialtyName: schedule.professional.specialty.name,
+          locationName: schedule.location.name,
+          classificationName: schedule.classification.name,
+          slotDurationMinutes: schedule.slotDuration,
+          maxOverbooksPerDay: schedule.maxOverbooksPerDay,
+          isPaused: schedule.isPaused,
+          isDeleted: !!schedule.deletedAt,
         })
     );
   }
@@ -168,38 +168,36 @@ export class ScheduleService {
    * >>} The schedule details or an error.
    */
   async getScheduleDetails(id) {
-    const exists = await this.scheduleRepository.checkExist(id);
+    const schedule = await this.scheduleRepository.findByIdWithDetails(id);
 
-    if (!exists) {
+    if (!schedule) {
       return err(new ScheduleNotFoundError(id));
     }
 
-    const s = await this.scheduleRepository.findByIdWithDetails(id);
-
     return ok(
       new ScheduleDetailsDTO({
-        id: s.id,
-        professionalName: `${s.professional.user.firstNames} ${s.professional.user.lastNames}`,
-        professionalLicense: s.professionalLicense,
-        specialtyName: s.professional.specialty.name,
-        locationName: s.location.name,
-        classificationName: s.classification.name,
-        slotDurationMinutes: s.slotDuration,
-        maxOverbooksPerDay: s.maxOverbooksPerDay,
-        maxOverbooksPerSlot: s.maxOverbooksPerSlot,
-        isPaused: s.isPaused,
-        isDeleted: !!s.deletedAt,
-        configs: s.configs.map((c) => ({
+        id: schedule.id,
+        professionalName: `${schedule.professional.user.firstNames} ${schedule.professional.user.lastNames}`,
+        professionalLicense: schedule.professionalLicense,
+        specialtyName: schedule.professional.specialty.name,
+        locationName: schedule.location.name,
+        classificationName: schedule.classification.name,
+        slotDurationMinutes: schedule.slotDuration,
+        maxOverbooksPerDay: schedule.maxOverbooksPerDay,
+        maxOverbooksPerSlot: schedule.maxOverbooksPerSlot,
+        isPaused: schedule.isPaused,
+        isDeleted: !!schedule.deletedAt,
+        configs: schedule.configs.map((c) => ({
           dayOfWeek: c.dayOfWeek,
           startTime: c.startTime,
           endTime: c.endTime,
         })),
-        blocks: s.blocks.map((b) => ({
+        blocks: schedule.blocks.map((b) => ({
           startDate: b.startDate,
           endDate: b.endDate,
           reason: b.reason,
         })),
-        slots: s.slots,
+        slots: schedule.slots,
       })
     );
   }
