@@ -175,6 +175,7 @@ export class PrismaScheduleRepository {
         },
         location: true,
         classification: true,
+        slots: true,
       },
     });
   }
