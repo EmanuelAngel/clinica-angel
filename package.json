@@ -27,7 +27,8 @@
     "test:watch": "pnpm run test -- --watch",
     "test:cov": "pnpm run test -- --coverage",
     "prepare": "husky",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "db:clean": "dotenv node scripts/clean-db.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
