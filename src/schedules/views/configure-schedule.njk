@@ -533,10 +533,9 @@
           body: JSON.stringify(payload),
         });
 
-        const html = await response.text();
-        document.open();
-        document.write(html);
-        document.close();
+        if (response.status === 201) {
+          window.location.href = '/schedules/list';
+        }
       } catch (error) {
         console.error('Error submitting form:', error);
         alert('Error al enviar el formulario. Intente nuevamente.');
