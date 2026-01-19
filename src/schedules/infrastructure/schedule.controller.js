@@ -57,14 +57,7 @@ export class ScheduleController {
     }
 
     if (newConfigurationResult.isOk()) {
-      // REFACTOR: Redirect to schedule list OR created schedule
-      res.status(201).render(res.locals.view, {
-        result: {
-          type: "success",
-          message: "Agenda configurada exitosamente.",
-        },
-      });
-
+      res.redirect("/schedules/list");
       return;
     }
   }
