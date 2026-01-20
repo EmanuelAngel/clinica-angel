@@ -29,9 +29,24 @@
 /** @type {Array<link | LinkGroup>} */
 export const links = [
   {
-    displayName: "Agendas",
-    url: "/schedules",
-    icon: "calendars",
+    title: "Agendas",
+    links: [
+      {
+        displayName: "Turnos",
+        url: "/schedules",
+        icon: "bell-dot",
+      },
+      {
+        displayName: "Configurar Agenda",
+        url: "/schedules/create",
+        icon: "calendar-plus",
+      },
+      {
+        displayName: "Lista de Agendas",
+        url: "/schedules/list",
+        icon: "calendars",
+      },
+    ],
   },
   {
     displayName: "Clasificaciones",
