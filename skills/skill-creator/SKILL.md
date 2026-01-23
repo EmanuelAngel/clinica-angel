@@ -51,9 +51,9 @@ name: { skill-name }
 description: >
   {One-line description of what this skill does}.
   Trigger: {When the AI should load this skill}.
-license: Apache-2.0
+license: MIT
 metadata:
-  author: prowler-cloud
+  author: angel-emanuel
   version: "1.0"
 ---
 
@@ -85,17 +85,6 @@ metadata:
 
 ---
 
-## Naming Conventions
-
-| Type | Pattern | Examples |
-|------|---------|----------|
-| Generic skill | `{technology}` | `pytest`, `playwright`, `typescript` |
-| Prowler-specific | `prowler-{component}` | `prowler-api`, `prowler-ui`, `prowler-sdk-check` |
-| Testing skill | `prowler-test-{component}` | `prowler-test-sdk`, `prowler-test-api` |
-| Workflow skill | `{action}-{target}` | `skill-creator`, `jira-task` |
-
----
-
 ## Decision: assets/ vs references/
 
 ```
@@ -106,21 +95,9 @@ Need example configs? → assets/
 Link to existing docs? → references/
 Link to external guides? → references/ (with local path)
 
-```
+````
 
 **Key Rule**: `references/` should point to LOCAL files (`docs/developer-guide/*.mdx`), not web URLs.
-
----
-
-## Decision: Prowler-Specific vs Generic
-
-```
-
-Patterns apply to ANY project? → Generic skill (e.g., pytest, typescript)
-Patterns are Prowler-specific? → prowler-{name} skill
-Generic skill needs Prowler info? → Add references/ pointing to Prowler docs
-
-````
 
 ---
 
@@ -130,8 +107,8 @@ Generic skill needs Prowler info? → Add references/ pointing to Prowler docs
 |-------|----------|-------------|
 | `name` | Yes | Skill identifier (lowercase, hyphens) |
 | `description` | Yes | What + Trigger in one block |
-| `license` | Yes | Always `Apache-2.0` for Prowler |
-| `metadata.author` | Yes | `prowler-cloud` |
+| `license` | Yes | Always `MIT` for Angel Emanuel |
+| `metadata.author` | Yes | `angel-emanuel` |
 | `metadata.version` | Yes | Semantic version as string |
 
 ---
