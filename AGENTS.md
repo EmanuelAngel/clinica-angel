@@ -39,6 +39,26 @@ The project follows a **Modular Architecture** (Vertical Slicing), where each ma
 
 ---
 
+## Architecture
+
+### Directory Structure
+
+The codebase is organized by **Feature Modules**:
+
+- `src/_shared/`: Common code used across modules (Database connection, global errors, base views).
+- `src/<feature>/`: (e.g., `src/users/`)
+  - `domain/`: Pure business logic, entity models, and repository interfaces (defined via JSDoc). **No external dependencies** (except maybe utility libs).
+  - `application/`: Service layer implementing use cases. Orchestrates domain objects and repositories.
+  - `infrastructure/`: Framework-specific code. Database implementations (Prisma), HTTP controllers, Routers, DTO schemas.
+  - `views/`: Nunjucks templates (`.njk`) for UI.
+
+## Key Files
+
+- `src/app.js`: Main Express application setup, middleware, and view engine configuration.
+- `prisma/schema.prisma`: Database schema definition.
+- `src/_shared/infrastructure/prisma.js`: Prisma client instance.
+- `src/_shared/infrastructure/services-container.js`: Central dependency injection point. Instantiates repositories and services, wiring them together, and exports a `services` object for use in controllers.
+
 ## Node.js Development
 
 ```bash
