@@ -68,9 +68,19 @@ The project uses **Lucide** icons.
 
 ### 5. Forms and Validation
 
-- For standard SEO-friendly pages, use traditional `<form method="POST">`.
-- For interactive pages, use `fetch()` and JSON as described in specific feature tasks.
-- Always include helpful error messages using the `result-alert.njk` partial when applicable.
+The project uses a two-tier validation approach:
+
+#### Frontend (Real-time Browser Validation)
+
+- Use the DaisyUI `validator` class on inputs.
+- Use native HTML attributes: `required`, `minlength`, `maxlength`, `pattern`, `min`, `max`.
+- Use the `validator-hint` div right after the input to provide feedback to the user as they type.
+
+#### Backend (Zod Schema Validation)
+
+- The server returns `values` (to preserve user input) and `errors` (an object containing field-specific error messages).
+- Apply the `input-error` class conditionally if there's a backend error for that field.
+- Display backend error messages (usually from Zod) using `{{ errors.properties.<field>[0] }}`.
 
 ### 6. Themes
 
@@ -81,30 +91,51 @@ The project supports light/dark/system themes.
 
 ## Code Examples
 
-### Basic Form Template
+### Form with Validation and Error Handling
 
 ```njk
 {% extends "layout/base.njk" %}
 
-{% set title = "Crear Nuevo" %}
+{% set title = "Registro de Paciente" %}
 
 {% block content %}
 <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
   <div class="card-body">
-    <h2 class="card-title text-2xl mb-6">Nueva Entidad</h2>
+    <h2 class="card-title text-2xl mb-6">Nuevo Paciente</h2>
 
-    <form action="/target-route" method="POST" class="space-y-4">
+    <form action="/patients/register" method="POST" class="space-y-4">
       <div class="form-control w-full">
-        <label class="label">
-          <span class="label-text">Nombre</span>
-        </label>
-        <input type="text" name="name" placeholder="Ej: Juan" class="input input-bordered w-full" required />
+        <label class="label">Nombres (requerido)</label>
+        <input type="text"
+               name="firstNames"
+               value="{{ values.firstNames }}"
+               class="input validator {{ 'input-error' if errors.properties.firstNames }}"
+               required
+               minlength="2"
+               maxlength="100"
+               pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
+               title="Solo letras, espacios, guiones o apóstrofes."
+               placeholder="Nombre completo" />
+
+        {# Backend Error Message #}
+        {% if errors.properties.firstNames %}
+          <div class="text-error text-sm mt-1">
+            {{ errors.properties.firstNames[0] }}<
+          /div>
+        {% endif %}
+
+        {# Frontend Browser Validation Hint #}
+        <div class="validator-hint">
+          Ingrese nombres válidos.
+          <br /> Solo letras, espacios, guiones o apóstrofes.
+          <br /> Mínimo 2 caracteres.
+        </div>
       </div>
 
       <div class="card-actions justify-end mt-6">
         <button type="submit" class="btn btn-primary">
           <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-          Guardar
+          Registrar
         </button>
       </div>
     </form>
