@@ -9,16 +9,18 @@ Use these skills for detailed patterns on-demand:
 | `skill-creator`       | Create new AI agent skills             | [SKILL.md](skills/skill-creator/SKILL.md)       |
 | `nunjucks-views`      | Patterns for Nunjucks templates and UI | [SKILL.md](skills/nunjucks-views/SKILL.md)      |
 | `integration-testing` | Patterns for integration tests (Jest)  | [SKILL.md](skills/integration-testing/SKILL.md) |
+| `jsdoc`               | Standards for JSDoc typing             | [SKILL.md](skills/jsdoc/SKILL.md)               |
 
 ### Auto-invoke Skills
 
 When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
-| Action                             | Skill                 |
-| ---------------------------------- | --------------------- |
-| Create new AI agent skill          | `skill-creator`       |
-| Create or modify a view            | `nunjucks-views`      |
-| Create or modify integration tests | `integration-testing` |
+| Action                              | Skill                 |
+| ----------------------------------- | --------------------- |
+| Create new AI agent skill           | `skill-creator`       |
+| Create or modify a view             | `nunjucks-views`      |
+| Create or modify integration tests  | `integration-testing` |
+| Define entities, repos, or services | `jsdoc`               |
 
 ---
 
