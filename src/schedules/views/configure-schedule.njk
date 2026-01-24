@@ -1,4 +1,5 @@
 {% extends "layout/base.njk" %}
+{% set title = "Configurar Agenda" %}
 
 {% block head %}
   <style>
@@ -40,7 +41,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="label">Sucursal</label>
-          <select name="schedule[locationId]" class="select select-bordered w-full" required>
+          <select name="schedule[locationId]" class="select select-bordered w-full {{ 'select-error' if errors.properties.schedule.properties.locationId }}" required>
             <option value="" disabled selected>Seleccione sucursal...</option>
             {% for location in locations %}
               <option value="{{ location.id }}" {{ 'selected' if values.schedule.locationId == location.id }}>
@@ -48,11 +49,14 @@
               </option>
             {% endfor %}
           </select>
+          {% if errors.properties.schedule.properties.locationId %}
+            <div class="text-error text-sm mt-1">{{ errors.properties.schedule.properties.locationId[0] }}</div>
+          {% endif %}
         </div>
 
         <div>
           <label class="label">Matrícula</label>
-          <select name="schedule[licenseNumber]" class="select select-bordered w-full" required>
+          <select name="schedule[licenseNumber]" class="select select-bordered w-full {{ 'select-error' if errors.properties.schedule.properties.licenseNumber }}" required>
             <option value="" disabled selected>Seleccione matrícula...</option>
             {% for professional in professionals %}
               {% for credential in professional.credentials %}
@@ -62,11 +66,14 @@
               {% endfor %}
             {% endfor %}
           </select>
+          {% if errors.properties.schedule.properties.licenseNumber %}
+            <div class="text-error text-sm mt-1">{{ errors.properties.schedule.properties.licenseNumber[0] }}</div>
+          {% endif %}
         </div>
 
         <div>
           <label class="label">Clasificación</label>
-          <select name="schedule[classificationId]" class="select select-bordered w-full" required>
+          <select name="schedule[classificationId]" class="select select-bordered w-full {{ 'select-error' if errors.properties.schedule.properties.classificationId }}" required>
             <option value="" disabled selected>Seleccione clasificación...</option>
             {% for classification in classifications %}
               <option value="{{ classification.id }}" {{ 'selected' if values.schedule.classificationId == classification.id }}>
@@ -74,6 +81,9 @@
               </option>
             {% endfor %}
           </select>
+          {% if errors.properties.schedule.properties.classificationId %}
+            <div class="text-error text-sm mt-1">{{ errors.properties.schedule.properties.classificationId[0] }}</div>
+          {% endif %}
         </div>
       </div>
     </fieldset>
@@ -92,16 +102,24 @@
           <input type="date"
                  id="validity-from"
                  name="config[validity][from]"
-                 class="input input-bordered w-full"
+                 value="{{ values.config.validity.from }}"
+                 class="input input-bordered w-full {{ 'input-error' if errors.properties.config.properties.validity.properties.from }}"
                  required />
+          {% if errors.properties.config.properties.validity.properties.from %}
+            <div class="text-error text-sm mt-1">{{ errors.properties.config.properties.validity.properties.from[0] }}</div>
+          {% endif %}
         </div>
         <div>
           <label class="label">Fecha hasta</label>
           <input type="date"
                  id="validity-to"
                  name="config[validity][to]"
-                 class="input input-bordered w-full"
+                 value="{{ values.config.validity.to }}"
+                 class="input input-bordered w-full {{ 'input-error' if errors.properties.config.properties.validity.properties.to }}"
                  required />
+          {% if errors.properties.config.properties.validity.properties.to %}
+            <div class="text-error text-sm mt-1">{{ errors.properties.config.properties.validity.properties.to[0] }}</div>
+          {% endif %}
           <p id="validity-error" class="text-error text-sm mt-1 hidden">
             La vigencia no puede superar los 3 meses.
           </p>
@@ -119,22 +137,28 @@
           <label class="label">Máximos por día</label>
           <input type="number"
                  name="schedule[maxOverbooksPerDay]"
-                 class="input input-bordered w-full"
+                 class="input input-bordered w-full {{ 'input-error' if errors.properties.schedule.properties.maxOverbooksPerDay }}"
                  min="0"
                  max="20"
                  value="{{ values.schedule.maxOverbooksPerDay | default(0) }}"
                  required />
+          {% if errors.properties.schedule.properties.maxOverbooksPerDay %}
+            <div class="text-error text-sm mt-1">{{ errors.properties.schedule.properties.maxOverbooksPerDay[0] }}</div>
+          {% endif %}
           <p class="text-sm text-base-content/70 mt-1">De 0 a 20</p>
         </div>
         <div>
           <label class="label">Máximos por horario</label>
           <input type="number"
                  name="schedule[maxOverbooksPerSlot]"
-                 class="input input-bordered w-full"
+                 class="input input-bordered w-full {{ 'input-error' if errors.properties.schedule.properties.maxOverbooksPerSlot }}"
                  min="0"
                  max="2"
                  value="{{ values.schedule.maxOverbooksPerSlot | default(0) }}"
                  required />
+          {% if errors.properties.schedule.properties.maxOverbooksPerSlot %}
+            <div class="text-error text-sm mt-1">{{ errors.properties.schedule.properties.maxOverbooksPerSlot[0] }}</div>
+          {% endif %}
           <p class="text-sm text-base-content/70 mt-1">De 0 a 2</p>
         </div>
       </div>
@@ -148,7 +172,7 @@
       <p class="text-sm text-base-content/70 mb-4">
         La duración en minutos que tendrá cada turno generado.
       </p>
-      <select name="schedule[slotDurationMinutes]" class="select select-bordered w-full max-w-xs" required>
+      <select name="schedule[slotDurationMinutes]" class="select select-bordered w-full max-w-xs {{ 'select-error' if errors.properties.schedule.properties.slotDurationMinutes }}" required>
         <option value="" disabled selected>Seleccione duración...</option>
         {% for duration in [10, 15, 20, 25, 30, 35, 45, 50, 60] %}
           <option value="{{ duration }}" {{ 'selected' if values.schedule.slotDurationMinutes == duration }}>
@@ -156,6 +180,9 @@
           </option>
         {% endfor %}
       </select>
+      {% if errors.properties.schedule.properties.slotDurationMinutes %}
+        <div class="text-error text-sm mt-1">{{ errors.properties.schedule.properties.slotDurationMinutes[0] }}</div>
+      {% endif %}
     </fieldset>
 
     {# ═══════════════════════════════════════════════════════════════════════════
@@ -173,6 +200,10 @@
       </button>
 
       <div id="horarios-container"></div>
+
+      {% if errors.properties.config.properties.weeklyDays %}
+        <div class="text-error text-sm mt-2 font-bold">{{ errors.properties.config.properties.weeklyDays[0] }}</div>
+      {% endif %}
 
       <p id="horarios-error" class="text-error text-sm hidden">
         Debe agregar al menos un horario.
@@ -535,6 +566,13 @@
 
         if (response.status === 201) {
           window.location.href = '/schedules/list';
+        } else {
+          // If the server returns an error (like 422), it renders the full HTML with error indicators.
+          // Since we are using fetch, we must manually replace the document content.
+          const html = await response.text();
+          document.open();
+          document.write(html);
+          document.close();
         }
       } catch (error) {
         console.error('Error submitting form:', error);
