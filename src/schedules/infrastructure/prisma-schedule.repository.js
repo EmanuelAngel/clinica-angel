@@ -66,9 +66,21 @@ export class PrismaScheduleRepository {
    * @returns {Promise<Schedule[]>} Found schedules that overlap with the given date range.
    */
   async findActiveByLicenseAndDateRange(licenseNumber, fromDate, toDate) {
+    const professionalSpecialty =
+      await this.db.professionalSpecialty.findUnique({
+        where: { licenseNumber },
+        select: { userId: true },
+      });
+
+    if (!professionalSpecialty) {
+      return [];
+    }
+
     const schedules = await this.db.schedule.findMany({
       where: {
-        professionalLicense: licenseNumber,
+        professional: {
+          userId: professionalSpecialty.userId,
+        },
         deletedAt: null,
         configs: {
           some: {
