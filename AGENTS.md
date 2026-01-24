@@ -4,12 +4,12 @@
 
 Use these skills for detailed patterns on-demand:
 
-| Skill                 | Description                            | URL                                             |
-| --------------------- | -------------------------------------- | ----------------------------------------------- |
-| `skill-creator`       | Create new AI agent skills             | [SKILL.md](skills/skill-creator/SKILL.md)       |
-| `nunjucks-views`      | Patterns for Nunjucks templates and UI | [SKILL.md](skills/nunjucks-views/SKILL.md)      |
-| `integration-testing` | Patterns for integration tests (Jest)  | [SKILL.md](skills/integration-testing/SKILL.md) |
-| `jsdoc`               | Standards for JSDoc typing             | [SKILL.md](skills/jsdoc/SKILL.md)               |
+| Skill                 | Description                            | URL                                                     |
+| --------------------- | -------------------------------------- | ------------------------------------------------------- |
+| `skill-creator`       | Create new AI agent skills             | [SKILL.md](.agents/skills/skill-creator/SKILL.md)       |
+| `nunjucks-views`      | Patterns for Nunjucks templates and UI | [SKILL.md](.agents/skills/nunjucks-views/SKILL.md)      |
+| `integration-testing` | Patterns for integration tests (Jest)  | [SKILL.md](.agents/skills/integration-testing/SKILL.md) |
+| `jsdoc`               | Standards for JSDoc typing             | [SKILL.md](.agents/skills/jsdoc/SKILL.md)               |
 
 ### Auto-invoke Skills
 

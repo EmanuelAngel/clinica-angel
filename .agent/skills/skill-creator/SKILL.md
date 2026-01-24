@@ -32,7 +32,7 @@ Create a skill when:
 ## Skill Structure
 
 ```
-skills/{skill-name}/
+.agent/skills/{skill-name}/
 ├── SKILL.md              # Required - main skill file
 ├── assets/               # Optional - templates, schemas, examples
 │   ├── template.py
