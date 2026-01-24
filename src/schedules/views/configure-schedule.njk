@@ -343,11 +343,30 @@
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
     const validityFrom = document.getElementById('validity-from');
     const validityTo = document.getElementById('validity-to');
-    const validityError = document.getElementById('validity-error');
-    const horariosError = document.getElementById('horarios-error');
     const blockStart = document.getElementById('block-start');
     const blockEnd = document.getElementById('block-end');
     const blockMotive = document.getElementById('block-motive');
+    const validityError = document.getElementById('validity-error');
+    const horariosError = document.getElementById('horarios-error');
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HYDRATION: Restore dynamic fields from server-side values
+    // ═══════════════════════════════════════════════════════════════════════════
+    const initialWeeklyDays = {{ (values.config.weeklyDays | dump | safe) if values.config else '[]' }};
+    initialWeeklyDays.forEach(wd => {
+      wd.ranges.forEach(r => {
+        horarios.push({ days: [wd.day], start: r.start, end: r.end });
+      });
+    });
+
+    const initialBlocks = {{ (values.blocks | dump | safe) if values.blocks else '[]' }};
+    initialBlocks.forEach(b => {
+      blocks.push(b);
+    });
+
+    // Render initial state
+    renderHorarios();
+    renderBlocks();
 
     // ═══════════════════════════════════════════════════════════════════════════
     // VALIDITY: 3-MONTH VALIDATION
