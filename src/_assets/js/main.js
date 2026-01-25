@@ -1,1 +1,3 @@
-console.log("Hello World!"); // eslint-disable-line no-console
+import { initThemeController } from "./theme-controller.js";
+
+initThemeController();
