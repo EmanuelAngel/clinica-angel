@@ -43,6 +43,7 @@ const envSchema = z
       .positive("El límite de conexiones debe ser positivo")
       .default(4),
     SALT_ROUNDS: z.coerce.number().positive().default(10),
+    LOG_ERRORS: z.coerce.boolean().default(false),
   })
   .transform((data) => {
     /** @type {import('ms').StringValue} */
@@ -65,10 +66,18 @@ const envSchema = z
 const result = envSchema.safeParse(process.env);
 
 if (!result.success) {
-  console.error("❌ Error en las variables de entorno:");
-  // Formatea los errores de Zod para que sean legibles
-  console.error(JSON.stringify(result.error.flatten().fieldErrors, null, 2));
-  process.exit(1);
+  // flatten() saca los errores por campo: { DB_URL: ['Required'], PORT: ['Invalid number'] }
+  const errors = JSON.stringify(result.error.flatten().fieldErrors, null, 2);
+
+  const errorMessage = `\n❌ Invalid Environment Variables:\n${errors}\n`;
+
+  if (process.env.NODE_ENV !== "test") {
+    console.error(errorMessage);
+    process.exit(1);
+  } else {
+    // Al meter los errores dentro del Error(), Jest los imprimirá SI O SÍ en la consola
+    throw new Error(errorMessage);
+  }
 }
 
 // Exportamos los datos validados

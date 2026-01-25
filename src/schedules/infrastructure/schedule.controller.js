@@ -27,6 +27,8 @@ export class ScheduleController {
 
     if (!validationResult.success) {
       res.status(422).render(res.locals.view, {
+        ...res.locals.viewData,
+        title: "Configurar Agenda",
         values: req.body,
         errors: z.treeifyError(validationResult.error),
         result: {
@@ -46,6 +48,8 @@ export class ScheduleController {
       res
         .status(newConfigurationResult.error.statusCode)
         .render(res.locals.view, {
+          ...res.locals.viewData,
+          title: "Configurar Agenda",
           values: req.body,
           result: {
             type: "failure",

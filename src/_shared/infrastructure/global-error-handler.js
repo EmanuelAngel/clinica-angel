@@ -10,12 +10,14 @@ import { negotiateResponse } from "./negotiate-response.js";
  */
 export function globalErrorHandler(err, req, res, _next) {
   const isDev = env.NODE_ENV === "development";
+  const showLogs = isDev || env.LOG_ERRORS === true;
   // @ts-ignore
   const statusCode = err.statusCode || 500;
 
-  if (isDev) {
+  if (showLogs) {
+    const firstStackLine = err.stack?.split("\n")[1]?.trim();
     // eslint-disable-next-line no-console
-    console.error(`[ERROR - ${statusCode}]: ${err.stack}`);
+    console.log(`❌ ${err.message} --> ${firstStackLine}`);
   }
 
   const resultMessage =

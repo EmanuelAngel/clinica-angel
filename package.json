@@ -24,6 +24,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "dotenv -e .env.test -- node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:debug": "set LOG_ERRORS=true&& pnpm run test",
     "test:watch": "pnpm run test -- --watch",
     "test:cov": "pnpm run test -- --coverage",
     "prepare": "husky",
