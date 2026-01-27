@@ -57,7 +57,7 @@
             <option value="">Todas las clasificaciones</option>
             {% for classification in classifications %}
               <option value="{{ classification.id }}" {{ 'selected' if filters.classification_id == classification.id }}>
-                {{ classification.name }}
+                {{ classification.name | upper }}
               </option>
             {% endfor %}
           </select>
