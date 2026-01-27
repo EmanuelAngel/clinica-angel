@@ -1,0 +1,91 @@
+{# Filters Panel - Multi-criteria filter form for schedule comparison #}
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body">
+    <form method="GET" action="/schedules/compare" class="space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {# Location Filter #}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Sucursal</span>
+          </label>
+          <select name="location_id" class="select select-bordered select-sm">
+            <option value="">Todas las sucursales</option>
+            {% for location in locations %}
+              <option value="{{ location.id }}" {{ 'selected' if filters.location_id == location.id }}>
+                {{ location.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {# Specialty Filter #}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Especialidad</span>
+          </label>
+          <select name="specialty_id" class="select select-bordered select-sm">
+            <option value="">Todas las especialidades</option>
+            {% for specialty in specialties %}
+              <option value="{{ specialty.id }}" {{ 'selected' if filters.specialty_id == specialty.id }}>
+                {{ specialty.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {# Professional Filter #}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Profesional</span>
+          </label>
+          <select name="professional_id" class="select select-bordered select-sm">
+            <option value="">Todos los profesionales</option>
+            {% for professional in professionals %}
+              <option value="{{ professional.id }}" {{ 'selected' if filters.professional_id == professional.id }}>
+                {{ professional.firstNames }} {{ professional.lastNames }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {# Classification Filter #}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Clasificación</span>
+          </label>
+          <select name="classification_id" class="select select-bordered select-sm">
+            <option value="">Todas las clasificaciones</option>
+            {% for classification in classifications %}
+              <option value="{{ classification.id }}" {{ 'selected' if filters.classification_id == classification.id }}>
+                {{ classification.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {# Date Filter #}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Fecha</span>
+          </label>
+          <input type="date" 
+                 name="date" 
+                 value="{{ date | date('yyyy-MM-dd') }}"
+                 class="input input-bordered input-sm" />
+        </div>
+      </div>
+
+      {# Submit Button #}
+      <div class="flex justify-end gap-2">
+        <a href="/schedules/compare" class="btn btn-ghost btn-sm">
+          <i data-lucide="x" class="w-4 h-4"></i>
+          Limpiar
+        </a>
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          Buscar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

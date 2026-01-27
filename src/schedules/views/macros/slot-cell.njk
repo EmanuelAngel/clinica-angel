@@ -1,0 +1,72 @@
+{#
+  Slot Cell Macro - Renders a single slot with status badge and patient info
+  
+  Parameters:
+    - slot: SlotForDay object with id, startsAt, status, patientName, isOverbook
+    - userRole: User's role (ADMIN, SECRETARY, PROFESSIONAL, PATIENT)
+#}
+
+{% macro renderSlot(slot, userRole) %}
+  {% set statusBadge = {
+    'FREE': 'badge-success',
+    'BOOKED': 'badge-warning',
+    'CANCELLED': 'badge-error',
+    'PROPOSED': 'badge-primary',
+    'IN_PROGRESS': 'badge-info',
+    'FULFILLED': 'badge-neutral',
+    'ARRIVED': 'badge-accent',
+    'NO_SHOW': 'badge-error'
+  } %}
+  
+  {% set statusLabel = {
+    'FREE': 'Libre',
+    'BOOKED': 'Reservado',
+    'CANCELLED': 'Cancelado',
+    'PROPOSED': 'Propuesto',
+    'IN_PROGRESS': 'En curso',
+    'FULFILLED': 'Cumplido',
+    'ARRIVED': 'Llegó',
+    'NO_SHOW': 'No asistió'
+  } %}
+  
+  <div class="flex flex-col gap-0.5 slot-trigger cursor-pointer hover:opacity-80" data-slot-id="{{ slot.id }}">
+    {# Status Badge #}
+    <span class="badge badge-xs {{ statusBadge[slot.status] or 'badge-neutral' }} w-full justify-center pointer-events-none">
+      {% if slot.isOverbook %}
+        <i data-lucide="layers" class="w-3 h-3 mr-1" title="Sobreturno"></i>
+      {% endif %}
+      {{ statusLabel[slot.status] or slot.status }}
+    </span>
+    
+    {# Patient Name - Only for ADMIN/SECRETARY #}
+    {% if slot.patientName and (userRole == 'ADMIN' or userRole == 'SECRETARY') %}
+      <span class="text-xs text-base-content/70 truncate max-w-[180px]" title="{{ slot.patientName }}">
+        {{ slot.patientName }}
+      </span>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{#
+  Render Block Info - Shows block reason for privileged users
+  
+  Parameters:
+    - block: BlockInfo object with startDate, endDate, reason
+    - userRole: User's role
+#}
+{% macro renderBlock(block, userRole) %}
+  {% if userRole == 'ADMIN' or userRole == 'SECRETARY' %}
+    <div class="bg-error/20 text-error text-xs p-2 rounded text-center">
+      <div class="flex items-center justify-center gap-1 mb-1">
+        <i data-lucide="ban" class="w-4 h-4"></i>
+        <span class="font-medium">Día Bloqueado</span>
+      </div>
+      <p class="text-xs opacity-80">{{ block.reason }}</p>
+    </div>
+  {% else %}
+    <div class="bg-base-300 text-base-content/50 text-xs p-2 rounded text-center">
+      <i data-lucide="calendar-x" class="w-4 h-4 mx-auto mb-1"></i>
+      No disponible
+    </div>
+  {% endif %}
+{% endmacro %}

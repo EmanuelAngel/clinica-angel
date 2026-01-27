@@ -1,0 +1,129 @@
+{# Import slot cell macro #}
+{% import "macros/slot-cell.njk" as slotMacros %}
+
+{# Vertical Resource Time Grid #}
+{# 
+  Displays schedules as columns (X-axis) and time slots from 08:00 to 22:00 as rows (Y-axis).
+  Features sticky headers for schedule info and time labels.
+#}
+
+<div class="card bg-base-100 shadow-sm overflow-hidden">
+  <div class="overflow-x-auto">
+    <div class="time-grid-container overflow-y-auto max-h-[70vh]">
+      <table class="table table-xs table-pin-rows table-pin-cols">
+        {# Header Row - Sticky #}
+        <thead>
+          <tr class="bg-base-200">
+            {# Corner Cell #}
+            <th class="bg-base-200 z-20 min-w-[80px]">Hora</th>
+            
+            {# Schedule Headers #}
+            {% for schedule in schedules %}
+              <th class="bg-base-200 min-w-[200px] text-center">
+                <div class="flex flex-col gap-1">
+                  <span class="font-bold text-sm">{{ schedule.professionalName }}</span>
+                  <span class="text-xs text-base-content/70">{{ schedule.specialtyName }}</span>
+                  <div class="flex items-center justify-center gap-1 text-xs">
+                    <i data-lucide="map-pin" class="w-3 h-3"></i>
+                    {{ schedule.locationName }}
+                  </div>
+                  <div class="flex items-center justify-center gap-1">
+                    <span class="badge badge-xs {{ 'badge-success' if not schedule.isPaused else 'badge-warning' }}">
+                      {{ schedule.classificationName }}
+                    </span>
+                    {% if schedule.isPaused %}
+                      <span class="badge badge-xs badge-warning">Pausada</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {# Generate time rows from 08:00 to 22:00 #}
+          {% set hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21] %}
+          {% set minutes = [0, 10, 20, 30, 40, 50] %}
+          
+          {% for hour in hours %}
+            {% for minute in minutes %}
+              {% set timeLabel = (hour | padStart(2, '0')) + ':' + (minute | padStart(2, '0')) %}
+              <tr class="hover:bg-base-200/50">
+                {# Time Label - Sticky left column #}
+                <th class="bg-base-100 font-mono text-xs text-right pr-2 w-[80px]">
+                  {% if minute == 0 %}
+                    <span class="font-bold">{{ timeLabel }}</span>
+                  {% else %}
+                    <span class="text-base-content/50">{{ timeLabel }}</span>
+                  {% endif %}
+                </th>
+                
+                {# Schedule Cells #}
+                {% for schedule in schedules %}
+                  <td class="p-1 border-l border-base-200">
+                    {% if schedule.dayBlock %}
+                      {# Day is blocked #}
+                      {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
+                        <div class="bg-error/20 text-error text-xs p-1 rounded text-center" title="{{ schedule.dayBlock.reason }}">
+                          <i data-lucide="ban" class="w-3 h-3 inline"></i>
+                          Bloqueado
+                        </div>
+                      {% else %}
+                        <div class="bg-base-300 text-base-content/50 text-xs p-1 rounded text-center">
+                          No disponible
+                        </div>
+                      {% endif %}
+                    {% else %}
+                      {# Find slot for this time #}
+                      {% set slotFound = false %}
+                      {% for slot in schedule.slots %}
+                        {% set slotHour = slot.startsAt | date('H') | int %}
+                        {% set slotMinute = slot.startsAt | date('m') | int %}
+                        {% if slotHour == hour and slotMinute == minute %}
+                          {% set slotFound = true %}
+                          {{ slotMacros.renderSlot(slot, userRole) }}
+                        {% endif %}
+                      {% endfor %}
+                      
+                      {% if not slotFound %}
+                        {# No slot at this time - not available #}
+                        <div class="bg-base-300/50 text-base-content/30 text-xs p-1 rounded text-center">
+                          -
+                        </div>
+                      {% endif %}
+                    {% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  .time-grid-container {
+    scrollbar-width: thin;
+  }
+  
+  .time-grid-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .time-grid-container::-webkit-scrollbar-track {
+    background: var(--fallback-b2,oklch(var(--b2)/1));
+  }
+  
+  .time-grid-container::-webkit-scrollbar-thumb {
+    background: var(--fallback-bc,oklch(var(--bc)/0.2));
+    border-radius: 4px;
+  }
+  
+  .time-grid-container::-webkit-scrollbar-thumb:hover {
+    background: var(--fallback-bc,oklch(var(--bc)/0.4));
+  }
+</style>

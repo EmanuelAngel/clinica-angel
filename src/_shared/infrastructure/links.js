@@ -32,8 +32,8 @@ export const links = [
     title: "Agendas",
     links: [
       {
-        displayName: "Turnos",
-        url: "/schedules",
+        displayName: "Buscar Turnos",
+        url: "/schedules/compare",
         icon: "bell-dot",
       },
       {

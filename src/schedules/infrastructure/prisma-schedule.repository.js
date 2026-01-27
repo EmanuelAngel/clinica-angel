@@ -242,4 +242,155 @@ export class PrismaScheduleRepository {
       ),
     });
   }
+
+  /**
+   * Finds non-deleted schedules matching filters with slots for a specific date.
+   * @param {import("./schedule-comparison.schemas.js").ComparisonFilters} filters
+   * @returns {Promise<any[]>} Schedules with slots for the specified day.
+   */
+  async findForComparison(filters) {
+    const {
+      date,
+      location_id,
+      specialty_id,
+      professional_id,
+      classification_id,
+    } = filters;
+
+    // Calculate day boundaries for slot filtering
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // Build dynamic where clause
+    /** @type {import("../../../generated/prisma/index.js").Prisma.ScheduleWhereInput} */
+    const whereClause = {
+      deletedAt: null,
+    };
+
+    if (location_id) {
+      whereClause.locationId = location_id;
+    }
+
+    if (classification_id) {
+      whereClause.classificationId = classification_id;
+    }
+
+    if (specialty_id || professional_id) {
+      whereClause.professional = {};
+      if (specialty_id) {
+        whereClause.professional.specialtyId = specialty_id;
+      }
+      if (professional_id) {
+        whereClause.professional.userId = professional_id;
+      }
+    }
+
+    return await this.db.schedule.findMany({
+      where: whereClause,
+      include: {
+        professional: {
+          include: {
+            user: {
+              select: {
+                firstNames: true,
+                lastNames: true,
+              },
+            },
+            specialty: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        location: {
+          select: {
+            name: true,
+          },
+        },
+        classification: {
+          select: {
+            name: true,
+          },
+        },
+        blocks: {
+          where: {
+            // Block overlaps with the requested day
+            startDate: { lte: dayEnd },
+            endDate: { gte: dayStart },
+          },
+        },
+        slots: {
+          where: {
+            startsAt: {
+              gte: dayStart,
+              lte: dayEnd,
+            },
+          },
+          include: {
+            patient: {
+              select: {
+                firstNames: true,
+                lastNames: true,
+              },
+            },
+          },
+          orderBy: {
+            startsAt: "asc",
+          },
+        },
+      },
+      orderBy: [
+        { location: { name: "asc" } },
+        { professional: { user: { lastNames: "asc" } } },
+      ],
+    });
+  }
+
+  /**
+   * Finds a slot by its ID with full details for the modal.
+   * @param {number} id - Slot ID.
+   * @returns {Promise<any | null>} Slot with patient and schedule details.
+   */
+  async findSlotById(id) {
+    return await this.db.slot.findUnique({
+      where: { id },
+      include: {
+        patient: {
+          include: {
+            patientInsurances: {
+              include: {
+                insurance: true,
+              },
+            },
+          },
+        },
+        schedule: {
+          include: {
+            professional: {
+              include: {
+                user: true,
+                specialty: true,
+              },
+            },
+            location: true,
+            classification: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Updates a slot's status.
+   * @param {number} id - Slot ID.
+   * @param {string} status - New status.
+   * @returns {Promise<void>}
+   */
+  async updateSlotStatus(id, status) {
+    // Method signature only for now as requested by user.
+    // In the future: await this.db.slot.update({ where: { id }, data: { status } });
+  }
 }

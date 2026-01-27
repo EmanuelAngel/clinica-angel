@@ -201,4 +201,114 @@ export class ScheduleService {
       })
     );
   }
+
+  /**
+   * Get schedules for comparison view with filters.
+   * @param {import("../infrastructure/schedule-comparison.schemas.js").ComparisonFilters} filters
+   * @returns {Promise<import("./schedule-comparison.dto.js").ScheduleComparisonDTO[]>}
+   * Schedules with slots for the specified day.
+   */
+  async getSchedulesForComparison(filters) {
+    const { ScheduleComparisonDTO, SlotForDay, BlockInfo } =
+      await import("./schedule-comparison.dto.js");
+
+    const schedules = await this.scheduleRepository.findForComparison(filters);
+
+    return schedules.map((schedule) => {
+      // Check if there's a block for this day
+      const dayBlock =
+        schedule.blocks.length > 0
+          ? new BlockInfo({
+              startDate: schedule.blocks[0].startDate,
+              endDate: schedule.blocks[0].endDate,
+              reason: schedule.blocks[0].reason,
+            })
+          : null;
+
+      // Map slots
+      const slots = schedule.slots.map(
+        (slot) =>
+          new SlotForDay({
+            id: slot.id,
+            startsAt: slot.startsAt,
+            status: slot.status,
+            patientName: slot.patient
+              ? `${slot.patient.firstNames} ${slot.patient.lastNames}`
+              : null,
+            isOverbook: slot.isOverbook,
+          })
+      );
+
+      return new ScheduleComparisonDTO({
+        id: schedule.id,
+        professionalName: `${schedule.professional.user.firstNames} ${schedule.professional.user.lastNames}`,
+        professionalLicense: schedule.professionalLicense,
+        specialtyName: schedule.professional.specialty.name,
+        locationName: schedule.location.name,
+        classificationName: schedule.classification.name,
+        slotDuration: schedule.slotDuration,
+        isPaused: schedule.isPaused,
+        slots,
+        dayBlock,
+      });
+    });
+  }
+
+  /**
+   * Get slot details by ID for the modal.
+   * @param {number} id - Slot ID.
+   * @returns {Promise<import("neverthrow").Result<any, ScheduleNotFoundError>>}
+   * Slot with patient and schedule details.
+   */
+  async getSlotDetails(id) {
+    const slot = await this.scheduleRepository.findSlotById(id);
+
+    if (!slot) {
+      return err(new ScheduleNotFoundError(id));
+    }
+
+    // Mapping relevant info for the modal
+    const patientInfo = slot.patient
+      ? {
+          fullNames: `${slot.patient.firstNames} ${slot.patient.lastNames}`,
+          nationalId: slot.patient.nationalId,
+          email: slot.patient.email,
+          phone: slot.patient.phone,
+          address: slot.patient.address,
+          nationalIdImageUrl: slot.patient.nationalIdImageUrl,
+          insurances: (slot.patient.patientInsurances || []).map((pi) => ({
+            name: pi.insurance.name,
+            memberNumber: pi.memberNumber,
+          })),
+        }
+      : null;
+
+    const scheduleInfo = {
+      classification: slot.schedule.classification.name,
+      professional: `${slot.schedule.professional.user.firstNames} ${slot.schedule.professional.user.lastNames}`,
+      specialty: slot.schedule.professional.specialty.name,
+      location: slot.schedule.location.name,
+    };
+
+    return ok({
+      id: slot.id,
+      startsAt: slot.startsAt,
+      status: slot.status,
+      patient: patientInfo,
+      schedule: scheduleInfo,
+    });
+  }
+
+  /**
+   * Updates a slot's status.
+   * @param {number} id - Slot ID.
+   * @param {string} status - New status.
+   * @returns {Promise<import("neverthrow").Result<void, ScheduleNotFoundError>>}
+   * Returns void if the slot is found, otherwise an error.
+   */
+  async updateSlotStatus(id, status) {
+    // Method signature only for now as requested by user.
+    // In the future: return this.scheduleRepository.updateSlotStatus(id, status);
+    return ok();
+  }
 }
