@@ -15,7 +15,7 @@ scheduleRouter.get(
   scheduleController.showDetails
 );
 scheduleRouter.get("/compare", scheduleController.showComparison);
-scheduleRouter.get("/slots/:id", scheduleController.getSlotDetails);
+scheduleRouter.get("/slots/:id", auth(), scheduleController.getSlotDetails);
 scheduleRouter.patch(
   "/slots/:id/status",
   auth(),
