@@ -1,0 +1,298 @@
+{% extends "layout/base.njk" %}
+
+{% set title = "Comparar Agendas" %}
+
+{% block pageInfo %}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold">Comparar Agendas</h1>
+    <p class="text-base-content/70">Vista de grilla de agendas médicas</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  {# Filters Panel #}
+  {% include "partials/filters-panel.njk" %}
+
+  {# Date Display and Navigation #}
+  <div class="flex items-center justify-between bg-base-200 rounded-lg px-4 py-3">
+    <a href="?{{ 'location_id=' + filters.location_id if filters.location_id }}{{ '&specialty_id=' + filters.specialty_id if filters.specialty_id }}{{ '&professional_id=' + filters.professional_id if filters.professional_id }}{{ '&classification_id=' + filters.classification_id if filters.classification_id }}&date={{ (date | dateAdd(-1, 'days')) | date('yyyy-MM-dd') }}"
+       class="btn btn-sm btn-ghost">
+      <i data-lucide="chevron-left" class="w-4 h-4"></i>
+      Anterior
+    </a>
+    
+    <div class="text-center">
+      <span class="text-lg font-semibold">{{ date | date('EEEE, d MMMM yyyy', 'es') }}</span>
+    </div>
+    
+    <div class="flex gap-2">
+      <a href="?{{ 'location_id=' + filters.location_id if filters.location_id }}{{ '&specialty_id=' + filters.specialty_id if filters.specialty_id }}{{ '&professional_id=' + filters.professional_id if filters.professional_id }}{{ '&classification_id=' + filters.classification_id if filters.classification_id }}"
+         class="btn btn-sm btn-outline btn-primary">
+        Hoy
+      </a>
+      <a href="?{{ 'location_id=' + filters.location_id if filters.location_id }}{{ '&specialty_id=' + filters.specialty_id if filters.specialty_id }}{{ '&professional_id=' + filters.professional_id if filters.professional_id }}{{ '&classification_id=' + filters.classification_id if filters.classification_id }}&date={{ (date | dateAdd(1, 'days')) | date('yyyy-MM-dd') }}"
+         class="btn btn-sm btn-ghost">
+        Siguiente
+        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      </a>
+    </div>
+  </div>
+
+  {# Content Area #}
+  {% if not hasFilters %}
+    {# Empty State #}
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body items-center text-center py-16">
+        <i data-lucide="calendar-search" class="w-16 h-16 text-base-content/30 mb-4"></i>
+        <h2 class="card-title text-xl">Seleccione criterios para comparar agendas</h2>
+        <p class="text-base-content/70 max-w-md">
+          Utilice los filtros de arriba para seleccionar agendas por sucursal, especialidad, profesional o clasificación.
+        </p>
+      </div>
+    </div>
+  {% elif schedules.length == 0 %}
+    {# No Results #}
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body items-center text-center py-16">
+        <i data-lucide="calendar-x" class="w-16 h-16 text-base-content/30 mb-4"></i>
+        <h2 class="card-title text-xl">No se encontraron agendas</h2>
+        <p class="text-base-content/70 max-w-md">
+          No hay agendas que coincidan con los filtros seleccionados.
+        </p>
+      </div>
+    </div>
+  {% else %}
+    {# Time Grid #}
+    {% include "partials/time-grid.njk" %}
+  {% endif %}
+</div>
+
+{# Slot Details Modal #}
+<dialog id="slot_details_modal" class="modal">
+  <div class="modal-box max-w-2xl">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    
+    <div id="modal_content" class="space-y-6">
+      {# Header #}
+      <div class="flex items-center justify-between">
+        <h3 class="text-2xl font-bold" id="slot_datetime">17/04/2024 - 08:00</h3>
+        <span id="slot_status_badge" class="badge badge-lg">Reservado</span>
+      </div>
+
+      {# Agenda Info #}
+      <div>
+        <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Agenda</h4>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <p class="text-xs text-base-content/60">Clasificación</p>
+            <p class="font-medium" id="slot_classification">Normal</p>
+          </div>
+          <div>
+            <p class="text-xs text-base-content/60">Profesional</p>
+            <p class="font-medium" id="slot_professional">Silvina Carrizo</p>
+          </div>
+          <div>
+            <p class="text-xs text-base-content/60">Especialidad</p>
+            <p class="font-medium" id="slot_specialty">Nutrición</p>
+          </div>
+          <div>
+            <p class="text-xs text-base-content/60">Sucursal</p>
+            <p class="font-medium" id="slot_location">Benavides</p>
+          </div>
+        </div>
+      </div>
+
+      {# Patient Info #}
+      <div id="patient_section" class="hidden">
+        <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Paciente</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <p class="text-xs text-base-content/60">Nombres y apellidos</p>
+            <p class="font-medium text-lg" id="patient_names">-</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <p class="text-xs text-base-content/60">DNI</p>
+            <p class="font-medium" id="patient_dni">-</p>
+          </div>
+          <div>
+            <p class="text-xs text-base-content/60">Correo electrónico</p>
+            <p class="font-medium" id="patient_email">-</p>
+          </div>
+          <div>
+            <p class="text-xs text-base-content/60">Teléfono</p>
+            <p class="font-medium" id="patient_phone">-</p>
+          </div>
+          <div>
+            <p class="text-xs text-base-content/60">Dirección</p>
+            <p class="font-medium" id="patient_address">-</p>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <p class="text-xs text-base-content/60 mb-2">Obras sociales</p>
+          <div id="patient_insurances" class="flex flex-wrap gap-2">
+            {# Insurances will be injected here #}
+          </div>
+        </div>
+
+        <div id="dni_image_section" class="hidden">
+          <p class="text-xs text-base-content/60 mb-2">Imagen del DNI</p>
+          <div class="bg-base-200 rounded-lg aspect-video flex items-center justify-center overflow-hidden border border-base-300">
+            <img id="patient_dni_image" src="" alt="DNI Paciente" class="max-w-full max-h-full object-contain" />
+            <div id="no_dni_image" class="text-base-content/30 flex flex-col items-center">
+              <i data-lucide="image-off" class="w-12 h-12 mb-2"></i>
+              <span>Imagen no cargada</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# State Actions (Deferred) #}
+      <div>
+        <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Cambiar estado del horario a</h4>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-xs btn-outline btn-success opacity-50 cursor-not-allowed">Libre</button>
+          <button class="btn btn-xs btn-outline btn-error opacity-50 cursor-not-allowed">Cancelado</button>
+          <button class="btn btn-xs btn-outline btn-warning opacity-50 cursor-not-allowed">Reservado</button>
+          <button class="btn btn-xs btn-outline btn-primary opacity-50 cursor-not-allowed">Confirmado</button>
+          <button class="btn btn-xs btn-outline btn-accent opacity-50 cursor-not-allowed">Presente</button>
+          <button class="btn btn-xs btn-outline btn-secondary opacity-50 cursor-not-allowed">Ausente</button>
+          <button class="btn btn-xs btn-outline btn-info opacity-50 cursor-not-allowed">En consulta</button>
+          <button class="btn btn-xs btn-outline opacity-50 cursor-not-allowed">Atendido</button>
+          <button class="btn btn-xs btn-outline opacity-50 cursor-not-allowed">No disponible</button>
+        </div>
+        <p class="text-[10px] text-base-content/40 mt-2 italic">* La actualización de estados estará disponible en una próxima fase.</p>
+      </div>
+
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn">Cerrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Re-initialize lucide icons
+    lucide.createIcons();
+
+    const modal = document.getElementById('slot_details_modal');
+    const triggers = document.querySelectorAll('.slot-trigger');
+
+    const statusBadges = {
+      'FREE': 'badge-success',
+      'BOOKED': 'badge-warning',
+      'CANCELLED': 'badge-error',
+      'PROPOSED': 'badge-primary',
+      'IN_PROGRESS': 'badge-info',
+      'FULFILLED': 'badge-neutral',
+      'ARRIVED': 'badge-accent',
+      'NO_SHOW': 'badge-error'
+    };
+
+    const statusLabels = {
+      'FREE': 'Libre',
+      'BOOKED': 'Reservado',
+      'CANCELLED': 'Cancelado',
+      'PROPOSED': 'Propuesto',
+      'IN_PROGRESS': 'En curso',
+      'FULFILLED': 'Cumplido',
+      'ARRIVED': 'Llegó',
+      'NO_SHOW': 'No asistió'
+    };
+
+    triggers.forEach(trigger => {
+      trigger.addEventListener('click', async () => {
+        const slotId = trigger.dataset.slotId;
+        if (!slotId) return;
+
+        try {
+          // Show loading state or clear previous data
+          modal.showModal();
+          
+          const response = await fetch(`/schedules/slots/${slotId}`);
+          if (!response.ok) throw new Error('Error al obtener datos');
+          
+          const slot = await response.json();
+          
+          // Populate Modal
+          // Use .replace('Z', '') to treat the ISO string as local time, 
+          // matching how the server renders the grid.
+          const date = new Date(slot.startsAt.replace('Z', ''));
+          const dateStr = date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          const timeStr = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+          
+          document.getElementById('slot_datetime').textContent = `${dateStr} - ${timeStr}`;
+          
+          const statusBadge = document.getElementById('slot_status_badge');
+          statusBadge.textContent = statusLabels[slot.status] || slot.status;
+          statusBadge.className = `badge badge-lg ${statusBadges[slot.status] || ''}`;
+
+          document.getElementById('slot_classification').textContent = slot.schedule.classification;
+          document.getElementById('slot_professional').textContent = slot.schedule.professional;
+          document.getElementById('slot_specialty').textContent = slot.schedule.specialty;
+          document.getElementById('slot_location').textContent = slot.schedule.location;
+
+          const patientSection = document.getElementById('patient_section');
+          if (slot.patient) {
+            patientSection.classList.remove('hidden');
+            document.getElementById('patient_names').textContent = slot.patient.fullNames;
+            document.getElementById('patient_dni').textContent = slot.patient.nationalId;
+            document.getElementById('patient_email').textContent = slot.patient.email;
+            document.getElementById('patient_phone').textContent = slot.patient.phone;
+            document.getElementById('patient_address').textContent = slot.patient.address;
+
+            // Insurances
+            const insuranceContainer = document.getElementById('patient_insurances');
+            insuranceContainer.innerHTML = '';
+            if (slot.patient.insurances && slot.patient.insurances.length > 0) {
+              slot.patient.insurances.forEach(ins => {
+                const badge = document.createElement('span');
+                badge.className = 'badge badge-outline';
+                badge.textContent = `${ins.name} - ${ins.memberNumber}`;
+                insuranceContainer.appendChild(badge);
+              });
+            } else {
+              insuranceContainer.innerHTML = '<span class="text-sm text-base-content/40 italic">Ninguna</span>';
+            }
+
+            // DNI Image
+            const dniImageSection = document.getElementById('dni_image_section');
+            const dniImage = document.getElementById('patient_dni_image');
+            const noDniImage = document.getElementById('no_dni_image');
+            
+            if (slot.patient.nationalIdImageUrl) {
+              dniImageSection.classList.remove('hidden');
+              dniImage.src = slot.patient.nationalIdImageUrl;
+              dniImage.classList.remove('hidden');
+              noDniImage.classList.add('hidden');
+            } else {
+              dniImageSection.classList.remove('hidden');
+              dniImage.classList.add('hidden');
+              noDniImage.classList.remove('hidden');
+            }
+          } else {
+            patientSection.classList.add('hidden');
+          }
+
+        } catch (error) {
+          console.error(error);
+          alert('Error al cargar los detalles del turno');
+          modal.close();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

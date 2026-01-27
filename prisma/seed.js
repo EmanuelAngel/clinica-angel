@@ -9,6 +9,7 @@ import { specialties } from "./seeders/specialties.seed.js";
 import { professionals } from "./seeders/professionals.seed.js";
 import { locations } from "./seeders/locations.seed.js";
 import { classifications } from "./seeders/classifications.seed.js";
+import { seedSchedules } from "./seeders/schedules.seed.js";
 
 /**
  * Seeds the database with initial data.
@@ -58,6 +59,8 @@ async function main() {
     data: classifications,
     skipDuplicates: true,
   });
+
+  await seedSchedules(prisma);
 
   console.log("✨ Seed completed!");
 }

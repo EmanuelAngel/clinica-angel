@@ -1,6 +1,7 @@
 /**
  * @typedef {import("../domain/schedule.model.js").Schedule} Schedule
  * @typedef {import("../domain/schedule.model.js").Slot} Slot
+ * @typedef {import("../infrastructure/schedule-comparison.schemas.js").ComparisonFilters} ComparisonFilters
  * @typedef {object} ScheduleRepository
  * @property {(licenseNumber: string) => Promise<boolean>} checkActive
  * Checks if the professional already has an active schedule with the same
@@ -12,4 +13,10 @@
  * @property {() => Promise<any[]>} findAll
  * @property {(id: number) => Promise<boolean>} checkExist
  * @property {(id: number) => Promise<any | null>} findByIdWithDetails
+ * @property {(filters: ComparisonFilters) => Promise<any[]>} findForComparison
+ * Finds non-deleted schedules matching filters with slots for a specific date.
+ * @property {(id: number) => Promise<any | null>} findSlotById
+ * Finds a slot by its ID with full details.
+ * @property {(id: number, status: string) => Promise<void>} updateSlotStatus
+ * Updates a slot's status.
  */

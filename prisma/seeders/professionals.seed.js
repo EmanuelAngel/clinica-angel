@@ -57,5 +57,84 @@ export const professionals = [
     lastNames: "Phoebe",
     phone: "29183832",
     address: "Rinascita, Avinolium.",
+    professionalCredentials: {
+      create: [
+        {
+          licenseNumber: "CA-38214288",
+          specialty: {
+            connect: { name: "Cardiología" },
+          },
+        },
+      ],
+    },
+  },
+  {
+    email: "takeo.masaki@professional.clinica-angel.com",
+    passwordHash:
+      "$2b$04$A2tyxFR4vAHs2DwBB2RG9.Ow1sQvhzkBFOFlzOpIUNP3VBrnak/2S",
+    role: "PROFESSIONAL",
+    nationalId: "11500935",
+    firstNames: "Takeo",
+    lastNames: "Masaki",
+    phone: "115009351",
+    address: "Japón, Shi No Numa",
+    professionalCredentials: {
+      create: [
+        {
+          licenseNumber: "DE-115",
+          specialty: {
+            connect: { name: "Dermatología" },
+          },
+        },
+      ],
+    },
+  },
+  {
+    email: "tank.dempsey@professional.clinica-angel.com",
+    passwordHash:
+      "$2b$04$A2tyxFR4vAHs2DwBB2RG9.Ow1sQvhzkBFOFlzOpIUNP3VBrnak/2S",
+    role: "PROFESSIONAL",
+    nationalId: "34115935",
+    firstNames: "Tank",
+    lastNames: "Dempsey",
+    phone: "11534115",
+    address: "EEUU, Verruckt",
+    professionalCredentials: {
+      create: [
+        {
+          licenseNumber: "TR-341",
+          specialty: {
+            connect: { name: "Traumatología" },
+          },
+        },
+      ],
+    },
+  },
+  {
+    email: "samantha.maxis@professional.clinica-angel.com",
+    passwordHash:
+      "$2b$04$A2tyxFR4vAHs2DwBB2RG9.Ow1sQvhzkBFOFlzOpIUNP3VBrnak/2S",
+    role: "PROFESSIONAL",
+    nationalId: "11511511",
+    firstNames: "Samantha",
+    lastNames: "Maxis",
+    phone: "935935935",
+    address: "Alemania, Der Riese",
+    professionalCredentials: {
+      create: [
+        {
+          licenseNumber: "PS-115",
+          specialty: {
+            connect: { name: "Psiquiatría" },
+          },
+        },
+        {
+          licenseNumber: "NE-935",
+          specialty: {
+            connect: { name: "Neurología" },
+          },
+        },
+      ],
+    },
   },
 ];

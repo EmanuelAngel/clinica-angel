@@ -1,6 +1,10 @@
 import z from "zod";
 import { services } from "../../_shared/infrastructure/services-container.js";
 import { validateCreateSchedule } from "./schedule.schemas.js";
+import {
+  validateComparisonFilters,
+  hasActiveFilters,
+} from "./schedule-comparison.schemas.js";
 
 export class ScheduleController {
   /**
@@ -116,6 +120,121 @@ export class ScheduleController {
       (schedule) => res.render("show-schedule", { schedule }),
       (error) =>
         res.status(error.statusCode).render("404", { message: error.message })
+    );
+  }
+
+  /**
+   * Renders the schedule comparison view.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   * @returns {Promise<void>}
+   */
+  async showComparison(req, res) {
+    // Load dropdown options
+    const [classifications, locations, professionals, specialties] =
+      await Promise.all([
+        services.classificationService.findAll(),
+        services.locationService.findAll(),
+        services.professionalService.findAll(),
+        services.specialtyService.findAll(),
+      ]);
+
+    // Validate filter params
+    const validationResult = await validateComparisonFilters(req.query);
+
+    if (!validationResult.success) {
+      // If validation fails, show empty state with error
+      return res.status(422).render("compare-schedules", {
+        classifications,
+        locations,
+        professionals,
+        specialties,
+        filters: req.query,
+        hasFilters: false,
+        schedules: [],
+        date: new Date(),
+        userRole: req.user?.role,
+      });
+    }
+
+    const filters = validationResult.data;
+    const hasFilters = hasActiveFilters(filters);
+
+    // Only fetch schedules if filters are applied
+    let schedules = [];
+    if (hasFilters) {
+      schedules =
+        await services.scheduleService.getSchedulesForComparison(filters);
+    }
+
+    res.render("compare-schedules", {
+      classifications,
+      locations,
+      professionals,
+      specialties,
+      filters,
+      hasFilters,
+      schedules,
+      date: filters.date,
+      userRole: req.user?.role,
+    });
+  }
+
+  /**
+   * Returns slot details as JSON.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async getSlotDetails(req, res) {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+      res.status(400).json({ message: "ID de turno inválido" });
+
+      return;
+    }
+
+    const result = await services.scheduleService.getSlotDetails(id);
+
+    result.match(
+      (slot) => {
+        // Redact personal info if not ADMIN/SECRETARY
+        const userRole = req.user?.role;
+        if (userRole !== "ADMIN" && userRole !== "SECRETARY") {
+          if (slot.patient) {
+            slot.patient.email = "REDACTED";
+            slot.patient.phone = "REDACTED";
+            slot.patient.address = "REDACTED";
+            slot.patient.nationalId = "REDACTED";
+            slot.patient.nationalIdImageUrl = null;
+          }
+        }
+        res.json(slot);
+      },
+      (error) => res.status(error.statusCode).json({ message: error.message })
+    );
+  }
+
+  /**
+   * Updates a slot's status.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async updateSlotStatus(req, res) {
+    const id = parseInt(req.params.id);
+    const { status } = req.body;
+
+    if (isNaN(id)) {
+      res.status(400).json({ message: "ID de turno inválido" });
+
+      return;
+    }
+
+    const result = await services.scheduleService.updateSlotStatus(id, status);
+
+    result.match(
+      () => res.json({ message: "Estado actualizado (simulado)" }),
+      (error) => res.status(error.statusCode).json({ message: error.message })
     );
   }
 }
