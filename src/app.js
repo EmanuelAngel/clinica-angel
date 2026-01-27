@@ -105,6 +105,11 @@ njkEnv.addFilter("padStart", (value, length, char = "0") => {
   return String(value).padStart(length, char);
 });
 
+njkEnv.addFilter("upper", (value) => {
+  if (!value) return "";
+  return String(value).toUpperCase();
+});
+
 app.use("/", viewsRouter);
 app.use("/api/v1", apiV1Router);
 
