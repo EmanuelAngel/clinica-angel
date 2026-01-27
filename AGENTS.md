@@ -4,23 +4,25 @@
 
 Use these skills for detailed patterns on-demand:
 
-| Skill                 | Description                            | URL                                                    |
-| --------------------- | -------------------------------------- | ------------------------------------------------------ |
-| `skill-creator`       | Create new AI agent skills             | [SKILL.md](.agent/skills/skill-creator/SKILL.md)       |
-| `nunjucks-views`      | Patterns for Nunjucks templates and UI | [SKILL.md](.agent/skills/nunjucks-views/SKILL.md)      |
-| `integration-testing` | Patterns for integration tests (Jest)  | [SKILL.md](.agent/skills/integration-testing/SKILL.md) |
-| `jsdoc`               | Standards for JSDoc typing             | [SKILL.md](.agent/skills/jsdoc/SKILL.md)               |
+| Skill                   | Description                                            | URL                                                      |
+| ----------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
+| `skill-creator`         | Create new AI agent skills                             | [SKILL.md](.agent/skills/skill-creator/SKILL.md)         |
+| `nunjucks-views`        | Patterns for Nunjucks templates and UI                 | [SKILL.md](.agent/skills/nunjucks-views/SKILL.md)        |
+| `integration-testing`   | Patterns for integration tests (Jest)                  | [SKILL.md](.agent/skills/integration-testing/SKILL.md)   |
+| `jsdoc`                 | Standards for JSDoc typing                             | [SKILL.md](.agent/skills/jsdoc/SKILL.md)                 |
+| `web-design-guidelines` | Review UI code for Web Interface Guidelines compliance | [SKILL.md](.agent/skills/web-design-guidelines/SKILL.md) |
 
 ### Auto-invoke Skills
 
 When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
-| Action                              | Skill                 |
-| ----------------------------------- | --------------------- |
-| Create new AI agent skill           | `skill-creator`       |
-| Create or modify a view             | `nunjucks-views`      |
-| Create or modify integration tests  | `integration-testing` |
-| Define entities, repos, or services | `jsdoc`               |
+| Action                                                 | Skill                   |
+| ------------------------------------------------------ | ----------------------- |
+| Create new AI agent skill                              | `skill-creator`         |
+| Create or modify a view                                | `nunjucks-views`        |
+| Create or modify integration tests                     | `integration-testing`   |
+| Define entities, repos, or services                    | `jsdoc`                 |
+| Review UI code for Web Interface Guidelines compliance | `web-design-guidelines` |
 
 ---
 
