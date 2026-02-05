@@ -154,6 +154,39 @@
         </div>
       </div>
 
+      {# Reservation Form (shown only for FREE slots) #}
+      <div id="reservation_section" class="hidden">
+        <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Reservar Turno</h4>
+        <form id="reservation_form" class="space-y-4">
+          {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-semibold">Paciente</span>
+            </label>
+            <select name="patientId" class="select select-bordered w-full select-sm" required>
+              <option value="" disabled selected>Seleccione un paciente</option>
+              {% for patient in patients %}
+              <option value="{{ patient.id }}">{{ patient.firstNames }} {{ patient.lastNames }} (DNI: {{ patient.nationalId }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-semibold">Motivo de consulta</span>
+            </label>
+            <textarea name="consultationReason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Control anual, Dolor de garganta..." required minlength="5"></textarea>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary btn-sm" id="btn_reserve_submit">
+              Confirmar Reserva
+            </button>
+          </div>
+        </form>
+      </div>
+
       {# State Actions #}
       <div id="actions_section">
         <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Cambiar estado del horario a</h4>
@@ -167,7 +200,6 @@
           <button id="btn_fulfill" data-action="fulfill" class="btn btn-xs btn-outline hidden">Atendido</button>
         </div>
         <p id="terminal_state_msg" class="text-[10px] text-base-content/40 mt-2 italic hidden">Este turno está en estado terminal y no puede ser modificado.</p>
-        <p id="free_state_msg" class="text-[10px] text-base-content/40 mt-2 italic hidden">Use el formulario de reserva para asignar un paciente a este turno.</p>
       </div>
 
       <div class="modal-action">
@@ -263,27 +295,76 @@
     }
 
     /**
-     * Render action buttons based on current slot status
+     * Update patient info section
      */
-    function renderActionButtons(slotId, status) {
+    function updatePatientInfo(patient) {
+      const patientSection = document.getElementById('patient_section');
+      if (patient) {
+        patientSection.classList.remove('hidden');
+        document.getElementById('patient_names').textContent = patient.fullNames;
+        document.getElementById('patient_dni').textContent = patient.nationalId;
+        document.getElementById('patient_email').textContent = patient.email;
+        document.getElementById('patient_phone').textContent = patient.phone;
+        document.getElementById('patient_address').textContent = patient.address;
+
+        // Insurances
+        const insuranceContainer = document.getElementById('patient_insurances');
+        insuranceContainer.innerHTML = '';
+        if (patient.insurances && patient.insurances.length > 0) {
+          patient.insurances.forEach(ins => {
+            const badge = document.createElement('span');
+            badge.className = 'badge badge-outline';
+            badge.textContent = `${ins.name} - ${ins.memberNumber}`;
+            insuranceContainer.appendChild(badge);
+          });
+        } else {
+          insuranceContainer.innerHTML = '<span class="text-sm text-base-content/40 italic">Ninguna</span>';
+        }
+
+        // DNI Image
+        const dniImageSection = document.getElementById('dni_image_section');
+        const dniImage = document.getElementById('patient_dni_image');
+        const noDniImage = document.getElementById('no_dni_image');
+        
+        if (patient.nationalIdImageUrl) {
+          dniImageSection.classList.remove('hidden');
+          dniImage.src = patient.nationalIdImageUrl;
+          dniImage.classList.remove('hidden');
+          noDniImage.classList.add('hidden');
+        } else {
+          dniImageSection.classList.remove('hidden');
+          dniImage.classList.add('hidden');
+          noDniImage.classList.remove('hidden');
+        }
+      } else {
+        patientSection.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Render action buttons / reservation form based on status
+     */
+    function renderActionUI(status) {
       const allButtons = document.querySelectorAll('#action_buttons button');
       const terminalMsg = document.getElementById('terminal_state_msg');
-      const freeMsg = document.getElementById('free_state_msg');
+      const reservationSection = document.getElementById('reservation_section');
+      const actionsSection = document.getElementById('actions_section');
       const validActions = TRANSITIONS[status] || [];
 
-      // Hide all buttons first
+      // Reset visibility
       allButtons.forEach(btn => btn.classList.add('hidden'));
       terminalMsg.classList.add('hidden');
-      freeMsg.classList.add('hidden');
+      reservationSection.classList.add('hidden');
+      actionsSection.classList.remove('hidden');
 
-      // Show special messages for FREE and FULFILLED states
       if (status === 'FULFILLED') {
         terminalMsg.classList.remove('hidden');
         return;
       }
 
       if (status === 'FREE') {
-        freeMsg.classList.remove('hidden');
+        reservationSection.classList.remove('hidden');
+        actionsSection.classList.add('hidden');
         return;
       }
 
@@ -294,6 +375,71 @@
           btn.classList.remove('hidden');
         }
       });
+    }
+
+    /**
+     * Handle reservation form submission
+     */
+    async function handleReserveSubmit(e) {
+      e.preventDefault();
+      if (!currentSlot) return;
+
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+      
+      const btn = document.getElementById('btn_reserve_submit');
+      const originalText = btn.textContent;
+      
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span>';
+
+      try {
+        const response = await fetch(`/api/v1/slots/${currentSlot.id}/reserve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Error al reservar el turno');
+        }
+
+        // Success - refresh slot data
+        const refreshResponse = await fetch(`/schedules/slots/${currentSlot.id}`);
+        if (refreshResponse.ok) {
+          currentSlot = await refreshResponse.json();
+          
+          // Update status badge
+          const statusBadge = document.getElementById('slot_status_badge');
+          statusBadge.textContent = statusLabels[currentSlot.status] || currentSlot.status;
+          statusBadge.className = `badge badge-lg ${statusBadges[currentSlot.status] || ''}`;
+
+          updatePatientInfo(currentSlot.patient);
+          renderActionUI(currentSlot.status);
+        }
+
+        showToast(result.message || 'Turno reservado correctamente', 'success');
+
+        // Update grid
+        const gridCell = document.querySelector(`.slot-trigger[data-slot-id="${currentSlot.id}"]`);
+        if (gridCell) {
+          gridCell.className = gridCell.className
+            .replace(/slot-(free|proposed|booked|cancelled|arrived|no-show|in-progress|fulfilled)/gi, '')
+            .trim();
+          gridCell.classList.add(`slot-${currentSlot.status.toLowerCase().replace('_', '-')}`);
+        }
+
+        // Reset form
+        e.target.reset();
+
+      } catch (error) {
+        showToast(error.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
     }
 
     /**
@@ -335,22 +481,15 @@
           statusBadge.textContent = statusLabels[currentSlot.status] || currentSlot.status;
           statusBadge.className = `badge badge-lg ${statusBadges[currentSlot.status] || ''}`;
 
-          // Update patient section visibility
-          const patientSection = document.getElementById('patient_section');
-          if (currentSlot.status === 'FREE') {
-            patientSection.classList.add('hidden');
-          }
-
-          // Re-render buttons
-          renderActionButtons(currentSlot.id, currentSlot.status);
+          updatePatientInfo(currentSlot.patient);
+          renderActionUI(currentSlot.status);
         }
 
         showToast(data.message || 'Turno actualizado correctamente', 'success');
 
-        // Update the grid cell if visible
+        // Update grid
         const gridCell = document.querySelector(`.slot-trigger[data-slot-id="${currentSlot.id}"]`);
         if (gridCell) {
-          // Update visual class based on new status
           gridCell.className = gridCell.className
             .replace(/slot-(free|proposed|booked|cancelled|arrived|no-show|in-progress|fulfilled)/gi, '')
             .trim();
@@ -363,6 +502,12 @@
         btn.disabled = false;
         btn.textContent = originalText;
       }
+    }
+
+    // Attach form submit handler
+    const reservationForm = document.getElementById('reservation_form');
+    if (reservationForm) {
+      reservationForm.addEventListener('submit', handleReserveSubmit);
     }
 
     // Attach click handlers to action buttons
@@ -405,50 +550,8 @@
           document.getElementById('slot_specialty').textContent = currentSlot.schedule.specialty;
           document.getElementById('slot_location').textContent = currentSlot.schedule.location;
 
-          const patientSection = document.getElementById('patient_section');
-          if (currentSlot.patient) {
-            patientSection.classList.remove('hidden');
-            document.getElementById('patient_names').textContent = currentSlot.patient.fullNames;
-            document.getElementById('patient_dni').textContent = currentSlot.patient.nationalId;
-            document.getElementById('patient_email').textContent = currentSlot.patient.email;
-            document.getElementById('patient_phone').textContent = currentSlot.patient.phone;
-            document.getElementById('patient_address').textContent = currentSlot.patient.address;
-
-            // Insurances
-            const insuranceContainer = document.getElementById('patient_insurances');
-            insuranceContainer.innerHTML = '';
-            if (currentSlot.patient.insurances && currentSlot.patient.insurances.length > 0) {
-              currentSlot.patient.insurances.forEach(ins => {
-                const badge = document.createElement('span');
-                badge.className = 'badge badge-outline';
-                badge.textContent = `${ins.name} - ${ins.memberNumber}`;
-                insuranceContainer.appendChild(badge);
-              });
-            } else {
-              insuranceContainer.innerHTML = '<span class="text-sm text-base-content/40 italic">Ninguna</span>';
-            }
-
-            // DNI Image
-            const dniImageSection = document.getElementById('dni_image_section');
-            const dniImage = document.getElementById('patient_dni_image');
-            const noDniImage = document.getElementById('no_dni_image');
-            
-            if (currentSlot.patient.nationalIdImageUrl) {
-              dniImageSection.classList.remove('hidden');
-              dniImage.src = currentSlot.patient.nationalIdImageUrl;
-              dniImage.classList.remove('hidden');
-              noDniImage.classList.add('hidden');
-            } else {
-              dniImageSection.classList.remove('hidden');
-              dniImage.classList.add('hidden');
-              noDniImage.classList.remove('hidden');
-            }
-          } else {
-            patientSection.classList.add('hidden');
-          }
-
-          // Render action buttons based on status
-          renderActionButtons(currentSlot.id, currentSlot.status);
+          updatePatientInfo(currentSlot.patient);
+          renderActionUI(currentSlot.status);
 
         } catch (error) {
           console.error(error);
