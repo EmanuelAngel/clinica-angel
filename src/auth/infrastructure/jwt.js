@@ -4,6 +4,10 @@ import { env } from "../../_shared/infrastructure/env-variables.js";
 import { SessionInvalidError } from "../domain/auth.errors.js";
 
 /**
+ * @typedef {import("express").Request & { user: UserPayload }} AuthenticatedRequest
+ */
+
+/**
  * @typedef {object} UserPayload
  * @property {number} sub User ID
  * @property {import("../domain/roles.js").Role} role User role

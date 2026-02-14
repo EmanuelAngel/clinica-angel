@@ -1,10 +1,9 @@
 import { Router } from "express";
 import { SlotController } from "./slot.controller.js";
-import { services } from "../../_shared/infrastructure/services-container.js";
 import { auth } from "../../auth/infrastructure/auth.middleware.js";
 
 export const slotRouter = Router();
-const slotController = new SlotController(services.slotService);
+const slotController = new SlotController();
 
 // All routes require authentication
 slotRouter.use(auth());

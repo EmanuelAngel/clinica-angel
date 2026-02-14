@@ -1,257 +1,229 @@
 import { ReserveSlotSchema } from "./slot.schemas.js";
 import { Roles } from "../../auth/domain/roles.js";
+import { services } from "../../_shared/infrastructure/services-container.js";
 
 /**
+ * @import { AuthenticatedRequest } from "../../auth/infrastructure/jwt.js";
  * @typedef {import("express").Request} Request
  * @typedef {import("express").Response} Response
  * @typedef {import("express").NextFunction} NextFunction
- * @typedef {import("../application/slot.service.js").SlotService} SlotService
  */
 
 export class SlotController {
   /**
-   * @param {SlotService} slotService
+   * POST /api/v1/slots/:id/reserve
+   * @param {AuthenticatedRequest} req
+   * @param {Response} res
+   * @param {NextFunction} _next
+   * @returns {Promise<void>}
    */
-  constructor(slotService) {
-    this.slotService = slotService;
+  async reserve(req, res, _next) {
+    const slotId = parseInt(req.params.id, 10);
+    const { role, sub: userId } = req.user;
+
+    // Validate body
+    const parseResult = ReserveSlotSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(422).json({
+        message: parseResult.error.issues[0].message,
+      });
+      return;
+    }
+
+    const { consultationReason } = parseResult.data;
+
+    // PATIENT can only reserve for themselves
+    // Non-PATIENT roles must provide patientId in the body
+    /** @type {number | null} */
+    let patientId;
+    if (role === Roles.PATIENT) {
+      patientId = userId;
+    } else {
+      patientId = req.body.patientId ? parseInt(req.body.patientId, 10) : null;
+    }
+
+    if (!patientId) {
+      res.status(422).json({
+        message: "El ID del paciente es obligatorio.",
+      });
+      return;
+    }
+
+    const result = await services.slotService.reserve(
+      slotId,
+      role,
+      patientId,
+      consultationReason
+    );
+
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+
+    res.status(200).json({ message: "Turno reservado exitosamente." });
+    return;
   }
 
   /**
-   * POST /api/v1/slots/:id/reserve
-   * @param {Request} req
-   * @param {Response} res
-   * @param {NextFunction} next
-   * @returns {Promise<void>}
-   */
-  reserve = async (req, res, next) => {
-    try {
-      const slotId = parseInt(req.params.id, 10);
-      const { role, sub: userId } = req.user;
-
-      // Validate body
-      const parseResult = ReserveSlotSchema.safeParse(req.body);
-      if (!parseResult.success) {
-        return res.status(422).json({
-          message: parseResult.error.issues[0].message,
-        });
-      }
-
-      const { consultationReason } = parseResult.data;
-
-      // PATIENT can only reserve for themselves
-      // Non-PATIENT roles must provide patientId in the body
-      /** @type {number | null} */
-      let patientId;
-      if (role === Roles.PATIENT) {
-        patientId = userId;
-      } else {
-        patientId = req.body.patientId
-          ? parseInt(req.body.patientId, 10)
-          : null;
-      }
-
-      if (!patientId) {
-        return res.status(422).json({
-          message: "El ID del paciente es obligatorio.",
-        });
-      }
-
-      const result = await this.slotService.reserve(
-        slotId,
-        role,
-        patientId,
-        consultationReason
-      );
-
-      if (result.isErr()) {
-        const error = result.error;
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res.status(200).json({ message: "Turno reservado exitosamente." });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  /**
    * PATCH /api/v1/slots/:id/status - Confirm
-   * @param {Request} req
+   * @param {AuthenticatedRequest} req
    * @param {Response} res
-   * @param {NextFunction} next
+   * @param {NextFunction} _next
    * @returns {Promise<void>}
    */
-  confirm = async (req, res, next) => {
-    try {
-      const slotId = parseInt(req.params.id, 10);
-      const { role } = req.user;
+  async confirm(req, res, _next) {
+    const slotId = parseInt(req.params.id, 10);
+    const { role } = req.user;
 
-      const result = await this.slotService.confirm(slotId, role);
+    const result = await services.slotService.confirm(slotId, role);
 
-      if (result.isErr()) {
-        const error = result.error;
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res
-        .status(200)
-        .json({ message: "Turno confirmado exitosamente." });
-    } catch (error) {
-      next(error);
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
     }
-  };
+
+    res.status(200).json({ message: "Turno confirmado exitosamente." });
+    return;
+  }
 
   /**
    * PATCH /api/v1/slots/:id/status - Cancel
-   * @param {Request} req
+   * @param {AuthenticatedRequest} req
    * @param {Response} res
-   * @param {NextFunction} next
+   * @param {NextFunction} _next
    * @returns {Promise<void>}
    */
-  cancel = async (req, res, next) => {
-    try {
-      const slotId = parseInt(req.params.id, 10);
-      const { role } = req.user;
+  async cancel(req, res, _next) {
+    const slotId = parseInt(req.params.id, 10);
+    const { role } = req.user;
 
-      const result = await this.slotService.cancel(slotId, role);
+    const result = await services.slotService.cancel(slotId, role);
 
-      if (result.isErr()) {
-        const error = result.error;
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res.status(200).json({ message: "Turno cancelado exitosamente." });
-    } catch (error) {
-      next(error);
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
     }
-  };
+
+    res.status(200).json({ message: "Turno cancelado exitosamente." });
+    return;
+  }
 
   /**
    * PATCH /api/v1/slots/:id/status - Mark as arrived
-   * @param {Request} req
+   * @param {AuthenticatedRequest} req
    * @param {Response} res
-   * @param {NextFunction} next
+   * @param {NextFunction} _next
    * @returns {Promise<void>}
    */
-  markArrived = async (req, res, next) => {
-    try {
-      const slotId = parseInt(req.params.id, 10);
-      const { role } = req.user;
+  async markArrived(req, res, _next) {
+    const slotId = parseInt(req.params.id, 10);
+    const { role } = req.user;
 
-      const result = await this.slotService.markArrived(slotId, role);
+    const result = await services.slotService.markArrived(slotId, role);
 
-      if (result.isErr()) {
-        const error = result.error;
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res
-        .status(200)
-        .json({ message: "Paciente marcado como presente." });
-    } catch (error) {
-      next(error);
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
     }
-  };
+
+    res.status(200).json({ message: "Paciente marcado como presente." });
+    return;
+  }
 
   /**
    * PATCH /api/v1/slots/:id/status - Mark as no-show
-   * @param {Request} req
+   * @param {AuthenticatedRequest} req
    * @param {Response} res
-   * @param {NextFunction} next
+   * @param {NextFunction} _next
    * @returns {Promise<void>}
    */
-  markNoShow = async (req, res, next) => {
-    try {
-      const slotId = parseInt(req.params.id, 10);
-      const { role } = req.user;
+  async markNoShow(req, res, _next) {
+    const slotId = parseInt(req.params.id, 10);
+    const { role } = req.user;
 
-      const result = await this.slotService.markNoShow(slotId, role);
+    const result = await services.slotService.markNoShow(slotId, role);
 
-      if (result.isErr()) {
-        const error = result.error;
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res
-        .status(200)
-        .json({ message: "Paciente marcado como ausente." });
-    } catch (error) {
-      next(error);
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
     }
-  };
+
+    res.status(200).json({ message: "Paciente marcado como ausente." });
+    return;
+  }
 
   /**
    * PATCH /api/v1/slots/:id/status - Start consultation
-   * @param {Request} req
+   * @param {AuthenticatedRequest} req
    * @param {Response} res
-   * @param {NextFunction} next
+   * @param {NextFunction} _next
    * @returns {Promise<void>}
    */
-  startConsultation = async (req, res, next) => {
-    try {
-      const slotId = parseInt(req.params.id, 10);
-      const { role } = req.user;
+  async startConsultation(req, res, _next) {
+    const slotId = parseInt(req.params.id, 10);
+    const { role } = req.user;
 
-      const result = await this.slotService.startConsultation(slotId, role);
+    const result = await services.slotService.startConsultation(slotId, role);
 
-      if (result.isErr()) {
-        const error = result.error;
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res.status(200).json({ message: "Consulta iniciada." });
-    } catch (error) {
-      next(error);
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
     }
-  };
+
+    res.status(200).json({ message: "Consulta iniciada." });
+    return;
+  }
 
   /**
    * PATCH /api/v1/slots/:id/status - Mark as fulfilled
-   * @param {Request} req
+   * @param {AuthenticatedRequest} req
    * @param {Response} res
-   * @param {NextFunction} next
+   * @param {NextFunction} _next
    * @returns {Promise<void>}
    */
-  markFulfilled = async (req, res, next) => {
-    try {
-      const slotId = parseInt(req.params.id, 10);
-      const { role } = req.user;
+  async markFulfilled(req, res, _next) {
+    const slotId = parseInt(req.params.id, 10);
+    const { role } = req.user;
 
-      const result = await this.slotService.markFulfilled(slotId, role);
+    const result = await services.slotService.markFulfilled(slotId, role);
 
-      if (result.isErr()) {
-        const error = result.error;
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res.status(200).json({ message: "Consulta finalizada." });
-    } catch (error) {
-      next(error);
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
     }
-  };
+
+    res.status(200).json({ message: "Consulta finalizada." });
+    return;
+  }
 
   /**
    * POST /api/v1/slots/:id/release
-   * @param {Request} req
+   * @param {AuthenticatedRequest} req
    * @param {Response} res
-   * @param {NextFunction} next
+   * @param {NextFunction} _next
    * @returns {Promise<void>}
    */
-  release = async (req, res, next) => {
-    try {
-      const slotId = parseInt(req.params.id, 10);
-      const { role } = req.user;
+  async release(req, res, _next) {
+    const slotId = parseInt(req.params.id, 10);
+    const { role } = req.user;
 
-      const result = await this.slotService.release(slotId, role);
+    const result = await services.slotService.release(slotId, role);
 
-      if (result.isErr()) {
-        const error = result.error;
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-
-      return res.status(200).json({ message: "Turno liberado exitosamente." });
-    } catch (error) {
-      next(error);
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
     }
-  };
+
+    res.status(200).json({ message: "Turno liberado exitosamente." });
+    return;
+  }
 }
