@@ -27,6 +27,9 @@ import { LocationService } from "../../locations/application/location.service.js
 import { PrismaScheduleRepository } from "../../schedules/infrastructure/prisma-schedule.repository.js";
 import { ScheduleService } from "../../schedules/application/schedule.service.js";
 
+import { PrismaSlotRepository } from "../../slots/infrastructure/prisma-slot.repository.js";
+import { SlotService } from "../../slots/application/slot.service.js";
+
 const prismaUserRepository = new PrismaUserRepository(prisma);
 const bcryptPasswordHasher = new BcryptPasswordHasher(env.SALT_ROUNDS);
 const userService = new UserService(prismaUserRepository, bcryptPasswordHasher);
@@ -72,6 +75,9 @@ const locationService = new LocationService(prismaLocationRepository);
 const prismaScheduleRepository = new PrismaScheduleRepository(prisma);
 const scheduleService = new ScheduleService(prismaScheduleRepository);
 
+const prismaSlotRepository = new PrismaSlotRepository(prisma);
+const slotService = new SlotService(prismaSlotRepository);
+
 export const services = {
   patientService,
   healthInsuranceService,
@@ -82,4 +88,5 @@ export const services = {
   classificationService,
   locationService,
   scheduleService,
+  slotService,
 };

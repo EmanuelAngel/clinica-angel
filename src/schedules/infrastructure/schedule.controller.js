@@ -131,12 +131,13 @@ export class ScheduleController {
    */
   async showComparison(req, res) {
     // Load dropdown options
-    const [classifications, locations, professionals, specialties] =
+    const [classifications, locations, professionals, specialties, patients] =
       await Promise.all([
         services.classificationService.findAll(),
         services.locationService.findAll(),
         services.professionalService.findAll(),
         services.specialtyService.findAll(),
+        services.patientService.listAll(),
       ]);
 
     // Validate filter params
@@ -149,6 +150,7 @@ export class ScheduleController {
         locations,
         professionals,
         specialties,
+        patients,
         filters: req.query,
         hasFilters: false,
         schedules: [],
@@ -172,6 +174,7 @@ export class ScheduleController {
       locations,
       professionals,
       specialties,
+      patients,
       filters,
       hasFilters,
       schedules,
