@@ -31,4 +31,4 @@ viewsRouter.use("/specialties", auth(Roles.ADMIN), specialtyRouter);
 viewsRouter.use("/professionals", auth(Roles.ADMIN), professionalRouter);
 viewsRouter.use("/classifications", auth(Roles.ADMIN), classificationRouter);
 viewsRouter.use("/locations", auth(Roles.ADMIN), locationRouter);
-viewsRouter.use("/schedules", auth(Roles.ADMIN), scheduleRouter);
+viewsRouter.use("/schedules", scheduleRouter);
