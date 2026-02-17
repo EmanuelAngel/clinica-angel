@@ -9,6 +9,7 @@ import { professionalRouter } from "./professionals/infrastructure/professional.
 import { classificationRouter } from "./classifications/infrastructure/classification.routes.js";
 import { locationRouter } from "./locations/infrastructure/location.routes.js";
 import { scheduleRouter } from "./schedules/infrastructure/schedule.routes.js";
+import { healthInsuranceRouter } from "./health-insurances/infrastructure/health-insurance.routes.js";
 
 export const viewsRouter = Router();
 
@@ -32,3 +33,4 @@ viewsRouter.use("/professionals", auth(Roles.ADMIN), professionalRouter);
 viewsRouter.use("/classifications", auth(Roles.ADMIN), classificationRouter);
 viewsRouter.use("/locations", auth(Roles.ADMIN), locationRouter);
 viewsRouter.use("/schedules", scheduleRouter);
+viewsRouter.use("/health-insurances", healthInsuranceRouter);

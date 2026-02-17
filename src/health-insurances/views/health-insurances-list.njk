@@ -1,0 +1,43 @@
+{% extends "layout/base.njk" %}
+{% set title = "Obras Sociales" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Obras Sociales", "Listado de todas las obras sociales registradas.") }}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="overflow-x-auto bg-base-100 rounded-lg shadow border border-base-300">
+        <table class="table table-zebra w-full">
+            <tbody>
+                {% for insurance in healthInsurances %}
+                <tr class="hover">
+                    <td class="font-medium text-lg py-4 px-6">
+                        {{ insurance.name }}
+                    </td>
+                    <td class="text-right py-4 px-6">
+                        {% if insurance.deletedAt %}
+                        <div class="badge badge-error gap-2">
+                           No disponible
+                        </div>
+                        {% else %}
+                        <div class="badge badge-success gap-2">
+                            Disponible
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="2" class="text-center py-12 text-base-content/60 italic">
+                        <i data-lucide="info" class="inline-block mr-2"></i>
+                        No hay obras sociales registradas
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

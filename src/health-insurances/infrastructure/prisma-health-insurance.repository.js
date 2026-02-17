@@ -14,13 +14,13 @@ export class PrismaHealthInsuranceRepository {
 
   /**
    * Find all health insurances or return an empty array.
-   * @returns {Promise<import("../domain/health-insurance.model.js").HealthInsurance[]>} All **active** health insurances.
+   * @param {{ includeDeleted?: boolean }} options
+   * @returns {Promise<import("../domain/health-insurance.model.js").HealthInsurance[]>} All health insurances.
    */
-  async findAll() {
+  async findAll(options = { includeDeleted: false }) {
+    const where = options.includeDeleted ? {} : { deletedAt: null };
     const rawHealthInsurances = await this.db.healthInsurance.findMany({
-      where: {
-        deletedAt: null,
-      },
+      where,
     });
 
     return rawHealthInsurances.map((fromPrisma) =>
