@@ -11,9 +11,10 @@ export class HealthInsuranceService {
 
   /**
    * Find all health insurances or return an empty array.
-   * @returns {Promise<HealthInsurance[]>} All **active** health insurances.
+   * @param {{ includeDeleted?: boolean }} options
+   * @returns {Promise<HealthInsurance[]>} Health insurances.
    */
-  async findAll() {
-    return this.healthInsuranceRepository.findAll();
+  async findAll(options = { includeDeleted: false }) {
+    return this.healthInsuranceRepository.findAll(options);
   }
 }
