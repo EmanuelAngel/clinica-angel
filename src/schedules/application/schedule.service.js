@@ -76,13 +76,30 @@ export class ScheduleService {
       return err(overlapResult.error);
     }
 
+    const globalBlocks = await this.scheduleRepository.findGlobalBlocks(
+      validityFrom,
+      validityTo
+    );
+
+    // Map global blocks to the format expected by the generator (start/end)
+    const allBlocks = [
+      ...(data.blocks || []).map((b) => ({
+        start: b.start,
+        end: b.end,
+      })),
+      ...globalBlocks.map((b) => ({
+        start: b.startDate,
+        end: b.endDate,
+      })),
+    ];
+
     // REFACTOR: .generate() method could just recieve a schedule.
     const generationResult = SlotsGeneratorService.generate({
       startDate: data.config.validity.from,
       endDate: data.config.validity.to,
       daysAndTimes: data.config.weeklyDays,
       slotDurationMinutes: data.schedule.slotDurationMinutes,
-      blocks: data.blocks,
+      blocks: allBlocks,
     });
 
     if (generationResult.isErr()) {
