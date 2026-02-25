@@ -1,0 +1,165 @@
+{# Waiting List FAB + Speed Dial (DaisyUI native component) #}
+{# Visible only for SECRETARY and ADMIN roles #}
+{% if user and (user.role == Roles.SECRETARY or user.role == Roles.ADMIN) %}
+
+{# ─── DaisyUI FAB with Speed Dial, labels, and fab-close ─── #}
+<div class="fab" id="wl-dial">
+  {# Trigger — must be a focusable div for cross-browser :focus-within support #}
+  <div tabindex="0" role="button" class="btn btn-lg btn-circle btn-primary" aria-label="Lista de Espera">
+    <i data-lucide="clock" class="w-6 h-6"></i>
+  </div>
+
+  {# Close button — not focusable so clicking it blurs the FAB #}
+  <div class="fab-close">
+    Cerrar
+    <span class="btn btn-circle btn-lg btn-error">✕</span>
+  </div>
+
+  {# Speed dial actions with labels #}
+  <div>
+    Agregar a Lista de Espera
+    <button class="btn btn-lg btn-circle" onclick="document.getElementById('wl-add-modal').showModal()">
+      <i data-lucide="user-plus" class="w-5 h-5"></i>
+    </button>
+  </div>
+  <div>
+    Ver Lista de Espera
+    <button class="btn btn-lg btn-circle" onclick="WaitingList.openListModal()">
+      <i data-lucide="list" class="w-5 h-5"></i>
+    </button>
+  </div>
+</div>
+
+{# ─── Modal A: Assignment Form ─── #}
+<dialog id="wl-add-modal" class="modal">
+  <div class="modal-box w-11/12 max-w-lg">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+
+    <h3 class="text-lg font-bold mb-4">
+      <i data-lucide="user-plus" class="w-5 h-5 inline-block mr-1"></i>
+      Agregar a Lista de Espera
+    </h3>
+
+    <form id="wl-add-form" class="space-y-4">
+      {# Patient search by DNI #}
+      <div class="form-control w-full">
+        <label class="label">Paciente (buscar por DNI)</label>
+        <input type="text"
+               id="wl-dni-input"
+               name="dni"
+               class="input input-bordered w-full"
+               placeholder="Ingrese DNI del paciente..."
+               autocomplete="off"
+               required />
+        <div id="wl-patient-result" class="mt-2 text-sm hidden">
+          <div class="alert alert-success py-2 px-3" id="wl-patient-found">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span id="wl-patient-name"></span>
+          </div>
+        </div>
+        <div id="wl-patient-error" class="mt-1 text-error text-sm hidden"></div>
+      </div>
+
+      {# Professional select #}
+      <div class="form-control w-full">
+        <label class="label">Profesional (opcional)</label>
+        <select id="wl-professional-select" name="professionalId" class="select select-bordered w-full">
+          <option value="">— Cualquier profesional —</option>
+        </select>
+      </div>
+
+      {# Specialty select #}
+      <div class="form-control w-full">
+        <label class="label">Especialidad (opcional)</label>
+        <select id="wl-specialty-select" name="specialtyId" class="select select-bordered w-full">
+          <option value="">— Cualquier especialidad —</option>
+        </select>
+      </div>
+
+      <p class="text-xs text-base-content/60">Debe seleccionar al menos un profesional o una especialidad.</p>
+
+      <div class="modal-action">
+        <button type="submit" class="btn btn-primary" id="wl-submit-btn">
+          <i data-lucide="save" class="w-4 h-4 mr-1"></i>
+          Guardar
+        </button>
+        <button type="button" class="btn" onclick="document.getElementById('wl-add-modal').close()">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+{# ─── Modal B: List View ─── #}
+<dialog id="wl-list-modal" class="modal">
+  <div class="modal-box w-11/12 max-w-4xl">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+
+    <h3 class="text-lg font-bold mb-4">
+      <i data-lucide="list" class="w-5 h-5 inline-block mr-1"></i>
+      Lista de Espera
+    </h3>
+
+    {# Filters row #}
+    <div class="flex flex-wrap gap-3 mb-4">
+      <select id="wl-filter-professional" class="select select-bordered select-sm">
+        <option value="">Todos los profesionales</option>
+      </select>
+      <select id="wl-filter-specialty" class="select select-bordered select-sm">
+        <option value="">Todas las especialidades</option>
+      </select>
+      <button class="btn btn-sm btn-ghost" id="wl-sort-toggle" title="Cambiar orden">
+        <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+        <span id="wl-sort-label">Más antiguos primero</span>
+      </button>
+    </div>
+
+    {# Table #}
+    <div class="overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Paciente</th>
+            <th>Requerimiento</th>
+            <th class="w-20">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="wl-table-body">
+          <tr>
+            <td colspan="4" class="text-center text-base-content/50 py-8">
+              <span class="loading loading-spinner loading-md"></span>
+              Cargando...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    {# Pagination #}
+    <div class="flex justify-between items-center mt-4">
+      <span class="text-sm text-base-content/60" id="wl-page-info">Mostrando 0 de 0</span>
+      <div class="join">
+        <button class="join-item btn btn-sm" id="wl-prev-btn" disabled>«</button>
+        <button class="join-item btn btn-sm" id="wl-page-number">1</button>
+        <button class="join-item btn btn-sm" id="wl-next-btn" disabled>»</button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+{# ─── Toast container ─── #}
+<div class="toast toast-end toast-bottom z-[100]" id="wl-toast-container"></div>
+
+{% endif %}

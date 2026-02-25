@@ -13,6 +13,8 @@
  * Deactivates a patient.
  * @property {(insuranceId: number, memberNumber: string) => Promise<boolean>} existsMemberNumber
  * Checks if the member number is already linked with the specified insurance.
+ * @property {(nationalId: string) => Promise<Patient | null>} findByNationalId
+ * Find a patient by national ID (DNI) or return null.
  */
 
 /*
