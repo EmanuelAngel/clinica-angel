@@ -14,6 +14,7 @@ export default [
       "generated/**",
       "*.config.js",
       "src/_assets/css/output.css",
+      "src/_assets/js",
     ],
   },
   js.configs.recommended,

@@ -146,4 +146,13 @@ export class PatientService {
   async listAll() {
     return this.patientRepository.findAll();
   }
+
+  /**
+   * Find a patient by national ID (DNI).
+   * @param {string} nationalId
+   * @returns {Promise<import("../domain/patient.model.js").Patient | null>}
+   */
+  async findByNationalId(nationalId) {
+    return this.patientRepository.findByNationalId(nationalId);
+  }
 }

@@ -149,6 +149,33 @@ export class PrismaPatientRepository {
   }
 
   /**
+   * Find a patient by national ID (DNI).
+   * @param {string} nationalId
+   * @returns {Promise<null | Patient>}
+   */
+  async findByNationalId(nationalId) {
+    const rawUser = await this.db.user.findFirst({
+      where: {
+        nationalId,
+        role: Roles.PATIENT,
+      },
+      include: {
+        patientInsurances: {
+          include: {
+            insurance: true,
+          },
+        },
+      },
+    });
+
+    if (!rawUser) {
+      return null;
+    }
+
+    return this.mapToDomain(rawUser);
+  }
+
+  /**
    * Maps a database model to a domain model.
    * @param {UserWithInsurances} fromPrisma Prisma user with insurances.
    * @returns {Patient} The domain model.

@@ -1,8 +1,8 @@
 minimumReleaseAge: 1440
 
 onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - '@prisma/engines'
+  - "@parcel/watcher"
+  - "@prisma/engines"
   - bcrypt
   - prisma
   - unrs-resolver

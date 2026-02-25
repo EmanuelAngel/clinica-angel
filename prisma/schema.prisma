@@ -201,11 +201,11 @@ model WaitingList {
   specialtyId    Int?     @map("specialty_id")
   professionalId Int?     @map("professional_id")
   requestDate    DateTime @default(now()) @map("request_date")
-  status         String
 
   patient      User       @relation("PatientWaitlist", fields: [patientId], references: [id])
   specialty    Specialty? @relation(fields: [specialtyId], references: [id])
   professional User?      @relation("ProfessionalWaitlist", fields: [professionalId], references: [id])
 
+  @@unique([patientId, professionalId, specialtyId], name: "unique_waitlist_entry")
   @@map("waiting_list")
 }
