@@ -350,6 +350,75 @@ export class PrismaScheduleRepository {
   }
 
   /**
+   * Finds a single schedule by ID with slots and blocks for a date range (drilldown view).
+   * @param {number} scheduleId - Schedule ID.
+   * @param {Date} startDate - Start of range (inclusive).
+   * @param {Date} endDate - End of range (inclusive).
+   * @returns {Promise<any | null>} Schedule with slots and blocks, or null.
+   */
+  async findForDrilldown(scheduleId, startDate, endDate) {
+    return await this.db.schedule.findUnique({
+      where: { id: scheduleId },
+      include: {
+        professional: {
+          include: {
+            user: {
+              select: {
+                firstNames: true,
+                lastNames: true,
+              },
+            },
+            specialty: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        location: {
+          select: {
+            name: true,
+          },
+        },
+        classification: {
+          select: {
+            name: true,
+          },
+        },
+        configs: {
+          orderBy: {
+            dayOfWeek: "asc",
+          },
+        },
+        blocks: {
+          orderBy: {
+            startDate: "asc",
+          },
+        },
+        slots: {
+          where: {
+            startsAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+          include: {
+            patient: {
+              select: {
+                firstNames: true,
+                lastNames: true,
+              },
+            },
+          },
+          orderBy: {
+            startsAt: "asc",
+          },
+        },
+      },
+    });
+  }
+
+  /**
    * Finds a slot by its ID with full details for the modal.
    * @param {number} id - Slot ID.
    * @returns {Promise<any | null>} Slot with patient and schedule details.
@@ -423,5 +492,104 @@ export class PrismaScheduleRepository {
           reason: b.reason,
         })
     );
+  }
+
+  /**
+   * Registers a schedule block within a transaction:
+   * 1. Creates the block record.
+   * 2. Deletes all FREE slots in the date range.
+   * 3. Updates PROPOSED/BOOKED slots to NEEDS_RESCHEDULE.
+   * @param {number} scheduleId
+   * @param {{ startDate: Date, endDate: Date, reason: string }} blockData
+   * @returns {Promise<{ deletedFree: number, markedReschedule: number }>}
+   */
+  async registerScheduleBlock(scheduleId, blockData) {
+    const rangeStart = new Date(blockData.startDate);
+    rangeStart.setHours(0, 0, 0, 0);
+    const rangeEnd = new Date(blockData.endDate);
+    rangeEnd.setHours(23, 59, 59, 999);
+
+    return await this.db.$transaction(async (tx) => {
+      // 1. Insert the block
+      await tx.scheduleBlock.create({
+        data: {
+          scheduleId,
+          startDate: blockData.startDate,
+          endDate: blockData.endDate,
+          reason: blockData.reason,
+        },
+      });
+
+      // 2. Delete FREE slots in the range
+      const deletedFree = await tx.slot.deleteMany({
+        where: {
+          scheduleId,
+          startsAt: { gte: rangeStart, lte: rangeEnd },
+          status: "FREE",
+        },
+      });
+
+      // 3. Update PROPOSED/BOOKED (including overbooks) to NEEDS_RESCHEDULE
+      const markedReschedule = await tx.slot.updateMany({
+        where: {
+          scheduleId,
+          startsAt: { gte: rangeStart, lte: rangeEnd },
+          status: { in: ["PROPOSED", "BOOKED"] },
+        },
+        data: {
+          status: "NEEDS_RESCHEDULE",
+        },
+      });
+
+      return {
+        deletedFree: deletedFree.count,
+        markedReschedule: markedReschedule.count,
+      };
+    });
+  }
+
+  /**
+   * Finds all slots in NEEDS_RESCHEDULE status with patient and schedule details.
+   * @returns {Promise<any[]>}
+   */
+  async findSlotsNeedingReschedule() {
+    return await this.db.slot.findMany({
+      where: {
+        status: "NEEDS_RESCHEDULE",
+      },
+      include: {
+        patient: {
+          select: {
+            firstNames: true,
+            lastNames: true,
+            phone: true,
+            email: true,
+          },
+        },
+        schedule: {
+          include: {
+            professional: {
+              include: {
+                user: {
+                  select: {
+                    firstNames: true,
+                    lastNames: true,
+                  },
+                },
+                specialty: {
+                  select: { name: true },
+                },
+              },
+            },
+            location: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+      orderBy: {
+        startsAt: "asc",
+      },
+    });
   }
 }

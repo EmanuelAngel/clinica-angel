@@ -12,6 +12,7 @@ export const SlotStatus = Object.freeze({
   ARRIVED: "ARRIVED",
   IN_PROGRESS: "IN_PROGRESS",
   FULFILLED: "FULFILLED",
+  NEEDS_RESCHEDULE: "NEEDS_RESCHEDULE",
 });
 
 /**

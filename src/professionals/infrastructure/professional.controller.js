@@ -97,6 +97,7 @@ export class ProfessionalController {
           slotsPast: data.slotsPast,
           slotsToday: data.slotsToday,
           slotsFuture: data.slotsFuture,
+          schedules: data.schedules,
           isAdmin,
           allSpecialties,
         });

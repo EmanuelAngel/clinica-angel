@@ -1,10 +1,18 @@
 import z from "zod";
 import { services } from "../../_shared/infrastructure/services-container.js";
-import { validateCreateSchedule } from "./schedule.schemas.js";
+import {
+  validateCreateSchedule,
+  validateRegisterBlock,
+} from "./schedule.schemas.js";
 import {
   validateComparisonFilters,
   hasActiveFilters,
 } from "./schedule-comparison.schemas.js";
+import {
+  calculateDateRange,
+  VISTA_STEPS,
+  VALID_VISTAS,
+} from "./date-range.utils.js";
 
 export class ScheduleController {
   /**
@@ -184,6 +192,80 @@ export class ScheduleController {
   }
 
   /**
+   * Renders the drill-down agenda view for a single schedule.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   * @returns {Promise<void>}
+   */
+  async showDrilldown(req, res) {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).render("errors/generic", {
+        error: {
+          message: "ID de agenda inválido",
+          statusCode: 400,
+        },
+      });
+    }
+
+    // Parse vista and fecha from query params
+    const vista = VALID_VISTAS.includes(req.query.vista)
+      ? req.query.vista
+      : "hoy";
+
+    let fecha;
+    if (req.query.fecha && /^\d{4}-\d{2}-\d{2}$/.test(req.query.fecha)) {
+      const [year, month, day] = req.query.fecha.split("-").map(Number);
+      fecha = new Date(year, month - 1, day, 0, 0, 0, 0);
+    } else {
+      const now = new Date();
+      fecha = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        0,
+        0,
+        0,
+        0
+      );
+    }
+
+    const { startDate, endDate, dates } = calculateDateRange(vista, fecha);
+
+    const [result, patients] = await Promise.all([
+      services.scheduleService.getScheduleForDrilldown(
+        id,
+        startDate,
+        endDate,
+        dates
+      ),
+      services.patientService.listAll(),
+    ]);
+
+    if (result.isErr()) {
+      return res.status(result.error.statusCode).render("errors/generic", {
+        error: {
+          message: result.error.message,
+          statusCode: result.error.statusCode,
+        },
+      });
+    }
+
+    const { schedule, days } = result.value;
+
+    res.render("schedule-drilldown", {
+      schedule,
+      days,
+      vista,
+      fecha,
+      vistaSteps: VISTA_STEPS,
+      patients,
+      userRole: req.user?.role,
+    });
+  }
+
+  /**
    * Returns slot details as JSON.
    * @param {import("express").Request} req
    * @param {import("express").Response} res
@@ -239,5 +321,51 @@ export class ScheduleController {
       () => res.json({ message: "Estado actualizado (simulado)" }),
       (error) => res.status(error.statusCode).json({ message: error.message })
     );
+  }
+
+  /**
+   * Registers a schedule block (unforeseen event) via JSON API.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async registerBlock(req, res) {
+    const scheduleId = parseInt(req.params.id);
+
+    if (isNaN(scheduleId)) {
+      return res.status(400).json({ message: "ID de agenda inválido" });
+    }
+
+    const validationResult = await validateRegisterBlock(req.body);
+
+    if (!validationResult.success) {
+      return res.status(422).json({
+        message: "Datos inválidos",
+        errors: validationResult.error.flatten().fieldErrors,
+      });
+    }
+
+    const result = await services.scheduleService.registerScheduleBlock(
+      scheduleId,
+      validationResult.data
+    );
+
+    result.match(
+      (data) =>
+        res.json({
+          message: `Bloqueo registrado. ${data.deletedFree} turnos libres eliminados, ${data.markedReschedule} turnos marcados para reasignar.`,
+          ...data,
+        }),
+      (error) => res.status(error.statusCode).json({ message: error.message })
+    );
+  }
+
+  /**
+   * Renders the reschedule inbox view.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async showRescheduleInbox(req, res) {
+    const slots = await services.scheduleService.getSlotsNeedingReschedule();
+    res.render("reschedule-inbox", { slots });
   }
 }

@@ -15,7 +15,8 @@
     'IN_PROGRESS': 'badge-info',
     'FULFILLED': 'badge-neutral',
     'ARRIVED': 'badge-accent',
-    'NO_SHOW': 'badge-error'
+    'NO_SHOW': 'badge-error',
+    'NEEDS_RESCHEDULE': 'badge-warning'
   } %}
   
   {% set statusLabel = {
@@ -26,7 +27,8 @@
     'IN_PROGRESS': 'En curso',
     'FULFILLED': 'Cumplido',
     'ARRIVED': 'Llegó',
-    'NO_SHOW': 'No asistió'
+    'NO_SHOW': 'No asistió',
+    'NEEDS_RESCHEDULE': 'A reasignar'
   } %}
   
   <div class="flex flex-col gap-0.5 slot-trigger cursor-pointer hover:opacity-80" data-slot-id="{{ slot.id }}">

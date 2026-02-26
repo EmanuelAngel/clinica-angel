@@ -16,7 +16,8 @@
     'IN_PROGRESS': 'badge-info',
     'FULFILLED': 'badge-neutral',
     'ARRIVED': 'badge-accent',
-    'NO_SHOW': 'badge-error'
+    'NO_SHOW': 'badge-error',
+    'NEEDS_RESCHEDULE': 'badge-warning'
   } %}
   
   {% set statusLabel = {
@@ -27,7 +28,8 @@
     'IN_PROGRESS': 'En curso',
     'FULFILLED': 'Cumplido',
     'ARRIVED': 'Llegó',
-    'NO_SHOW': 'No asistió'
+    'NO_SHOW': 'No asistió',
+    'NEEDS_RESCHEDULE': 'Turno a reasignar'
   } %}
   
   <span class="badge {{ statusBadge[status] or 'badge-neutral' }} gap-1">

@@ -272,6 +272,142 @@ export class ScheduleService {
   }
 
   /**
+   * Get a schedule for the drilldown agenda view with per-day slot grouping.
+   * @param {number} scheduleId - Schedule ID.
+   * @param {Date} startDate - Start of range.
+   * @param {Date} endDate - End of range.
+   * @param {Date[]} dates - Array of individual day dates for column generation.
+   * @returns {Promise<import("neverthrow").Result<{
+   *   schedule: any,
+   *   days: Array<{ date: Date, dayLabel: string, slots: import("./schedule-comparison.dto.js").SlotForDay[], dayBlock: import("./schedule-comparison.dto.js").BlockInfo | null }>
+   * }, ScheduleNotFoundError>>}
+   */
+  async getScheduleForDrilldown(scheduleId, startDate, endDate, dates) {
+    const { SlotForDay, BlockInfo } =
+      await import("./schedule-comparison.dto.js");
+
+    const schedule = await this.scheduleRepository.findForDrilldown(
+      scheduleId,
+      startDate,
+      endDate
+    );
+
+    if (!schedule) {
+      return err(new ScheduleNotFoundError(scheduleId));
+    }
+
+    // Build per-day grouping
+    const days = dates.map((date) => {
+      const dayStart = new Date(date);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(date);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      // Build day label
+      const dayLabel = date.toLocaleDateString("es-AR", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      });
+
+      // Filter slots for this specific day
+      const daySlots = schedule.slots
+        .filter((slot) => {
+          const t = new Date(slot.startsAt).getTime();
+          return t >= dayStart.getTime() && t <= dayEnd.getTime();
+        })
+        .map(
+          (slot) =>
+            new SlotForDay({
+              id: slot.id,
+              startsAt: slot.startsAt,
+              status: slot.status,
+              patientName: slot.patient
+                ? `${slot.patient.firstNames} ${slot.patient.lastNames}`
+                : null,
+              isOverbook: slot.isOverbook,
+            })
+        );
+
+      // Check if any block overlaps with this day
+      const dayBlock = schedule.blocks.find((block) => {
+        const blockStart = new Date(block.startDate).getTime();
+        const blockEnd = new Date(block.endDate).getTime();
+        return blockStart <= dayEnd.getTime() && blockEnd >= dayStart.getTime();
+      });
+
+      return {
+        date,
+        dayLabel,
+        slots: daySlots,
+        dayBlock: dayBlock
+          ? new BlockInfo({
+              startDate: dayBlock.startDate,
+              endDate: dayBlock.endDate,
+              reason: dayBlock.reason,
+            })
+          : null,
+      };
+    });
+
+    // Build schedule metadata
+    const scheduleInfo = {
+      id: schedule.id,
+      professionalName: `${schedule.professional.user.firstNames} ${schedule.professional.user.lastNames}`,
+      professionalLicense: schedule.professionalLicense,
+      specialtyName: schedule.professional.specialty.name,
+      locationName: schedule.location.name,
+      classificationName: schedule.classification.name,
+      slotDuration: schedule.slotDuration,
+      maxOverbooksPerDay: schedule.maxOverbooksPerDay,
+      maxOverbooksPerSlot: schedule.maxOverbooksPerSlot,
+      isPaused: schedule.isPaused,
+      weeklySchedule: this._formatWeeklySchedule(schedule.configs),
+      blocks: schedule.blocks.map((b) => ({
+        startDate: b.startDate,
+        endDate: b.endDate,
+        reason: b.reason,
+      })),
+    };
+
+    return ok({ schedule: scheduleInfo, days });
+  }
+
+  /**
+   * Helper to format weekly configurations into a readable summary in Spanish.
+   * @param {any[]} configs
+   * @private
+   * @returns {any}
+   */
+  _formatWeeklySchedule(configs) {
+    if (!configs || configs.length === 0) return [];
+
+    const dayTranslations = {
+      MONDAY: "Lunes",
+      TUESDAY: "Martes",
+      WEDNESDAY: "Miércoles",
+      THURSDAY: "Jueves",
+      FRIDAY: "Viernes",
+      SATURDAY: "Sábado",
+      SUNDAY: "Domingo",
+    };
+
+    // Group by day to handles multiple ranges per day if they exist
+    const grouped = configs.reduce((acc, config) => {
+      const day = dayTranslations[config.dayOfWeek] || config.dayOfWeek;
+      if (!acc[day]) acc[day] = [];
+      acc[day].push(`${config.startTime} - ${config.endTime}`);
+
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).map(([day, ranges]) => ({
+      day,
+      ranges: ranges.join(", "),
+    }));
+  }
+
+  /**
    * Get slot details by ID for the modal.
    * @param {number} id - Slot ID.
    * @returns {Promise<import("neverthrow").Result<any, ScheduleNotFoundError>>}
@@ -327,5 +463,57 @@ export class ScheduleService {
     // Method signature only for now as requested by user.
     // In the future: return this.scheduleRepository.updateSlotStatus(id, status);
     return ok();
+  }
+
+  /**
+   * Registers a schedule block (unforeseen event) and handles affected slots.
+   * @param {number} scheduleId
+   * @param {{ startDate: Date, endDate: Date, reason: string }} data
+   * @returns {Promise<import("neverthrow").Result<
+   *   { deletedFree: number, markedReschedule: number },
+   *   ScheduleNotFoundError
+   * >>}
+   */
+  async registerScheduleBlock(scheduleId, data) {
+    const exists = await this.scheduleRepository.checkExist(scheduleId);
+
+    if (!exists) {
+      return err(new ScheduleNotFoundError(scheduleId));
+    }
+
+    const result = await this.scheduleRepository.registerScheduleBlock(
+      scheduleId,
+      data
+    );
+
+    return ok(result);
+  }
+
+  /**
+   * Gets all slots needing rescheduling with patient and schedule details.
+   * @returns {Promise<any[]>} Mapped slot data for the reschedule inbox view.
+   */
+  async getSlotsNeedingReschedule() {
+    const slots = await this.scheduleRepository.findSlotsNeedingReschedule();
+
+    return slots.map((slot) => ({
+      id: slot.id,
+      startsAt: slot.startsAt,
+      status: slot.status,
+      consultationReason: slot.consultationReason,
+      isOverbook: slot.isOverbook,
+      patient: slot.patient
+        ? {
+            fullName: `${slot.patient.firstNames} ${slot.patient.lastNames}`,
+            phone: slot.patient.phone,
+            email: slot.patient.email,
+          }
+        : null,
+      schedule: {
+        professionalName: `${slot.schedule.professional.user.firstNames} ${slot.schedule.professional.user.lastNames}`,
+        specialtyName: slot.schedule.professional.specialty.name,
+        locationName: slot.schedule.location.name,
+      },
+    }));
   }
 }

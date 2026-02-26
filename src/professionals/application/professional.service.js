@@ -275,12 +275,25 @@ export class ProfessionalService {
     slotsToday.sort((a, b) => a.startsAt - b.startsAt);
     slotsFuture.sort((a, b) => a.startsAt - b.startsAt);
 
+    // Collect schedules for drilldown links
+    const schedules = [];
+    for (const cred of rawProfessional.professionalCredentials) {
+      for (const schedule of cred.schedules) {
+        schedules.push({
+          id: schedule.id,
+          specialtyName: cred.specialty.name,
+          classificationName: schedule.classification.name,
+        });
+      }
+    }
+
     return ok({
       professional,
       specialties: professional.credentials,
       slotsPast,
       slotsToday,
       slotsFuture,
+      schedules,
     });
   }
 }

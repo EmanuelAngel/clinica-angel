@@ -172,6 +172,18 @@
                 <i data-lucide="calendar" class="w-6 h-6 text-primary"></i>
                 Agenda de Turnos
               </h3>
+
+              {% if schedules and schedules.length > 0 %}
+                <div class="flex flex-wrap gap-2 mt-3">
+                  {% for sched in schedules %}
+                    <a href="/schedules/{{ sched.id }}/agenda"
+                       class="btn btn-sm btn-outline btn-primary">
+                      <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                      {{ sched.specialtyName }} — {{ sched.classificationName }}
+                    </a>
+                  {% endfor %}
+                </div>
+              {% endif %}
             </div>
 
             <div class="tabs tabs-lifted tabs-lg mt-6">

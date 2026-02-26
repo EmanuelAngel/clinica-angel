@@ -14,10 +14,21 @@ scheduleRouter.get(
   auth(Roles.ADMIN),
   scheduleController.showDetails
 );
+scheduleRouter.get(
+  "/reschedule",
+  auth(Roles.ADMIN, Roles.SECRETARY),
+  scheduleController.showRescheduleInbox
+);
+scheduleRouter.get("/:id/agenda", auth(), scheduleController.showDrilldown);
 scheduleRouter.get("/compare", auth(), scheduleController.showComparison);
 scheduleRouter.get("/slots/:id", auth(), scheduleController.getSlotDetails);
 scheduleRouter.patch(
   "/slots/:id/status",
   auth(),
   scheduleController.updateSlotStatus
+);
+scheduleRouter.post(
+  "/:id/blocks",
+  auth(Roles.ADMIN),
+  scheduleController.registerBlock
 );

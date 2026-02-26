@@ -1,0 +1,115 @@
+{% extends "layout/base.njk" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Bandeja de Reasignación", "Turnos que requieren ser reasignados") }}
+{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-6xl mx-auto space-y-6">
+
+  {# Header #}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold flex items-center gap-3">
+        <i data-lucide="alert-triangle" class="w-6 h-6 text-warning"></i>
+        Bandeja de Reasignación
+      </h1>
+      <p class="text-base-content/60 text-sm mt-1">
+        Turnos afectados por imprevistos que necesitan ser reprogramados.
+      </p>
+    </div>
+    {% if slots.length > 0 %}
+      <span class="badge badge-warning badge-lg gap-1">
+        <i data-lucide="clock" class="w-4 h-4"></i>
+        {{ slots.length }} turno{{ "s" if slots.length != 1 }} pendiente{{ "s" if slots.length != 1 }}
+      </span>
+    {% endif %}
+  </div>
+
+  {# Slots List #}
+  {% if slots.length > 0 %}
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {% for slot in slots %}
+        <div class="card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow">
+          <div class="card-body p-5 space-y-3">
+            {# Status + Date Header #}
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-lg font-bold">
+                  {{ slot.startsAt | date("DD/MM/YYYY") }}
+                </p>
+                <p class="text-sm font-mono text-base-content/70">
+                  {{ slot.startsAt | time }}
+                </p>
+              </div>
+              <span class="badge badge-warning gap-1">
+                <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                A reasignar
+              </span>
+            </div>
+
+            <div class="divider my-0"></div>
+
+            {# Patient Info #}
+            {% if slot.patient %}
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="user" class="w-4 h-4 text-primary shrink-0"></i>
+                  <span class="font-semibold">{{ slot.patient.fullName }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="phone" class="w-4 h-4 text-base-content/50 shrink-0"></i>
+                  <a href="tel:{{ slot.patient.phone }}" class="link link-hover text-sm">{{ slot.patient.phone }}</a>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="mail" class="w-4 h-4 text-base-content/50 shrink-0"></i>
+                  <a href="mailto:{{ slot.patient.email }}" class="link link-hover text-sm truncate" title="{{ slot.patient.email }}">{{ slot.patient.email }}</a>
+                </div>
+              </div>
+            {% else %}
+              <p class="text-sm text-base-content/40 italic">Paciente no asignado</p>
+            {% endif %}
+
+            {# Consultation Reason #}
+            {% if slot.consultationReason %}
+              <div class="bg-base-200 rounded-lg p-3">
+                <p class="text-[10px] uppercase tracking-wider text-base-content/50 font-bold mb-1">Motivo de consulta</p>
+                <p class="text-sm">{{ slot.consultationReason }}</p>
+              </div>
+            {% endif %}
+
+            {# Schedule Info #}
+            <div class="text-xs text-base-content/60 space-y-0.5">
+              <div class="flex items-center gap-1">
+                <i data-lucide="stethoscope" class="w-3 h-3"></i>
+                {{ slot.schedule.professionalName }} · {{ slot.schedule.specialtyName }}
+              </div>
+              <div class="flex items-center gap-1">
+                <i data-lucide="map-pin" class="w-3 h-3"></i>
+                {{ slot.schedule.locationName }}
+              </div>
+            </div>
+
+            {% if slot.isOverbook %}
+              <span class="badge badge-xs badge-outline gap-1">
+                <i data-lucide="layers" class="w-3 h-3"></i>
+                Sobreturno
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+      <div class="card-body items-center text-center py-16">
+        <i data-lucide="check-circle-2" class="w-16 h-16 text-success/30 mb-4"></i>
+        <h3 class="text-lg font-semibold text-base-content/70">Sin turnos pendientes</h3>
+        <p class="text-sm text-base-content/50">No hay turnos que requieran reasignación en este momento.</p>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

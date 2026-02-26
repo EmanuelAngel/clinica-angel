@@ -181,3 +181,49 @@ export const createScheduleSchema = z.object({
 export async function validateCreateSchedule(body) {
   return createScheduleSchema.safeParseAsync(body);
 }
+
+// --- Register Block Schema ---
+
+/**
+ * Schema for registering a schedule block (unforeseen event).
+ */
+export const registerBlockSchema = z
+  .object({
+    startDate: z.preprocess(
+      parseLocalDate,
+      z.date({ error: "Fecha de inicio inválida" })
+    ),
+    endDate: z.preprocess(
+      parseLocalDate,
+      z.date({ error: "Fecha de fin inválida" })
+    ),
+    reason: z
+      .string({ error: "El motivo es requerido" })
+      .trim()
+      .min(3, "El motivo debe tener al menos 3 caracteres")
+      .max(500, "El motivo no puede tener más de 500 caracteres"),
+  })
+  .refine((data) => data.endDate >= data.startDate, {
+    message: "La fecha de fin no puede ser anterior a la de inicio",
+    path: ["endDate"],
+  });
+
+/**
+ * Successfully validated register block data type.
+ * @typedef {z.infer<typeof registerBlockSchema>} RegisterBlockDTO
+ */
+
+/**
+ * Validates the register block data.
+ * @param {unknown} body Data to validate.
+ * @returns {Promise<{
+ *   success: true;
+ *   data: RegisterBlockDTO;
+ * } | {
+ *   success: false;
+ *   error: import('zod').ZodError;
+ * }>}
+ */
+export async function validateRegisterBlock(body) {
+  return registerBlockSchema.safeParseAsync(body);
+}
