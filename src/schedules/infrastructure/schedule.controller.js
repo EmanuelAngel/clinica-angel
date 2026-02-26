@@ -5,6 +5,11 @@ import {
   validateComparisonFilters,
   hasActiveFilters,
 } from "./schedule-comparison.schemas.js";
+import {
+  calculateDateRange,
+  VISTA_STEPS,
+  VALID_VISTAS,
+} from "./date-range.utils.js";
 
 export class ScheduleController {
   /**
@@ -179,6 +184,80 @@ export class ScheduleController {
       hasFilters,
       schedules,
       date: filters.date,
+      userRole: req.user?.role,
+    });
+  }
+
+  /**
+   * Renders the drill-down agenda view for a single schedule.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   * @returns {Promise<void>}
+   */
+  async showDrilldown(req, res) {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).render("errors/generic", {
+        error: {
+          message: "ID de agenda inválido",
+          statusCode: 400,
+        },
+      });
+    }
+
+    // Parse vista and fecha from query params
+    const vista = VALID_VISTAS.includes(req.query.vista)
+      ? req.query.vista
+      : "hoy";
+
+    let fecha;
+    if (req.query.fecha && /^\d{4}-\d{2}-\d{2}$/.test(req.query.fecha)) {
+      const [year, month, day] = req.query.fecha.split("-").map(Number);
+      fecha = new Date(year, month - 1, day, 0, 0, 0, 0);
+    } else {
+      const now = new Date();
+      fecha = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        0,
+        0,
+        0,
+        0
+      );
+    }
+
+    const { startDate, endDate, dates } = calculateDateRange(vista, fecha);
+
+    const [result, patients] = await Promise.all([
+      services.scheduleService.getScheduleForDrilldown(
+        id,
+        startDate,
+        endDate,
+        dates
+      ),
+      services.patientService.listAll(),
+    ]);
+
+    if (result.isErr()) {
+      return res.status(result.error.statusCode).render("errors/generic", {
+        error: {
+          message: result.error.message,
+          statusCode: result.error.statusCode,
+        },
+      });
+    }
+
+    const { schedule, days } = result.value;
+
+    res.render("schedule-drilldown", {
+      schedule,
+      days,
+      vista,
+      fecha,
+      vistaSteps: VISTA_STEPS,
+      patients,
       userRole: req.user?.role,
     });
   }

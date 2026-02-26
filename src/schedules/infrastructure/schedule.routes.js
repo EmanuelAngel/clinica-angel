@@ -14,6 +14,7 @@ scheduleRouter.get(
   auth(Roles.ADMIN),
   scheduleController.showDetails
 );
+scheduleRouter.get("/:id/agenda", auth(), scheduleController.showDrilldown);
 scheduleRouter.get("/compare", auth(), scheduleController.showComparison);
 scheduleRouter.get("/slots/:id", auth(), scheduleController.getSlotDetails);
 scheduleRouter.patch(

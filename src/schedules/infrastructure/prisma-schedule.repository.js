@@ -350,6 +350,71 @@ export class PrismaScheduleRepository {
   }
 
   /**
+   * Finds a single schedule by ID with slots and blocks for a date range (drilldown view).
+   * @param {number} scheduleId - Schedule ID.
+   * @param {Date} startDate - Start of range (inclusive).
+   * @param {Date} endDate - End of range (inclusive).
+   * @returns {Promise<any | null>} Schedule with slots and blocks, or null.
+   */
+  async findForDrilldown(scheduleId, startDate, endDate) {
+    return await this.db.schedule.findUnique({
+      where: { id: scheduleId },
+      include: {
+        professional: {
+          include: {
+            user: {
+              select: {
+                firstNames: true,
+                lastNames: true,
+              },
+            },
+            specialty: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        location: {
+          select: {
+            name: true,
+          },
+        },
+        classification: {
+          select: {
+            name: true,
+          },
+        },
+        blocks: {
+          where: {
+            startDate: { lte: endDate },
+            endDate: { gte: startDate },
+          },
+        },
+        slots: {
+          where: {
+            startsAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+          include: {
+            patient: {
+              select: {
+                firstNames: true,
+                lastNames: true,
+              },
+            },
+          },
+          orderBy: {
+            startsAt: "asc",
+          },
+        },
+      },
+    });
+  }
+
+  /**
    * Finds a slot by its ID with full details for the modal.
    * @param {number} id - Slot ID.
    * @returns {Promise<any | null>} Slot with patient and schedule details.
