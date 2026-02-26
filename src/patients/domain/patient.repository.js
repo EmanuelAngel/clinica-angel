@@ -15,6 +15,12 @@
  * Checks if the member number is already linked with the specified insurance.
  * @property {(nationalId: string) => Promise<Patient | null>} findByNationalId
  * Find a patient by national ID (DNI) or return null.
+ * @property {(id: string) => Promise<any | null>} findByIdWithSlots
+ * Find a patient by ID including their requested slots and related info.
+ * @property {(id: string, data: import("../../users/infrastructure/user.schemas.js").UpdateProfileDTO) => Promise<void>} update
+ * Updates a patient's basic profile information.
+ * @property {function(any): Patient} mapToDomain
+ * Maps a database model to a domain model.
  */
 
 /*

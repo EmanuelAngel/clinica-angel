@@ -97,23 +97,111 @@ export class PatientController {
    * @param {import("express").Response} res
    * @param {import("express").NextFunction} next
    */
+  /**
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   * @param {import("express").NextFunction} next
+   */
   async profileView(req, res, next) {
     const userId = req.params.id;
 
-    const result = await services.patientService.getProfile(userId);
+    const result = await services.patientService.getProfileWithSlots(userId);
 
     result.match(
-      (patient) => {
-        res.render("patient-profile.njk", { patient });
+      (data) => {
+        res.render("patient-profile.njk", {
+          patient: data.patient,
+          slotsPast: data.slotsPast,
+          slotsToday: data.slotsToday,
+          slotsFuture: data.slotsFuture,
+        });
       },
       (error) => {
-        // If it's a 404, let the not-found-handler handle it.
         if (error.statusCode == 404) {
           sendNotFound(req, res, error.message);
           return;
         }
 
         next(error);
+      }
+    );
+  }
+
+  /**
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   * @param {import("express").NextFunction} next
+   */
+  async editView(req, res, next) {
+    const userId = req.params.id;
+
+    const result = await services.patientService.getProfile(userId);
+
+    result.match(
+      (patient) => {
+        res.render("edit-patient.njk", { patient });
+      },
+      (error) => {
+        if (error.statusCode == 404) {
+          sendNotFound(req, res, error.message);
+          return;
+        }
+
+        next(error);
+      }
+    );
+  }
+
+  /**
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   * @param {import("express").NextFunction} next
+   */
+  async update(req, res, next) {
+    const userId = req.params.id;
+
+    const patientResult = await services.patientService.getProfile(userId);
+
+    if (patientResult.isErr()) {
+      sendNotFound(req, res, patientResult.error.message);
+      return;
+    }
+
+    const patient = patientResult.value;
+
+    const { validateUpdateProfile } =
+      await import("../../users/infrastructure/user.schemas.js");
+
+    const validationResult = await validateUpdateProfile(req.body);
+
+    if (!validationResult.success) {
+      res.status(422).render("edit-patient.njk", {
+        errors: z.treeifyError(validationResult.error),
+        values: req.body,
+        patient,
+        result: {
+          type: "failure",
+          message: "Revise los datos ingresados.",
+        },
+      });
+      return;
+    }
+
+    const updateResult = await services.patientService.updateProfile(
+      userId,
+      validationResult.data
+    );
+
+    updateResult.match(
+      () => {
+        res.redirect(`/patients/${userId}`);
+      },
+      (error) => {
+        res.status(error.statusCode).render("edit-patient.njk", {
+          result: { type: "failure", message: error.message },
+          values: req.body,
+          patient,
+        });
       }
     );
   }

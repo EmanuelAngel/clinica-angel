@@ -1,0 +1,125 @@
+{% extends "layout/base.njk" %}
+
+{% block pageInfo %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Editar perfil de paciente", "Editando el perfil de " + patient.fullName + ".") }}
+{% endblock %}
+
+{% block content %}
+  <div class="w-full max-w-3xl mx-auto space-y-6">
+
+    {# Read-only header with patient context #}
+    <div class="card bg-base-200 shadow-md">
+      <div class="card-body">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="card-title text-2xl">{{ patient.fullName }}</h2>
+            <p class="text-sm text-base-content/60">{{ patient.email }} · DNI: {{ patient.nationalId }}</p>
+          </div>
+          <div class="flex gap-2">
+            {% import "partials/role-badge.njk" as RoleBadge %}
+            {{ RoleBadge.badge(patient.role) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Edit form #}
+    <form action="/patients/{{ patient.id }}" method="POST" class="space-y-6">
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+        <legend>Datos personales</legend>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <label class="label">Nombres (requerido)</label>
+            <input type="text"
+                   name="firstNames"
+                   value="{{ values.firstNames if values else patient.firstNames }}"
+                   class="input validator {{ 'input-error' if errors.properties.firstNames }}"
+                   required
+                   minlength="2"
+                   maxlength="100"
+                   pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
+                   title="Solo letras, espacios, guiones o apóstrofes."
+                   placeholder="Nombre completo" />
+            {% if errors.properties.firstNames %}
+              <div class="text-error text-sm mt-1">{{ errors.properties.firstNames[0] }}</div>
+            {% endif %}
+            <div class="validator-hint">
+              Ingrese nombres válidos.
+              <br /> Solo letras, espacios, guiones o apóstrofes.
+              <br /> Mínimo 2 caracteres.
+            </div>
+          </div>
+
+          <div>
+            <label class="label">Apellidos (requerido)</label>
+            <input type="text"
+                   name="lastNames"
+                   value="{{ values.lastNames if values else patient.lastNames }}"
+                   class="input validator {{ 'input-error' if errors.properties.lastNames }}"
+                   required
+                   minlength="2"
+                   maxlength="100"
+                   pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
+                   title="Solo letras, espacios, guiones o apóstrofes."
+                   placeholder="Apellido" />
+            {% if errors.properties.lastNames %}
+              <div class="text-error text-sm mt-1">{{ errors.properties.lastNames[0] }}</div>
+            {% endif %}
+            <div class="validator-hint">
+              Ingrese apellidos válidos.
+              <br /> Solo letras, espacios, guiones o apóstrofes.
+              <br /> Mínimo 2 caracteres.
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+        <legend>Datos de contacto</legend>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <label class="label">Teléfono (requerido)</label>
+            <input type="tel"
+                   name="phone"
+                   value="{{ values.phone if values else patient.phone }}"
+                   class="input validator {{ 'input-error' if errors.properties.phone }}"
+                   required
+                   placeholder="Número de teléfono" />
+            {% if errors.properties.phone %}
+              <div class="text-error text-sm mt-1">{{ errors.properties.phone[0] }}</div>
+            {% endif %}
+            <div class="validator-hint">Ingrese un número de teléfono válido</div>
+          </div>
+
+          <div>
+            <label class="label">Dirección (requerido)</label>
+            <input type="text"
+                   name="address"
+                   value="{{ values.address if values else patient.address }}"
+                   class="input validator {{ 'input-error' if errors.properties.address }}"
+                   required
+                   minlength="5"
+                   maxlength="180"
+                   placeholder="Dirección" />
+            {% if errors.properties.address %}
+              <div class="text-error text-sm mt-1">{{ errors.properties.address[0] }}</div>
+            {% endif %}
+            <div class="validator-hint">Ingrese una dirección válida</div>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="flex flex-col lg:flex-row gap-4">
+        <button type="submit" class="btn btn-primary flex-1">
+          <i data-lucide="save" class="w-4 h-4"></i>
+          Guardar cambios
+        </button>
+        <a href="/patients/{{ patient.id }}" class="btn btn-ghost flex-1 text-center">
+          Cancelar
+        </a>
+      </div>
+    </form>
+
+  </div>
+{% endblock %}

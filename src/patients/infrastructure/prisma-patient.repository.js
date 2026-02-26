@@ -69,6 +69,61 @@ export class PrismaPatientRepository {
   }
 
   /**
+   * @param {string} id
+   * @returns {Promise<any | null>} The patient with slots or null.
+   */
+  async findByIdWithSlots(id) {
+    return this.db.user.findUnique({
+      where: {
+        id: parseInt(id, 10),
+      },
+      include: {
+        patientInsurances: {
+          include: {
+            insurance: true,
+          },
+        },
+        requestedSlots: {
+          include: {
+            schedule: {
+              include: {
+                location: true,
+                classification: true,
+                professional: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            startsAt: "desc",
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * @param {string} id
+   * @param {import("../../users/infrastructure/user.schemas.js").UpdateProfileDTO} data
+   */
+  async update(id, data) {
+    await this.db.user.update({
+      where: {
+        id: parseInt(id, 10),
+      },
+      data: {
+        firstNames: data.firstNames,
+        lastNames: data.lastNames,
+        phone: data.phone,
+        address: data.address,
+      },
+    });
+  }
+
+  /**
    * @param {Patient} data
    */
   async register(data) {
