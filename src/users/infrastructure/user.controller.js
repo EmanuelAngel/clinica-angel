@@ -1,6 +1,9 @@
 import z from "zod";
 import { services } from "../../_shared/infrastructure/services-container.js";
-import { validateBaseUserRegistration } from "./user.schemas.js";
+import {
+  validateBaseUserRegistration,
+  validateUpdateProfile,
+} from "./user.schemas.js";
 import { sendNotFound } from "../../_shared/infrastructure/response-helpers.js";
 
 export class UserController {
@@ -80,6 +83,75 @@ export class UserController {
         }
 
         next(error);
+      }
+    );
+  }
+
+  /**
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   * @param {import("express").NextFunction} next
+   */
+  async editView(req, res, next) {
+    const result = await services.userService.getProfile(+req.params.id);
+
+    result.match(
+      (user) => {
+        res.render("edit-user", { user });
+      },
+      (error) => {
+        if (error.statusCode == 404) {
+          sendNotFound(req, res, error.message);
+          return;
+        }
+
+        next(error);
+      }
+    );
+  }
+
+  /**
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async update(req, res) {
+    const userId = +req.params.id;
+
+    const profileResult = await services.userService.getProfile(userId);
+
+    if (profileResult.isErr()) {
+      sendNotFound(req, res, profileResult.error.message);
+      return;
+    }
+
+    const user = profileResult.value;
+    const result = await validateUpdateProfile(req.body);
+
+    if (!result.success) {
+      res.status(422).render("edit-user", {
+        errors: z.treeifyError(result.error),
+        values: req.body,
+        user,
+      });
+
+      return;
+    }
+
+    const updateResult = await services.userService.updateProfile(
+      userId,
+      result.data
+    );
+
+    updateResult.match(
+      () => {
+        res.redirect(`/users/${userId}`);
+      },
+      (error) => {
+        res.status(error.statusCode).render("edit-user", {
+          result: { type: "failure", message: error.message },
+          values: req.body,
+          user,
+        });
       }
     );
   }

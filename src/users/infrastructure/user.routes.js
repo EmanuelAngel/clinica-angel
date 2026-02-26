@@ -15,6 +15,18 @@ userRouter.get("/", userController.listAll);
 userRouter.get(
   "/:id",
   auth(),
-  checkOwnership(Roles.ADMIN),
+  checkOwnership(Roles.ADMIN, Roles.SECRETARY),
   userController.show
+);
+userRouter.get(
+  "/:id/edit",
+  auth(),
+  checkOwnership(Roles.ADMIN, Roles.SECRETARY),
+  userController.editView
+);
+userRouter.post(
+  "/:id",
+  auth(),
+  checkOwnership(Roles.ADMIN, Roles.SECRETARY),
+  userController.update
 );
