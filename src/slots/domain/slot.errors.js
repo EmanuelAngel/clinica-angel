@@ -87,3 +87,33 @@ export class SlotNotFreeError extends CustomError {
     super("El turno no está disponible para reservar.", 422);
   }
 }
+
+/**
+ * Source slot is not in BOOKED status for overbook creation.
+ */
+export class OverbookSlotNotBookedError extends CustomError {
+  constructor() {
+    super(
+      "Solo se pueden crear sobreturnos a partir de turnos en estado Propuesto.",
+      422
+    );
+  }
+}
+
+/**
+ * Per-slot overbook limit reached.
+ */
+export class OverbookPerSlotLimitError extends CustomError {
+  constructor() {
+    super("Se alcanzó el límite de sobreturnos para este horario.", 422);
+  }
+}
+
+/**
+ * Per-day overbook limit reached.
+ */
+export class OverbookPerDayLimitError extends CustomError {
+  constructor() {
+    super("Se alcanzó el límite de sobreturnos para este día.", 422);
+  }
+}

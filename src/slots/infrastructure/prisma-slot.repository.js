@@ -81,4 +81,76 @@ export class PrismaSlotRepository {
       },
     });
   }
+
+  /**
+   * Counts active (non-CANCELLED) overbooks for a specific schedule and time.
+   * @param {number} scheduleId
+   * @param {Date} startsAt
+   * @returns {Promise<number>}
+   */
+  async countActiveOverbooksByTime(scheduleId, startsAt) {
+    return this.db.slot.count({
+      where: {
+        scheduleId,
+        startsAt,
+        isOverbook: true,
+        status: { not: SlotStatus.CANCELLED },
+      },
+    });
+  }
+
+  /**
+   * Counts active (non-CANCELLED) overbooks for a specific schedule within a day range.
+   * @param {number} scheduleId
+   * @param {Date} dayStart
+   * @param {Date} dayEnd
+   * @returns {Promise<number>}
+   */
+  async countActiveOverbooksByDay(scheduleId, dayStart, dayEnd) {
+    return this.db.slot.count({
+      where: {
+        scheduleId,
+        isOverbook: true,
+        status: { not: SlotStatus.CANCELLED },
+        startsAt: { gte: dayStart, lt: dayEnd },
+      },
+    });
+  }
+
+  /**
+   * Creates a new overbook slot and returns its ID.
+   * @param {import("../domain/slot.repository.js").CreateOverbookData} data
+   * @returns {Promise<number>}
+   */
+  async createOverbook(data) {
+    const slot = await this.db.slot.create({
+      data: {
+        scheduleId: data.scheduleId,
+        startsAt: data.startsAt,
+        patientId: data.patientId,
+        consultationReason: data.consultationReason,
+        isOverbook: true,
+        status: SlotStatus.BOOKED,
+      },
+    });
+
+    return slot.id;
+  }
+
+  /**
+   * Finds the overbook limits for a schedule.
+   * @param {number} scheduleId
+   * @returns {Promise<import("../domain/slot.repository.js").ScheduleOverbookLimits | null>}
+   */
+  async findScheduleLimits(scheduleId) {
+    const schedule = await this.db.schedule.findUnique({
+      where: { id: scheduleId },
+      select: {
+        maxOverbooksPerSlot: true,
+        maxOverbooksPerDay: true,
+      },
+    });
+
+    return schedule;
+  }
 }

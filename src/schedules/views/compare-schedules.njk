@@ -202,6 +202,44 @@
         <p id="terminal_state_msg" class="text-[10px] text-base-content/40 mt-2 italic hidden">Este turno está en estado terminal y no puede ser modificado.</p>
       </div>
 
+      {# Overbook Section - ADMIN/SECRETARY only, visible when slot is BOOKED #}
+      {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
+      <div id="overbook_section" class="hidden">
+        <div class="divider"></div>
+        <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">
+          <i data-lucide="layers" class="w-4 h-4 inline mr-1"></i>
+          Crear Sobreturno
+        </h4>
+        <form id="overbook_form" class="space-y-4">
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-semibold">Paciente</span>
+            </label>
+            <select name="patientId" class="select select-bordered w-full select-sm" required>
+              <option value="" disabled selected>Seleccione un paciente</option>
+              {% for patient in patients %}
+              <option value="{{ patient.id }}">{{ patient.firstNames }} {{ patient.lastNames }} (DNI: {{ patient.nationalId }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-semibold">Motivo de consulta</span>
+            </label>
+            <textarea name="consultationReason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Control urgente, Derivación..." required minlength="5"></textarea>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-warning btn-sm" id="btn_overbook_submit">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+              Crear Sobreturno
+            </button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+
       <div class="modal-action">
         <form method="dialog">
           <button class="btn">Cerrar</button>
@@ -349,6 +387,7 @@
       const terminalMsg = document.getElementById('terminal_state_msg');
       const reservationSection = document.getElementById('reservation_section');
       const actionsSection = document.getElementById('actions_section');
+      const overbookSection = document.getElementById('overbook_section');
       const validActions = TRANSITIONS[status] || [];
 
       // Reset visibility
@@ -356,6 +395,7 @@
       terminalMsg.classList.add('hidden');
       reservationSection.classList.add('hidden');
       actionsSection.classList.remove('hidden');
+      if (overbookSection) overbookSection.classList.add('hidden');
 
       if (status === 'FULFILLED') {
         terminalMsg.classList.remove('hidden');
@@ -366,6 +406,12 @@
         reservationSection.classList.remove('hidden');
         actionsSection.classList.add('hidden');
         return;
+      }
+
+      // Show overbook section for PROPOSED slots
+      if (status === 'PROPOSED' && overbookSection) {
+        overbookSection.classList.remove('hidden');
+        lucide.createIcons();
       }
 
       // Show valid action buttons
@@ -508,6 +554,50 @@
     const reservationForm = document.getElementById('reservation_form');
     if (reservationForm) {
       reservationForm.addEventListener('submit', handleReserveSubmit);
+    }
+
+    // Attach overbook form submit handler
+    const overbookForm = document.getElementById('overbook_form');
+    if (overbookForm) {
+      overbookForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentSlot) return;
+
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        const btn = document.getElementById('btn_overbook_submit');
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span>';
+
+        try {
+          const response = await fetch(`/api/v1/slots/${currentSlot.id}/overbook`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.message || 'Error al crear el sobreturno');
+          }
+
+          showToast(result.message || 'Sobreturno creado correctamente', 'success');
+          e.target.reset();
+
+          // Reload page to reflect the new overbook in the grid
+          setTimeout(() => window.location.reload(), 1000);
+
+        } catch (error) {
+          showToast(error.message, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+        }
+      });
     }
 
     // Attach click handlers to action buttons
