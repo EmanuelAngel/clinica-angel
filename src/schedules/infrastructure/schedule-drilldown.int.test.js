@@ -50,6 +50,24 @@ describe("Schedule drilldown view (GET /schedules/:id/agenda)", () => {
         locationId: location.id,
         classificationId: classification.id,
         slotDuration: 20,
+        maxOverbooksPerDay: 15,
+        maxOverbooksPerSlot: 2,
+        configs: {
+          create: {
+            dayOfWeek: "MONDAY",
+            startTime: "08:00",
+            endTime: "12:00",
+            validFrom: new Date("2020-01-01"),
+            validUntil: new Date("2030-12-31"),
+          },
+        },
+        blocks: {
+          create: {
+            startDate: new Date("2026-07-01"),
+            endDate: new Date("2026-07-15"),
+            reason: "Vacaciones Test",
+          },
+        },
       },
     });
 
@@ -69,6 +87,8 @@ describe("Schedule drilldown view (GET /schedules/:id/agenda)", () => {
 
   afterEach(async () => {
     await prisma.slot.deleteMany({});
+    await prisma.scheduleConfig.deleteMany({});
+    await prisma.scheduleBlock.deleteMany({});
     await prisma.schedule.deleteMany({});
     await prisma.professionalSpecialty.deleteMany({});
     await prisma.classification.deleteMany({});
@@ -83,7 +103,7 @@ describe("Schedule drilldown view (GET /schedules/:id/agenda)", () => {
     });
   });
 
-  test("returns 200 and renders the drilldown grid for authenticated admin", async () => {
+  test("returns 200 and renders the drilldown grid with agenda metadata", async () => {
     const res = await request(app)
       .get(`/schedules/${schedule.id}/agenda`)
       .set("Cookie", `access_token=${adminToken}`);
@@ -91,7 +111,21 @@ describe("Schedule drilldown view (GET /schedules/:id/agenda)", () => {
     expect(res.status).toBe(200);
     expect(res.text).toContain("Ana Martinez");
     expect(res.text).toContain("Drilldown Test Specialty");
-    expect(res.text).toContain("Drilldown Clinic");
+
+    // Metadata checks
+    expect(res.text).toContain("20 min");
+    expect(res.text).toContain("Día/Sobret.");
+    expect(res.text).toContain("15");
+
+    // Spanish weekly schedule
+    expect(res.text).toContain("Lunes");
+    expect(res.text).toContain("08:00 - 12:00");
+
+    // Blocks
+    expect(res.text).toContain("Vacaciones Test");
+
+    // Admin button
+    expect(res.text).toContain("Modificar agenda");
   });
 
   test("defaults to vista=hoy when no query param provided", async () => {
@@ -177,5 +211,8 @@ describe("Schedule drilldown view (GET /schedules/:id/agenda)", () => {
 
     expect(res.status).toBe(200);
     expect(res.text).toContain("Ana Martinez");
+
+    // Professional should NOT see the "Modificar agenda" button
+    expect(res.text).not.toContain("Modificar agenda");
   });
 });

@@ -17,11 +17,65 @@
       {% endif %}
     </p>
   </div>
+  {% if userRole == 'ADMIN' %}
+    <div class="flex items-center">
+      <a href="/schedules/details/{{ schedule.id }}" class="btn btn-sm btn-outline btn-warning gap-2">
+        <i data-lucide="edit-3" class="w-4 h-4"></i>
+        Modificar agenda
+      </a>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
 
 {% block content %}
 <div class="space-y-4">
+
+  {# Compact Agenda Info #}
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+    {# Config Card #}
+    <div class="card bg-base-100 shadow-sm border border-base-200 p-3">
+      <h4 class="text-[10px] uppercase tracking-widest text-base-content/50 font-bold mb-2">Configuración</h4>
+      <div class="grid grid-cols-2 gap-y-1 text-xs">
+        <span class="text-base-content/70">Duración:</span>
+        <span class="font-bold text-right">{{ schedule.slotDuration }} min</span>
+        <span class="text-base-content/70">Día/Sobret.:</span>
+        <span class="font-bold text-right">{{ schedule.maxOverbooksPerDay }}</span>
+        <span class="text-base-content/70">Turno/Sobret.:</span>
+        <span class="font-bold text-right">{{ schedule.maxOverbooksPerSlot }}</span>
+      </div>
+    </div>
+
+    {# Weekly Schedule Card #}
+    <div class="card bg-base-100 shadow-sm border border-base-200 p-3 lg:col-span-2">
+      <h4 class="text-[10px] uppercase tracking-widest text-base-content/50 font-bold mb-2">Horarios de Atención</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs">
+        {% for config in schedule.weeklySchedule %}
+          <div class="flex justify-between border-b border-base-content/5 pb-0.5">
+            <span class="font-semibold text-base-content/80">{{ config.day }}</span>
+            <span class="text-base-content/70 font-mono">{{ config.ranges }}</span>
+          </div>
+        {% else %}
+          <p class="text-base-content/40 italic">No hay horarios configurados.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Blocks Card #}
+    <div class="card bg-base-100 shadow-sm border border-base-200 p-3">
+      <h4 class="text-[10px] uppercase tracking-widest text-base-content/50 font-bold mb-2">Bloqueos</h4>
+      <div class="space-y-1 max-h-20 overflow-y-auto pr-1">
+        {% for block in schedule.blocks %}
+          <div class="text-[10px] leading-tight border-l-2 border-error/50 pl-2">
+            <p class="font-bold">{{ block.startDate | date('DD/MM') }} - {{ block.endDate | date('DD/MM') }}</p>
+            <p class="text-base-content/60 truncate" title="{{ block.reason }}">{{ block.reason }}</p>
+          </div>
+        {% else %}
+          <p class="text-xs text-base-content/40 italic">No hay bloqueos registrados.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 
   {# View Selector Tabs + Date Navigation #}
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-base-200 rounded-lg px-4 py-3">

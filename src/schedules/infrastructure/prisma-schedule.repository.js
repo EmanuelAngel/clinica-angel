@@ -385,10 +385,14 @@ export class PrismaScheduleRepository {
             name: true,
           },
         },
+        configs: {
+          orderBy: {
+            dayOfWeek: "asc",
+          },
+        },
         blocks: {
-          where: {
-            startDate: { lte: endDate },
-            endDate: { gte: startDate },
+          orderBy: {
+            startDate: "asc",
           },
         },
         slots: {

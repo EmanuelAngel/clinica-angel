@@ -359,10 +359,52 @@ export class ScheduleService {
       locationName: schedule.location.name,
       classificationName: schedule.classification.name,
       slotDuration: schedule.slotDuration,
+      maxOverbooksPerDay: schedule.maxOverbooksPerDay,
+      maxOverbooksPerSlot: schedule.maxOverbooksPerSlot,
       isPaused: schedule.isPaused,
+      weeklySchedule: this._formatWeeklySchedule(schedule.configs),
+      blocks: schedule.blocks.map((b) => ({
+        startDate: b.startDate,
+        endDate: b.endDate,
+        reason: b.reason,
+      })),
     };
 
     return ok({ schedule: scheduleInfo, days });
+  }
+
+  /**
+   * Helper to format weekly configurations into a readable summary in Spanish.
+   * @param {any[]} configs
+   * @private
+   * @returns {any}
+   */
+  _formatWeeklySchedule(configs) {
+    if (!configs || configs.length === 0) return [];
+
+    const dayTranslations = {
+      MONDAY: "Lunes",
+      TUESDAY: "Martes",
+      WEDNESDAY: "Miércoles",
+      THURSDAY: "Jueves",
+      FRIDAY: "Viernes",
+      SATURDAY: "Sábado",
+      SUNDAY: "Domingo",
+    };
+
+    // Group by day to handles multiple ranges per day if they exist
+    const grouped = configs.reduce((acc, config) => {
+      const day = dayTranslations[config.dayOfWeek] || config.dayOfWeek;
+      if (!acc[day]) acc[day] = [];
+      acc[day].push(`${config.startTime} - ${config.endTime}`);
+
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).map(([day, ranges]) => ({
+      day,
+      ranges: ranges.join(", "),
+    }));
   }
 
   /**
