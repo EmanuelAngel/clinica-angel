@@ -30,6 +30,20 @@ patientRouter.get(
 );
 
 patientRouter.get(
+  "/:id/edit",
+  auth(),
+  checkOwnership(Roles.SECRETARY, Roles.ADMIN),
+  patientController.editView
+);
+
+patientRouter.post(
+  "/:id",
+  auth(),
+  checkOwnership(Roles.SECRETARY, Roles.ADMIN),
+  patientController.update
+);
+
+patientRouter.get(
   "/",
   auth(Roles.ADMIN, Roles.SECRETARY),
   patientController.listAll

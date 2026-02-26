@@ -1,0 +1,39 @@
+{#
+  Slot Status Badge Macro - Renders a badge representing the slot status.
+  Reused from slot-cell.njk for consistency.
+  
+  Parameters:
+    - status: The status string (FREE, BOOKED, etc.)
+    - isOverbook: Boolean, if true shows an overbook icon
+#}
+
+{% macro renderStatusBadge(status, isOverbook = false) %}
+  {% set statusBadge = {
+    'FREE': 'badge-success',
+    'BOOKED': 'badge-warning',
+    'CANCELLED': 'badge-error',
+    'PROPOSED': 'badge-primary',
+    'IN_PROGRESS': 'badge-info',
+    'FULFILLED': 'badge-neutral',
+    'ARRIVED': 'badge-accent',
+    'NO_SHOW': 'badge-error'
+  } %}
+  
+  {% set statusLabel = {
+    'FREE': 'Libre',
+    'BOOKED': 'Reservado',
+    'CANCELLED': 'Cancelado',
+    'PROPOSED': 'Propuesto',
+    'IN_PROGRESS': 'En curso',
+    'FULFILLED': 'Cumplido',
+    'ARRIVED': 'Llegó',
+    'NO_SHOW': 'No asistió'
+  } %}
+  
+  <span class="badge {{ statusBadge[status] or 'badge-neutral' }} gap-1">
+    {% if isOverbook %}
+      <i data-lucide="layers" class="w-3 h-3"></i>
+    {% endif %}
+    {{ statusLabel[status] or status }}
+  </span>
+{% endmacro %}

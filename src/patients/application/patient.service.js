@@ -139,12 +139,75 @@ export class PatientService {
   }
 
   /**
-   * List all patients.
-   * @returns {Promise<Patient[]>} All patients. If no patients are found, an
-   * empty array is returned.
+   * @param {string} userId
+   * @returns {Promise<import("neverthrow").Result<{
+   *   patient: Patient,
+   *   slotsPast: any[],
+   *   slotsToday: any[],
+   *   slotsFuture: any[]
+   * }, PatientNotFoundError>>} The patient profile with partitioned slots.
    */
-  async listAll() {
-    return this.patientRepository.findAll();
+  async getProfileWithSlots(userId) {
+    const rawPatient = await this.patientRepository.findByIdWithSlots(userId);
+
+    if (!rawPatient) {
+      return err(new PatientNotFoundError(userId));
+    }
+
+    const patient = this.patientRepository.mapToDomain(rawPatient);
+
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(now);
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const slotsPast = [];
+    const slotsToday = [];
+    const slotsFuture = [];
+
+    for (const slot of rawPatient.requestedSlots) {
+      const displaySlot = {
+        id: slot.id,
+        startsAt: slot.startsAt,
+        status: slot.status,
+        professionalName: `${slot.schedule.professional.user.firstNames} ${slot.schedule.professional.user.lastNames}`,
+        specialty: slot.schedule.classification.name,
+        location: slot.schedule.location.name,
+      };
+
+      if (slot.startsAt < todayStart) {
+        slotsPast.push(displaySlot);
+      } else if (slot.startsAt > todayEnd) {
+        slotsFuture.push(displaySlot);
+      } else {
+        slotsToday.push(displaySlot);
+      }
+    }
+
+    return ok({
+      patient,
+      slotsPast,
+      slotsToday,
+      slotsFuture,
+    });
+  }
+
+  /**
+   * Updates a patient's basic profile.
+   * @param {string} id User ID.
+   * @param {import("../../users/infrastructure/user.schemas.js").UpdateProfileDTO} data Updated fields.
+   * @returns {Promise<import("neverthrow").Result<void, PatientNotFoundError>>}
+   */
+  async updateProfile(id, data) {
+    const patientResult = await this.getProfile(id);
+
+    if (patientResult.isErr()) {
+      return err(patientResult.error);
+    }
+
+    await this.patientRepository.update(id, data);
+    return ok(undefined);
   }
 
   /**
@@ -154,5 +217,13 @@ export class PatientService {
    */
   async findByNationalId(nationalId) {
     return this.patientRepository.findByNationalId(nationalId);
+  }
+
+  /**
+   * List all patients.
+   * @returns {Promise<import("../domain/patient.model.js").Patient[]>}
+   */
+  async listAll() {
+    return this.patientRepository.findAll();
   }
 }
