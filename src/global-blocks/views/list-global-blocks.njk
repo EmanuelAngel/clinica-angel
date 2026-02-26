@@ -1,0 +1,148 @@
+{% extends "layout/base.njk" %}
+
+{% block head %}
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css"
+        rel="stylesheet"
+        type="text/css">
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"
+          type="text/javascript"></script>
+{% endblock %}
+
+{% block scripts %}
+  <script type="module">
+  const dataTable = new simpleDatatables.DataTable("#global-blocks-table");
+  </script>
+{% endblock %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Bloqueos Globales", "Días bloqueados para todas las agendas (feriados, festividades, etc.).") }}
+
+  <a href="/global-blocks/create" class="btn btn-primary mb-6">
+    <i data-lucide="plus"></i>
+    Nuevo bloqueo
+  </a>
+
+  {% if blocks.length > 0 %}
+    <div class="overflow-x-auto">
+      <table id="global-blocks-table" class="table table-zebra">
+        <thead>
+          <tr>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Motivo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for block in blocks %}
+            {% set isPast = block.endDate < today %}
+            <tr>
+              <td>{{ block.startDate | date("DD/MM/YYYY") }}</td>
+              <td>{{ block.endDate | date("DD/MM/YYYY") }}</td>
+              <td>{{ block.reason }}</td>
+              <td>
+                {% if isPast %}
+                  <span class="badge badge-ghost badge-sm">Pasado</span>
+                {% else %}
+                  <button type="button"
+                          class="btn btn-xs btn-secondary"
+                          title="Editar"
+                          onclick="edit_modal_{{ block.id }}.showModal()">
+                    <i data-lucide="edit" class="w-3 h-3"></i>
+                  </button>
+                  <button type="button"
+                          class="btn btn-xs btn-error"
+                          title="Eliminar"
+                          onclick="delete_modal_{{ block.id }}.showModal()">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  </button>
+                {% endif %}
+              </td>
+            </tr>
+
+            {% if not isPast %}
+              {# Edit modal #}
+              <dialog id="edit_modal_{{ block.id }}" class="modal">
+                <div class="modal-box">
+                  <h3 class="font-bold text-lg">Editar bloqueo global</h3>
+                  <form action="/global-blocks/{{ block.id }}" method="POST">
+                    <div class="py-4 space-y-4">
+                      <div class="form-control w-full">
+                        <label class="label">Fecha de inicio</label>
+                        <input type="date"
+                               name="startDate"
+                               value="{{ block.startDate | date('yyyy-MM-dd') }}"
+                               class="input input-bordered w-full"
+                               required />
+                      </div>
+                      <div class="form-control w-full">
+                        <label class="label">Fecha de fin</label>
+                        <input type="date"
+                               name="endDate"
+                               value="{{ block.endDate | date('yyyy-MM-dd') }}"
+                               class="input input-bordered w-full"
+                               required />
+                      </div>
+                      <div class="form-control w-full">
+                        <label class="label">Motivo</label>
+                        <input type="text"
+                               name="reason"
+                               value="{{ block.reason }}"
+                               class="input input-bordered w-full"
+                               required
+                               minlength="3"
+                               maxlength="500"
+                               placeholder="Ej: Feriado nacional" />
+                      </div>
+                    </div>
+                    <div class="modal-action">
+                      <button type="button" class="btn btn-ghost" onclick="edit_modal_{{ block.id }}.close()">
+                        Cancelar
+                      </button>
+                      <button type="submit" class="btn btn-primary">
+                        <i data-lucide="save"></i>
+                        Guardar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                <form method="dialog" class="modal-backdrop">
+                  <button>close</button>
+                </form>
+              </dialog>
+
+              {# Delete confirmation modal #}
+              <dialog id="delete_modal_{{ block.id }}" class="modal">
+                <div class="modal-box">
+                  <h3 class="font-bold text-lg">Confirmar eliminación</h3>
+                  <p class="py-4">¿Está seguro de eliminar el bloqueo <strong>"{{ block.reason }}"</strong> ({{ block.startDate | date("DD/MM/YYYY") }} — {{ block.endDate | date("DD/MM/YYYY") }})?</p>
+                  <p class="text-sm text-warning">Esta acción no se puede deshacer.</p>
+                  <div class="modal-action">
+                    <form method="dialog">
+                      <button class="btn btn-ghost">Cancelar</button>
+                    </form>
+                    <form action="/global-blocks/{{ block.id }}/delete" method="POST">
+                      <button type="submit" class="btn btn-error">
+                        <i data-lucide="trash-2"></i>
+                        Eliminar
+                      </button>
+                    </form>
+                  </div>
+                </div>
+                <form method="dialog" class="modal-backdrop">
+                  <button>close</button>
+                </form>
+              </dialog>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <i data-lucide="info"></i>
+      <span>No hay bloqueos globales registrados. Crea uno nuevo para comenzar.</span>
+    </div>
+  {% endif %}
+{% endblock %}

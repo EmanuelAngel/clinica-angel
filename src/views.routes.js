@@ -10,6 +10,7 @@ import { classificationRouter } from "./classifications/infrastructure/classific
 import { locationRouter } from "./locations/infrastructure/location.routes.js";
 import { scheduleRouter } from "./schedules/infrastructure/schedule.routes.js";
 import { healthInsuranceRouter } from "./health-insurances/infrastructure/health-insurance.routes.js";
+import { globalBlockRouter } from "./global-blocks/infrastructure/global-block.routes.js";
 
 export const viewsRouter = Router();
 
@@ -34,3 +35,4 @@ viewsRouter.use("/classifications", auth(Roles.ADMIN), classificationRouter);
 viewsRouter.use("/locations", auth(Roles.ADMIN), locationRouter);
 viewsRouter.use("/schedules", scheduleRouter);
 viewsRouter.use("/health-insurances", healthInsuranceRouter);
+viewsRouter.use("/global-blocks", auth(Roles.ADMIN), globalBlockRouter);

@@ -1,0 +1,76 @@
+{% extends "layout/base.njk" %}
+
+{% block content %}
+  {% import "partials/page-info.njk" as PageInfo %}
+  {{ PageInfo.titleAndDescription("Nuevo Bloqueo Global", "Definir un período de bloqueo para todas las agendas.") }}
+
+  <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
+    <div class="card-body">
+      <form action="/global-blocks" method="POST" class="space-y-4">
+        <div class="form-control w-full">
+          <label class="label">Fecha de inicio (requerido)</label>
+          <input type="date"
+                 name="startDate"
+                 value="{{ values.startDate }}"
+                 class="input validator {{ 'input-error' if errors.properties.startDate }}"
+                 required />
+          {% if errors.properties.startDate %}
+            <div class="text-error text-sm mt-1">
+              {{ errors.properties.startDate[0] }}
+            </div>
+          {% endif %}
+          <div class="validator-hint">
+            Seleccione la fecha de inicio del bloqueo.
+          </div>
+        </div>
+
+        <div class="form-control w-full">
+          <label class="label">Fecha de fin (requerido)</label>
+          <input type="date"
+                 name="endDate"
+                 value="{{ values.endDate }}"
+                 class="input validator {{ 'input-error' if errors.properties.endDate }}"
+                 required />
+          {% if errors.properties.endDate %}
+            <div class="text-error text-sm mt-1">
+              {{ errors.properties.endDate[0] }}
+            </div>
+          {% endif %}
+          <div class="validator-hint">
+            Seleccione la fecha de fin del bloqueo (puede ser el mismo día).
+          </div>
+        </div>
+
+        <div class="form-control w-full">
+          <label class="label">Motivo (requerido)</label>
+          <input type="text"
+                 name="reason"
+                 value="{{ values.reason }}"
+                 class="input validator {{ 'input-error' if errors.properties.reason }}"
+                 required
+                 minlength="3"
+                 maxlength="500"
+                 placeholder="Ej: Feriado nacional, Jornada de mantenimiento" />
+          {% if errors.properties.reason %}
+            <div class="text-error text-sm mt-1">
+              {{ errors.properties.reason[0] }}
+            </div>
+          {% endif %}
+          <div class="validator-hint">
+            Mínimo 3 caracteres, máximo 500.
+          </div>
+        </div>
+
+        <div class="card-actions justify-end mt-6">
+          <a href="/global-blocks" class="btn btn-ghost">
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+            Crear bloqueo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
