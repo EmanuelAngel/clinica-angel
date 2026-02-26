@@ -1,6 +1,9 @@
 import z from "zod";
 import { services } from "../../_shared/infrastructure/services-container.js";
-import { validateCreateSchedule } from "./schedule.schemas.js";
+import {
+  validateCreateSchedule,
+  validateRegisterBlock,
+} from "./schedule.schemas.js";
 import {
   validateComparisonFilters,
   hasActiveFilters,
@@ -318,5 +321,51 @@ export class ScheduleController {
       () => res.json({ message: "Estado actualizado (simulado)" }),
       (error) => res.status(error.statusCode).json({ message: error.message })
     );
+  }
+
+  /**
+   * Registers a schedule block (unforeseen event) via JSON API.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async registerBlock(req, res) {
+    const scheduleId = parseInt(req.params.id);
+
+    if (isNaN(scheduleId)) {
+      return res.status(400).json({ message: "ID de agenda inválido" });
+    }
+
+    const validationResult = await validateRegisterBlock(req.body);
+
+    if (!validationResult.success) {
+      return res.status(422).json({
+        message: "Datos inválidos",
+        errors: validationResult.error.flatten().fieldErrors,
+      });
+    }
+
+    const result = await services.scheduleService.registerScheduleBlock(
+      scheduleId,
+      validationResult.data
+    );
+
+    result.match(
+      (data) =>
+        res.json({
+          message: `Bloqueo registrado. ${data.deletedFree} turnos libres eliminados, ${data.markedReschedule} turnos marcados para reasignar.`,
+          ...data,
+        }),
+      (error) => res.status(error.statusCode).json({ message: error.message })
+    );
+  }
+
+  /**
+   * Renders the reschedule inbox view.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async showRescheduleInbox(req, res) {
+    const slots = await services.scheduleService.getSlotsNeedingReschedule();
+    res.render("reschedule-inbox", { slots });
   }
 }

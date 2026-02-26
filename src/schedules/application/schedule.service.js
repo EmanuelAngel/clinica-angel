@@ -464,4 +464,56 @@ export class ScheduleService {
     // In the future: return this.scheduleRepository.updateSlotStatus(id, status);
     return ok();
   }
+
+  /**
+   * Registers a schedule block (unforeseen event) and handles affected slots.
+   * @param {number} scheduleId
+   * @param {{ startDate: Date, endDate: Date, reason: string }} data
+   * @returns {Promise<import("neverthrow").Result<
+   *   { deletedFree: number, markedReschedule: number },
+   *   ScheduleNotFoundError
+   * >>}
+   */
+  async registerScheduleBlock(scheduleId, data) {
+    const exists = await this.scheduleRepository.checkExist(scheduleId);
+
+    if (!exists) {
+      return err(new ScheduleNotFoundError(scheduleId));
+    }
+
+    const result = await this.scheduleRepository.registerScheduleBlock(
+      scheduleId,
+      data
+    );
+
+    return ok(result);
+  }
+
+  /**
+   * Gets all slots needing rescheduling with patient and schedule details.
+   * @returns {Promise<any[]>} Mapped slot data for the reschedule inbox view.
+   */
+  async getSlotsNeedingReschedule() {
+    const slots = await this.scheduleRepository.findSlotsNeedingReschedule();
+
+    return slots.map((slot) => ({
+      id: slot.id,
+      startsAt: slot.startsAt,
+      status: slot.status,
+      consultationReason: slot.consultationReason,
+      isOverbook: slot.isOverbook,
+      patient: slot.patient
+        ? {
+            fullName: `${slot.patient.firstNames} ${slot.patient.lastNames}`,
+            phone: slot.patient.phone,
+            email: slot.patient.email,
+          }
+        : null,
+      schedule: {
+        professionalName: `${slot.schedule.professional.user.firstNames} ${slot.schedule.professional.user.lastNames}`,
+        specialtyName: slot.schedule.professional.specialty.name,
+        locationName: slot.schedule.location.name,
+      },
+    }));
+  }
 }

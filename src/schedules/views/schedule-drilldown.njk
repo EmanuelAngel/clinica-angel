@@ -18,7 +18,11 @@
     </p>
   </div>
   {% if userRole == 'ADMIN' %}
-    <div class="flex items-center">
+    <div class="flex items-center gap-2">
+      <button class="btn btn-sm btn-outline btn-error gap-2" onclick="document.getElementById('block_modal').showModal()">
+        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+        Registrar Imprevisto
+      </button>
       <a href="/schedules/details/{{ schedule.id }}" class="btn btn-sm btn-outline btn-warning gap-2">
         <i data-lucide="edit-3" class="w-4 h-4"></i>
         Modificar agenda
@@ -376,6 +380,57 @@
     </div>
   </div>
 </dialog>
+
+{# Register Block Modal (Admin only) #}
+{% if userRole == 'ADMIN' %}
+<dialog id="block_modal" class="modal">
+  <div class="modal-box max-w-md">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+
+    <h3 class="text-lg font-bold flex items-center gap-2 mb-4">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-error"></i>
+      Registrar Imprevisto
+    </h3>
+
+    <form id="block_form" class="space-y-4">
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Fecha de inicio</span>
+        </label>
+        <input type="date" name="startDate" class="input input-bordered input-sm w-full" required />
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Fecha de fin</span>
+        </label>
+        <input type="date" name="endDate" class="input input-bordered input-sm w-full" required />
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Motivo del bloqueo</span>
+        </label>
+        <textarea name="reason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Enfermedad del profesional, feriado..." required minlength="3"></textarea>
+      </div>
+
+      <div id="block_result" class="hidden"></div>
+
+      <div class="modal-action">
+        <button type="submit" class="btn btn-error btn-sm" id="btn_block_submit">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          Confirmar Bloqueo
+        </button>
+        <form method="dialog">
+          <button class="btn btn-sm">Cancelar</button>
+        </form>
+      </div>
+    </form>
+  </div>
+</dialog>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -394,7 +449,8 @@
       'IN_PROGRESS': 'badge-info',
       'FULFILLED': 'badge-neutral',
       'ARRIVED': 'badge-accent',
-      'NO_SHOW': 'badge-error'
+      'NO_SHOW': 'badge-error',
+      'NEEDS_RESCHEDULE': 'badge-warning'
     };
 
     const statusLabels = {
@@ -405,7 +461,8 @@
       'IN_PROGRESS': 'En curso',
       'FULFILLED': 'Cumplido',
       'ARRIVED': 'Llegó',
-      'NO_SHOW': 'No asistió'
+      'NO_SHOW': 'No asistió',
+      'NEEDS_RESCHEDULE': 'A reasignar'
     };
 
     const TRANSITIONS = {
@@ -416,7 +473,8 @@
       'ARRIVED': ['start', 'release'],
       'NO_SHOW': ['release'],
       'IN_PROGRESS': ['fulfill', 'release'],
-      'FULFILLED': []
+      'FULFILLED': [],
+      'NEEDS_RESCHEDULE': ['release']
     };
 
     const ACTION_ENDPOINTS = {
@@ -709,6 +767,46 @@
         }
       });
     });
+
+    // Block registration form handler
+    const blockForm = document.getElementById('block_form');
+    if (blockForm) {
+      blockForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        const btn = document.getElementById('btn_block_submit');
+        const originalHTML = btn.innerHTML;
+        const resultDiv = document.getElementById('block_result');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span>';
+
+        try {
+          const response = await fetch(`/schedules/{{ schedule.id }}/blocks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          const result = await response.json();
+
+          if (!response.ok) throw new Error(result.message || 'Error al registrar el bloqueo');
+
+          showToast(result.message || 'Bloqueo registrado correctamente', 'success');
+          document.getElementById('block_modal').close();
+          e.target.reset();
+          setTimeout(() => window.location.reload(), 1000);
+        } catch (error) {
+          resultDiv.className = 'alert alert-error text-sm';
+          resultDiv.textContent = error.message;
+          resultDiv.classList.remove('hidden');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+          lucide.createIcons();
+        }
+      });
+    }
   });
 </script>
 {% endblock %}

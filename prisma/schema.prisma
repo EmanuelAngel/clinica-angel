@@ -25,10 +25,11 @@ enum SlotStatus {
   PROPOSED
   BOOKED
   CANCELLED
-  NO_SHOW     @map("NO-SHOW")
+  NO_SHOW          @map("NO-SHOW")
   ARRIVED
-  IN_PROGRESS @map("IN-PROGRESS")
+  IN_PROGRESS      @map("IN-PROGRESS")
   FULFILLED
+  NEEDS_RESCHEDULE @map("NEEDS-RESCHEDULE")
 }
 
 enum DayOfWeek {

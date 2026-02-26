@@ -24,4 +24,8 @@
  * Updates a slot's status.
  * @property {(from?: Date, to?: Date) => Promise<ScheduleBlock[]>} findGlobalBlocks
  * Finds all global blocks (those with scheduleId as null), optionally within a date range.
+ * @property {(scheduleId: number, blockData: { startDate: Date, endDate: Date, reason: string }) => Promise<{ deletedFree: number, markedReschedule: number }>} registerScheduleBlock
+ * Registers a schedule block and handles affected slots transactionally.
+ * @property {() => Promise<any[]>} findSlotsNeedingReschedule
+ * Finds all slots in NEEDS_RESCHEDULE status with patient and schedule details.
  */
