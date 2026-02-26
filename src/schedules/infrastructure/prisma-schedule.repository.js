@@ -592,4 +592,21 @@ export class PrismaScheduleRepository {
       },
     });
   }
+
+  /**
+   * Updates a schedule's configuration fields (overbooking and pause status).
+   * @param {number} id - Schedule ID.
+   * @param {object} data - Data to update.
+   * @returns {Promise<void>}
+   */
+  async updateConfig(id, data) {
+    await this.db.schedule.update({
+      where: { id },
+      data: {
+        maxOverbooksPerDay: data.maxOverbooksPerDay,
+        maxOverbooksPerSlot: data.maxOverbooksPerSlot,
+        isPaused: data.isPaused,
+      },
+    });
+  }
 }

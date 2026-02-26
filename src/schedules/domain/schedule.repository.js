@@ -28,4 +28,6 @@
  * Registers a schedule block and handles affected slots transactionally.
  * @property {() => Promise<any[]>} findSlotsNeedingReschedule
  * Finds all slots in NEEDS_RESCHEDULE status with patient and schedule details.
+ * @property {(id: number, data: { maxOverbooksPerDay?: number, maxOverbooksPerSlot?: number, isPaused?: boolean }) => Promise<void>} updateConfig
+ * Updates a schedule's configuration fields (overbooking and pause status).
  */

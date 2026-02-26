@@ -32,3 +32,4 @@ scheduleRouter.post(
   auth(Roles.ADMIN),
   scheduleController.registerBlock
 );
+scheduleRouter.patch("/:id", auth(Roles.ADMIN), scheduleController.update);

@@ -516,4 +516,22 @@ export class ScheduleService {
       },
     }));
   }
+
+  /**
+   * Updates a schedule's configuration (overbooking limits and pause status).
+   * @param {number} scheduleId
+   * @param {object} updateData
+   * @returns {Promise<import("neverthrow").Result<void, ScheduleNotFoundError>>}
+   */
+  async updateScheduleConfig(scheduleId, updateData) {
+    const exists = await this.scheduleRepository.checkExist(scheduleId);
+
+    if (!exists) {
+      return err(new ScheduleNotFoundError(scheduleId));
+    }
+
+    await this.scheduleRepository.updateConfig(scheduleId, updateData);
+
+    return ok();
+  }
 }
