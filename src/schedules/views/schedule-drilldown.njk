@@ -19,6 +19,10 @@
   </div>
   {% if userRole == 'ADMIN' %}
     <div class="flex items-center gap-2">
+      <button class="btn btn-sm btn-outline btn-primary gap-2" onclick="document.getElementById('edit_config_modal').showModal()">
+        <i data-lucide="settings-2" class="w-4 h-4"></i>
+        Editar Configuración
+      </button>
       <button class="btn btn-sm btn-outline btn-error gap-2" onclick="document.getElementById('block_modal').showModal()">
         <i data-lucide="alert-triangle" class="w-4 h-4"></i>
         Registrar Imprevisto
@@ -380,6 +384,58 @@
     </div>
   </div>
 </dialog>
+
+{# Edit Config Modal (Admin only) #}
+{% if userRole == 'ADMIN' %}
+<dialog id="edit_config_modal" class="modal">
+  <div class="modal-box max-w-md">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+
+    <h3 class="text-lg font-bold flex items-center gap-2 mb-4">
+      <i data-lucide="settings-2" class="w-5 h-5 text-primary"></i>
+      Editar Configuración de Agenda
+    </h3>
+
+    <form id="edit_config_form" class="space-y-4">
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Máx. Sobreturnos por Día</span>
+        </label>
+        <input type="number" name="maxOverbooksPerDay" class="input input-bordered input-sm w-full" value="{{ schedule.maxOverbooksPerDay }}" min="0" max="20" required />
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Máx. Sobreturnos por Turno</span>
+        </label>
+        <input type="number" name="maxOverbooksPerSlot" class="input input-bordered input-sm w-full" value="{{ schedule.maxOverbooksPerSlot }}" min="0" max="2" required />
+      </div>
+
+      <div class="form-control">
+        <label class="label cursor-pointer justify-start gap-4">
+          <span class="label-text font-semibold">Pausar Agenda</span>
+          <input type="checkbox" name="isPaused" class="toggle toggle-warning toggle-sm" {% if schedule.isPaused %}checked{% endif %} />
+        </label>
+        <p class="text-[10px] text-base-content/50 italic mt-1">
+          (Impide la creación de nuevos turnos temporalmente)
+        </p>
+      </div>
+
+      <div class="modal-action">
+        <button type="submit" class="btn btn-primary btn-sm" id="btn_config_submit">
+          <i data-lucide="save" class="w-4 h-4"></i>
+          Guardar Cambios
+        </button>
+        <form method="dialog">
+          <button class="btn btn-sm">Cancelar</button>
+        </form>
+      </div>
+    </form>
+  </div>
+</dialog>
+{% endif %}
 
 {# Register Block Modal (Admin only) #}
 {% if userRole == 'ADMIN' %}
@@ -767,6 +823,46 @@
         }
       });
     });
+
+    // Config update form handler
+    const configForm = document.getElementById('edit_config_form');
+    if (configForm) {
+      configForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+          maxOverbooksPerDay: parseInt(formData.get('maxOverbooksPerDay')),
+          maxOverbooksPerSlot: parseInt(formData.get('maxOverbooksPerSlot')),
+          isPaused: formData.get('isPaused') === 'on'
+        };
+        const btn = document.getElementById('btn_config_submit');
+        const originalHTML = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span>';
+
+        try {
+          const response = await fetch(`/schedules/{{ schedule.id }}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          const result = await response.json();
+
+          if (!response.ok) throw new Error(result.message || 'Error al actualizar la configuración');
+
+          showToast(result.message || 'Configuración actualizada correctamente', 'success');
+          document.getElementById('edit_config_modal').close();
+          setTimeout(() => window.location.reload(), 1000);
+        } catch (error) {
+          showToast(error.message, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+          lucide.createIcons();
+        }
+      });
+    }
 
     // Block registration form handler
     const blockForm = document.getElementById('block_form');

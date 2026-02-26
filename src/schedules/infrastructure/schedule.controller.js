@@ -3,6 +3,7 @@ import { services } from "../../_shared/infrastructure/services-container.js";
 import {
   validateCreateSchedule,
   validateRegisterBlock,
+  validateUpdateSchedule,
 } from "./schedule.schemas.js";
 import {
   validateComparisonFilters,
@@ -367,5 +368,37 @@ export class ScheduleController {
   async showRescheduleInbox(req, res) {
     const slots = await services.scheduleService.getSlotsNeedingReschedule();
     res.render("reschedule-inbox", { slots });
+  }
+
+  /**
+   * Updates a schedule configuration via JSON API.
+   * @param {import("express").Request} req
+   * @param {import("express").Response} res
+   */
+  async update(req, res) {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "ID de agenda inválido" });
+    }
+
+    const validationResult = await validateUpdateSchedule(req.body);
+
+    if (!validationResult.success) {
+      return res.status(422).json({
+        message: "Datos inválidos",
+        errors: validationResult.error.flatten().fieldErrors,
+      });
+    }
+
+    const result = await services.scheduleService.updateScheduleConfig(
+      id,
+      validationResult.data
+    );
+
+    result.match(
+      () => res.json({ message: "Configuración de agenda actualizada." }),
+      (error) => res.status(error.statusCode).json({ message: error.message })
+    );
   }
 }

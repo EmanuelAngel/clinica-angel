@@ -227,3 +227,40 @@ export const registerBlockSchema = z
 export async function validateRegisterBlock(body) {
   return registerBlockSchema.safeParseAsync(body);
 }
+
+/**
+ * Schema for updating safe schedule configuration fields.
+ */
+export const updateScheduleSchema = z.object({
+  maxOverbooksPerDay: z.coerce
+    .number()
+    .min(0, "Mínimo 0")
+    .max(20, "Máximo 20 sobreturnos por día")
+    .optional(),
+  maxOverbooksPerSlot: z.coerce
+    .number()
+    .min(0, "Mínimo 0")
+    .max(2, "Máximo 2 sobreturnos por horario")
+    .optional(),
+  isPaused: z.boolean().optional(),
+});
+
+/**
+ * Successfully validated update schedule data type.
+ * @typedef {z.infer<typeof updateScheduleSchema>} UpdateScheduleDTO
+ */
+
+/**
+ * Validates the update schedule data.
+ * @param {unknown} body Data to validate.
+ * @returns {Promise<{
+ *   success: true;
+ *   data: UpdateScheduleDTO;
+ * } | {
+ *   success: false;
+ *   error: import('zod').ZodError;
+ * }>}
+ */
+export async function validateUpdateSchedule(body) {
+  return updateScheduleSchema.safeParseAsync(body);
+}
