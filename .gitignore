@@ -142,3 +142,6 @@ vite.config.ts.timestamp-*
 
 # Tailwind CSS output
 src/_assets/css/output.css
+
+# Patients national ID image uploads
+src/assets/uploads
