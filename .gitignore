@@ -144,4 +144,4 @@ vite.config.ts.timestamp-*
 src/_assets/css/output.css
 
 # Patients national ID image uploads
-src/assets/uploads
+src/_assets/uploads
