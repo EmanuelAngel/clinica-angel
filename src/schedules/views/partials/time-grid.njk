@@ -19,13 +19,13 @@
             
             {# Schedule Headers #}
             {% for schedule in schedules %}
-              <th class="bg-base-200 min-w-[200px] text-center">
-                <div class="flex flex-col gap-1">
-                  <div class="flex items-center justify-center gap-1 text-sm">
+              <th class="bg-base-200 min-w-[200px] text-center p-0">
+                <a href="/schedules/{{ schedule.id }}/agenda" class="flex flex-col gap-1 p-2 hover:bg-base-300 transition-colors cursor-pointer group">
+                  <div class="flex items-center justify-center gap-1 text-sm font-bold text-primary group-hover:underline">
                     <i data-lucide="user-star" class="size-3"></i>
                     {{ schedule.professionalName }}
                   </div>
-                  <div class="flex items-center justify-center gap-1 text-sm">
+                  <div class="flex items-center justify-center gap-1 text-xs">
                     <i data-lucide="star" class="size-3"></i>
                     {{ schedule.specialtyName }}
                   </div>
@@ -33,14 +33,14 @@
                     <i data-lucide="map-pin" class="w-3 h-3"></i>
                     {{ schedule.locationName }}
                   </div>
-                  <div class="flex items-center justify-center gap-1 text-xs">
+                  <div class="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wider text-base-content/60">
                     <i data-lucide="tag" class="size-3"></i>
-                    {{ schedule.classificationName | upper }}
+                    {{ schedule.classificationName }}
                     {% if schedule.isPaused %}
-                      <span class="badge badge-xs badge-warning">Pausada</span>
+                      <span class="badge badge-xs badge-warning ml-1">Pausada</span>
                     {% endif %}
                   </div>
-                </div>
+                </a>
               </th>
             {% endfor %}
           </tr>
