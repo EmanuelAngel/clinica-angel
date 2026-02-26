@@ -11,6 +11,9 @@ import {
   UnauthorizedSlotActionError,
   SlotNotFreeError,
   FulfilledSlotImmutableError,
+  OverbookSlotNotBookedError,
+  OverbookPerSlotLimitError,
+  OverbookPerDayLimitError,
 } from "../domain/slot.errors.js";
 
 /**
@@ -280,5 +283,73 @@ export class SlotService {
     // Release slot (clears patient data)
     await this.slotRepository.release(slotId);
     return ok();
+  }
+
+  /**
+   * Create an overbook slot from an existing BOOKED slot.
+   * @param {number} sourceSlotId - ID of the source BOOKED slot.
+   * @param {number} patientId - Patient ID for the overbook.
+   * @param {string} consultationReason - Consultation reason.
+   * @returns {Promise<Result<number,
+   *   SlotNotFoundError |
+   *   OverbookSlotNotBookedError |
+   *   OverbookPerSlotLimitError |
+   *   OverbookPerDayLimitError
+   * >>}
+   */
+  async createOverbook(sourceSlotId, patientId, consultationReason) {
+    // Find source slot
+    const sourceSlot = await this.slotRepository.findById(sourceSlotId);
+    if (!sourceSlot) {
+      return err(new SlotNotFoundError(sourceSlotId));
+    }
+
+    // Source slot must be PROPOSED
+    if (sourceSlot.status !== SlotStatus.PROPOSED) {
+      return err(new OverbookSlotNotBookedError());
+    }
+
+    // Get schedule limits
+    const limits = await this.slotRepository.findScheduleLimits(
+      sourceSlot.scheduleId
+    );
+    if (!limits) {
+      return err(new SlotNotFoundError(sourceSlotId));
+    }
+
+    // Per-slot limit
+    const overbooksAtTime =
+      await this.slotRepository.countActiveOverbooksByTime(
+        sourceSlot.scheduleId,
+        sourceSlot.startsAt
+      );
+    if (overbooksAtTime >= limits.maxOverbooksPerSlot) {
+      return err(new OverbookPerSlotLimitError());
+    }
+
+    // Per-day limit
+    const dayStart = new Date(sourceSlot.startsAt);
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+
+    const overbooksOnDay = await this.slotRepository.countActiveOverbooksByDay(
+      sourceSlot.scheduleId,
+      dayStart,
+      dayEnd
+    );
+    if (overbooksOnDay >= limits.maxOverbooksPerDay) {
+      return err(new OverbookPerDayLimitError());
+    }
+
+    // Create overbook
+    const newSlotId = await this.slotRepository.createOverbook({
+      scheduleId: sourceSlot.scheduleId,
+      startsAt: sourceSlot.startsAt,
+      patientId,
+      consultationReason,
+    });
+
+    return ok(newSlotId);
   }
 }

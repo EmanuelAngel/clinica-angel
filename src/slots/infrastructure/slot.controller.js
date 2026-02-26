@@ -1,4 +1,4 @@
-import { ReserveSlotSchema } from "./slot.schemas.js";
+import { ReserveSlotSchema, CreateOverbookSchema } from "./slot.schemas.js";
 import { Roles } from "../../auth/domain/roles.js";
 import { services } from "../../_shared/infrastructure/services-container.js";
 
@@ -224,6 +224,46 @@ export class SlotController {
     }
 
     res.status(200).json({ message: "Turno liberado exitosamente." });
+    return;
+  }
+
+  /**
+   * POST /api/v1/slots/:id/overbook
+   * @param {AuthenticatedRequest} req
+   * @param {Response} res
+   * @param {NextFunction} _next
+   * @returns {Promise<void>}
+   */
+  async createOverbook(req, res, _next) {
+    const sourceSlotId = parseInt(req.params.id, 10);
+
+    // Validate body
+    const parseResult = CreateOverbookSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(422).json({
+        message: parseResult.error.issues[0].message,
+      });
+      return;
+    }
+
+    const { patientId, consultationReason } = parseResult.data;
+
+    const result = await services.slotService.createOverbook(
+      sourceSlotId,
+      patientId,
+      consultationReason
+    );
+
+    if (result.isErr()) {
+      const error = result.error;
+      res.status(error.statusCode).json({ message: error.message });
+      return;
+    }
+
+    res.status(201).json({
+      message: "Sobreturno creado exitosamente.",
+      overbookSlotId: result.value,
+    });
     return;
   }
 }

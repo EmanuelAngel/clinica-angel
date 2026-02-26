@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { SlotController } from "./slot.controller.js";
 import { auth } from "../../auth/infrastructure/auth.middleware.js";
+import { Roles } from "../../auth/domain/roles.js";
 
 export const slotRouter = Router();
 const slotController = new SlotController();
@@ -21,3 +22,10 @@ slotRouter.patch("/:id/fulfill", slotController.markFulfilled);
 
 // POST /api/v1/slots/:id/release - Release a slot (hard reset)
 slotRouter.post("/:id/release", slotController.release);
+
+// POST /api/v1/slots/:id/overbook - Create an overbook (ADMIN/SECRETARY only)
+slotRouter.post(
+  "/:id/overbook",
+  auth(Roles.ADMIN, Roles.SECRETARY),
+  slotController.createOverbook
+);
