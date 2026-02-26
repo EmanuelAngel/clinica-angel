@@ -28,11 +28,11 @@ describe("Auth middleware integration", () => {
   });
 
   test("returns 403 when user role is not authorized", async () => {
-    const secretaryToken = generateToken({ sub: 1, role: Roles.SECRETARY });
+    const patientToken = generateToken({ sub: 1, role: Roles.PATIENT });
 
     const response = await request(app)
       .get("/users")
-      .set("Cookie", `access_token=${secretaryToken}`);
+      .set("Cookie", `access_token=${patientToken}`);
 
     expect(response.status).toBe(403);
   });

@@ -26,7 +26,7 @@ viewsRouter.get("/", (req, res) => {
   res.render("home");
 });
 
-viewsRouter.use("/users", auth(Roles.ADMIN), userRouter);
+viewsRouter.use("/users", auth(Roles.ADMIN, Roles.SECRETARY), userRouter);
 viewsRouter.use("/auth", authRouter);
 viewsRouter.use("/patients", patientRouter);
 viewsRouter.use("/specialties", auth(Roles.ADMIN), specialtyRouter);

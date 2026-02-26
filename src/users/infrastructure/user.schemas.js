@@ -86,3 +86,30 @@ export const baseUserRegistrationSchema = commonUserFields.extend({
 export async function validateBaseUserRegistration(body) {
   return baseUserRegistrationSchema.safeParseAsync(body);
 }
+
+/**
+ * Successfully validated update profile data type.
+ * @typedef {z.infer<typeof updateProfileSchema>} UpdateProfileDTO
+ */
+
+export const updateProfileSchema = commonUserFields.pick({
+  firstNames: true,
+  lastNames: true,
+  phone: true,
+  address: true,
+});
+
+/**
+ * Validates the profile update data.
+ * @param {unknown} body Update data.
+ * @returns {Promise<{
+ *   success: true;
+ *   data: UpdateProfileDTO;
+ * } | {
+ *   success: false;
+ *   error: import('zod').ZodError;
+ * }>} Resultado de la validación segura.
+ */
+export async function validateUpdateProfile(body) {
+  return updateProfileSchema.safeParseAsync(body);
+}

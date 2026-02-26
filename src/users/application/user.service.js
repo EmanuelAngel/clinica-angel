@@ -91,4 +91,23 @@ export class UserService {
 
     return ok(user);
   }
+
+  /**
+   * Update a user's basic profile info.
+   * @param {number} id User ID.
+   * @param {import("../infrastructure/user.schemas.js").UpdateProfileDTO} data Updated fields.
+   * @returns {Promise<import("neverthrow").Result<void, UserNotFoundError>>}
+   * Returns void when the user is successfully updated.
+   * - `UserNotFoundError` The user does not exist.
+   */
+  async updateProfile(id, data) {
+    const user = await this.userRepository.findById(id);
+
+    if (!user) {
+      return err(new UserNotFoundError(id));
+    }
+
+    await this.userRepository.update(id, data);
+    return ok(undefined);
+  }
 }
