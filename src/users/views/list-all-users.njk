@@ -51,7 +51,7 @@
             </td>
             <td>
               {% if user.role === Roles.PROFESSIONAL %}
-                <a href="/professionals/{{ user.id }}" class="link link-primary">
+                <a href="/professionals/{{ user.id }}/profile" class="link link-primary">
                   Ir al perfil
                 </a>                
               {% elif user.role === Roles.PATIENT %}
