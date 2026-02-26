@@ -185,7 +185,7 @@ describe("Professional integration tests", () => {
     });
   });
 
-  describe("GET /professionals/:id", () => {
+  describe("GET /professionals/:id/profile", () => {
     test("shows professional profile", async () => {
       const pro = await prisma.user.create({
         data: {
@@ -201,7 +201,7 @@ describe("Professional integration tests", () => {
       });
 
       const response = await request(app)
-        .get(`/professionals/${pro.id}`)
+        .get(`/professionals/${pro.id}/profile`)
         .set("Cookie", `access_token=${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -210,7 +210,7 @@ describe("Professional integration tests", () => {
 
     test("returns 404 for non-existent professional", async () => {
       const response = await request(app)
-        .get("/professionals/99999")
+        .get("/professionals/99999/profile")
         .set("Cookie", `access_token=${adminToken}`);
 
       expect(response.status).toBe(404);

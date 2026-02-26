@@ -43,3 +43,38 @@ export const createProfessionalSchema = commonUserFields.extend({
 export async function validateCreateProfessional(body) {
   return createProfessionalSchema.safeParseAsync(body);
 }
+
+/**
+ * Schema for adding a specialty to an existing professional.
+ */
+export const addSpecialtySchema = z.object({
+  specialtyId: z.coerce
+    .number({ error: "La especialidad es requerida" })
+    .int()
+    .positive("Seleccione una especialidad válida"),
+  licenseNumber: z
+    .string({ error: "El número de matrícula es requerido" })
+    .trim()
+    .min(1, "El número de matrícula es requerido")
+    .max(50, "El número de matrícula no puede tener más de 50 caracteres"),
+});
+
+/**
+ * Successfully validated add specialty data type.
+ * @typedef {z.infer<typeof addSpecialtySchema>} AddSpecialtyDTO
+ */
+
+/**
+ * Validates the add specialty data.
+ * @param {unknown} body Data to validate.
+ * @returns {Promise<{
+ *   success: true;
+ *   data: AddSpecialtyDTO;
+ * } | {
+ *   success: false;
+ *   error: import('zod').ZodError;
+ * }>}
+ */
+export async function validateAddSpecialty(body) {
+  return addSpecialtySchema.safeParseAsync(body);
+}

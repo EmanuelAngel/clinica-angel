@@ -10,4 +10,8 @@
  * Find credential by license number or return null.
  * @property {function(Professional, string): Promise<Professional>} create
  * Create a new professional with user data and hashed password. Returns the created professional.
+ * @property {function(number, number, string): Promise<ProfessionalCredential>} addSpecialty
+ * Add a specialty credential to a professional. Params: (userId, specialtyId, licenseNumber).
+ * @property {function(number): Promise<any | null>} findByIdWithSlots
+ * Find by user ID with deep nested slots (professionalCredentials → schedules → slots → patient + insurance).
  */

@@ -94,9 +94,9 @@ export class PrismaProfessionalRepository {
 
   /**
    * Create a new professional with user data and hashed password.
-   * @param {Professional} professional
-   * @param {string} passwordHash
-   * @returns {Promise<Professional>}
+   * @param {Professional} professional - The professional domain model.
+   * @param {string} passwordHash - Hashed password.
+   * @returns {Promise<Professional>} The created professional.
    */
   async create(professional, passwordHash) {
     const created = await this.db.user.create({
@@ -126,6 +126,77 @@ export class PrismaProfessionalRepository {
     });
 
     return this.mapToDomain(created);
+  }
+
+  /**
+   * Add a specialty credential to a professional.
+   * @param {number} userId
+   * @param {number} specialtyId
+   * @param {string} licenseNumber
+   * @returns {Promise<ProfessionalCredential>}
+   */
+  async addSpecialty(userId, specialtyId, licenseNumber) {
+    const created = await this.db.professionalSpecialty.create({
+      data: {
+        licenseNumber,
+        userId,
+        specialtyId,
+      },
+      include: {
+        specialty: true,
+      },
+    });
+
+    return new ProfessionalCredential(
+      created.licenseNumber,
+      created.specialtyId,
+      created.specialty.name
+    );
+  }
+
+  /**
+   * Find professional by ID with deep nested slots for agenda display.
+   * @param {number} id - User ID.
+   * @returns {Promise<any | null>} Raw Prisma result with nested relations.
+   */
+  async findByIdWithSlots(id) {
+    return this.db.user.findUnique({
+      where: {
+        id,
+        role: Roles.PROFESSIONAL,
+      },
+      include: {
+        professionalCredentials: {
+          include: {
+            specialty: true,
+            schedules: {
+              include: {
+                classification: true,
+                slots: {
+                  where: {
+                    patientId: { not: null },
+                  },
+                  include: {
+                    patient: {
+                      include: {
+                        patientInsurances: {
+                          include: {
+                            insurance: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                  orderBy: {
+                    startsAt: "asc",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
   /**
