@@ -1,5 +1,6 @@
 /**
  * @typedef {import("../domain/schedule.model.js").Schedule} Schedule
+ * @typedef {import("../domain/schedule.model.js").ScheduleBlock} ScheduleBlock
  * @typedef {import("../domain/schedule.model.js").Slot} Slot
  * @typedef {import("../infrastructure/schedule-comparison.schemas.js").ComparisonFilters} ComparisonFilters
  * @typedef {object} ScheduleRepository
@@ -19,4 +20,6 @@
  * Finds a slot by its ID with full details.
  * @property {(id: number, status: string) => Promise<void>} updateSlotStatus
  * Updates a slot's status.
+ * @property {(from?: Date, to?: Date) => Promise<ScheduleBlock[]>} findGlobalBlocks
+ * Finds all global blocks (those with scheduleId as null), optionally within a date range.
  */

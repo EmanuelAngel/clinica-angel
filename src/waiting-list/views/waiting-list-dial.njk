@@ -28,6 +28,14 @@
       <i data-lucide="list" class="w-5 h-5"></i>
     </button>
   </div>
+  {% if user.role == Roles.ADMIN %}
+  <div>
+    Gestionar Bloqueos Globales
+    <a href="/global-blocks" class="btn btn-lg btn-circle">
+      <i data-lucide="calendar-off" class="w-5 h-5"></i>
+    </a>
+  </div>
+  {% endif %}
 </div>
 
 {# ─── Modal A: Assignment Form ─── #}

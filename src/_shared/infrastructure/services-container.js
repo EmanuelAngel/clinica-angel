@@ -33,6 +33,9 @@ import { SlotService } from "../../slots/application/slot.service.js";
 import { PrismaWaitingListRepository } from "../../waiting-list/infrastructure/prisma-waiting-list.repository.js";
 import { WaitingListService } from "../../waiting-list/application/waiting-list.service.js";
 
+import { PrismaGlobalBlockRepository } from "../../global-blocks/infrastructure/prisma-global-block.repository.js";
+import { GlobalBlockService } from "../../global-blocks/application/global-block.service.js";
+
 const prismaUserRepository = new PrismaUserRepository(prisma);
 const bcryptPasswordHasher = new BcryptPasswordHasher(env.SALT_ROUNDS);
 const userService = new UserService(prismaUserRepository, bcryptPasswordHasher);
@@ -87,6 +90,9 @@ const waitingListService = new WaitingListService(
   prismaPatientRepository
 );
 
+const prismaGlobalBlockRepository = new PrismaGlobalBlockRepository(prisma);
+const globalBlockService = new GlobalBlockService(prismaGlobalBlockRepository);
+
 export const services = {
   patientService,
   healthInsuranceService,
@@ -99,4 +105,5 @@ export const services = {
   scheduleService,
   slotService,
   waitingListService,
+  globalBlockService,
 };

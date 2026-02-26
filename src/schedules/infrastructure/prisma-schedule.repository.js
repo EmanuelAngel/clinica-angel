@@ -393,4 +393,35 @@ export class PrismaScheduleRepository {
     // Method signature only for now as requested by user.
     // In the future: await this.db.slot.update({ where: { id }, data: { status } });
   }
+
+  /**
+   * Finds all global blocks (those with scheduleId as null), optionally within a date range.
+   * @param {Date} [from]
+   * @param {Date} [to]
+   * @returns {Promise<ScheduleBlock[]>}
+   */
+  async findGlobalBlocks(from, to) {
+    /** @type {import("../../../generated/prisma/index.js").Prisma.ScheduleBlockWhereInput} */
+    const where = {
+      scheduleId: null,
+    };
+
+    if (from && to) {
+      where.startDate = { lte: to };
+      where.endDate = { gte: from };
+    }
+
+    const blocks = await this.db.scheduleBlock.findMany({
+      where,
+    });
+
+    return blocks.map(
+      (b) =>
+        new ScheduleBlock({
+          startDate: b.startDate,
+          endDate: b.endDate,
+          reason: b.reason,
+        })
+    );
+  }
 }
