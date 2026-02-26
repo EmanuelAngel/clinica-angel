@@ -17,12 +17,12 @@ El proyecto sigue una estructura modular basada en dominios, facilitando la esca
 
 ```mermaid
 graph TD
-    User((Usuario/Paciente)) --> |HTTP Requests| Express[Express.js Server]
-    Express --> |Validation (Zod)| Controllers[Controllers]
-    Controllers --> |Business Logic| Services[Application Services]
-    Services --> |Data Access| Repositories[Repositories]
-    Repositories --> |ORM| Prisma[Prisma ORM]
-    Prisma --> |SQL| MariaDB[(MariaDB Database)]
+    User((Usuario/Paciente)) --> |"HTTP Requests"| Express[Express.js Server]
+    Express --> |"Validation (Zod)"| Controllers[Controllers]
+    Controllers --> |"Business Logic"| Services[Application Services]
+    Services --> |"Data Access"| Repositories[Repositories]
+    Repositories --> |"ORM"| Prisma[Prisma ORM]
+    Prisma --> |"SQL"| MariaDB[(MariaDB Database)]
 
     subgraph "Error Handling"
         Results[Neverthrow: Result Object]
