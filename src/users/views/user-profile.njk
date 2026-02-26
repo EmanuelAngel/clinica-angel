@@ -2,21 +2,109 @@
 
 {% block pageInfo %}
   {% import "partials/page-info.njk" as PageInfo %}
-  {{ PageInfo.titleAndDescription(user.fullName, "Viendo el perfil de " + user.fullName + " [" + user.role + "].") }}
+  {{ PageInfo.titleAndDescription(user.fullName, "Perfil de usuario") }}
 {% endblock %}
 
 {% block content %}
-  <div class="w-full max-w-3xl mx-auto space-y-8">
+  <div class="w-full max-w-3xl mx-auto space-y-6">
+
+    {# Header card with name, role badge, and status badge #}
     <div class="card bg-base-200 shadow-md">
       <div class="card-body">
-        <h2 class="card-title">Información Personal</h2>
-        <p><strong>Nombres:</strong> {{ user.firstNames }}</p>
-        <p><strong>Apellidos:</strong> {{ user.lastNames }}</p>
-        <p><strong>DNI:</strong> {{ user.nationalId }}</p>
-        <p><strong>Correo Electrónico:</strong> {{ user.email }}</p>
-        <p><strong>Teléfono:</strong> {{ user.phone }}</p>
-        <p><strong>Dirección:</strong> {{ user.address }}</p>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="card-title text-2xl">{{ user.fullName }}</h2>
+            <p class="text-sm text-base-content/60">ID: {{ user.id }}</p>
+          </div>
+          <div class="flex gap-2">
+            {% import "partials/role-badge.njk" as RoleBadge %}
+            {{ RoleBadge.badge(user.role) }}
+            {% import "partials/user-status-badge.njk" as UserStatus %}
+            {{ UserStatus.badge(user.isActive) }}
+          </div>
+        </div>
       </div>
     </div>
+
+    {# Personal information card #}
+    <div class="card bg-base-200 shadow-md">
+      <div class="card-body">
+        <h3 class="card-title text-lg mb-4">
+          <i data-lucide="user" class="w-5 h-5"></i>
+          Información Personal
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+          <div>
+            <p class="text-sm text-base-content/60">Nombres</p>
+            <p class="font-medium">{{ user.firstNames }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-base-content/60">Apellidos</p>
+            <p class="font-medium">{{ user.lastNames }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-base-content/60">DNI</p>
+            <p class="font-medium">{{ user.nationalId }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-base-content/60">Correo Electrónico</p>
+            <p class="font-medium">{{ user.email }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Contact information card #}
+    <div class="card bg-base-200 shadow-md">
+      <div class="card-body">
+        <h3 class="card-title text-lg mb-4">
+          <i data-lucide="phone" class="w-5 h-5"></i>
+          Información de Contacto
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+          <div>
+            <p class="text-sm text-base-content/60">Teléfono</p>
+            <p class="font-medium">{{ user.phone }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-base-content/60">Dirección</p>
+            <p class="font-medium">{{ user.address }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Account information card #}
+    <div class="card bg-base-200 shadow-md">
+      <div class="card-body">
+        <h3 class="card-title text-lg mb-4">
+          <i data-lucide="shield" class="w-5 h-5"></i>
+          Información de Cuenta
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+          <div>
+            <p class="text-sm text-base-content/60">Rol</p>
+            <p class="font-medium">{{ user.role }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-base-content/60">Fecha de Registro</p>
+            <p class="font-medium">{{ user.registeredAt | date }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Action buttons #}
+    <div class="flex gap-4">
+      <a href="/users/{{ user.id }}/edit" class="btn btn-primary">
+        <i data-lucide="pencil" class="w-4 h-4"></i>
+        Editar perfil
+      </a>
+      <a href="/users" class="btn btn-ghost">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Volver a la lista
+      </a>
+    </div>
+
   </div>
 {% endblock %}

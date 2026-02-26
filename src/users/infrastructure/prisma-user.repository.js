@@ -99,6 +99,24 @@ export class PrismaUserRepository {
   }
 
   /**
+   * Update a user's basic info.
+   * @param {number} id User ID.
+   * @param {import("./user.schemas.js").UpdateProfileDTO} data Updated fields.
+   * @returns {Promise<void>}
+   */
+  async update(id, data) {
+    await this.db.user.update({
+      where: { id },
+      data: {
+        firstNames: data.firstNames,
+        lastNames: data.lastNames,
+        phone: data.phone,
+        address: data.address,
+      },
+    });
+  }
+
+  /**
    * Maps a Prisma user to the domain model.
    * @param {PrismaUser} fromPrisma
    * @returns {User} The domain model.

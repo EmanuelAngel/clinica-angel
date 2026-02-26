@@ -7,97 +7,131 @@
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)
 
-Plataforma enfocada en la autogestión de pacientes y la administración eficiente de turnos médicos por secretaría. Diseñada con un enfoque estricto en la validación de datos, la privacidad de los usuarios y la mantenibilidad del código.
+Plataforma integral enfocada en la **autogestión de pacientes** y la **administración eficiente** de turnos médicos. Este sistema ha sido diseñado bajo principios de Arquitectura Limpia, priorizando la robustez mediante validación estricta y manejo funcional de errores.
 
-Proyecto desarrollado para la asignatura "Laboratorio 2" la cual integra conocimientos de desarrollo backend y gestión de bases de datos, para la Universidad de La Punta, San Luis, Argentina.
+---
 
-## 📋 Características Principales
+## 🏗️ Arquitectura del Sistema
 
-- **Autogestión de Pacientes:** Registro seguro, autenticación y gestión del perfil personal.
-- **Administración de Turnos:** Sistema intuitivo para la reserva, visualización y cancelación de citas médicas.
-- **Privacidad y Seguridad:** Manejo de datos sensibles mediante encriptación (Bcrypt), autenticación por tokens (JWT) y validación estricta de esquemas.
-- **Manejo Seguro de Errores:** Implementación de flujos predecibles para garantizar la estabilidad del sistema y evitar la exposición de datos internos.
+El proyecto sigue una estructura modular basada en dominios, facilitando la escalabilidad y el mantenimiento.
 
-## 🛠️ Stack Tecnológico
+```mermaid
+graph TD
+    User((Usuario/Paciente)) --> |HTTP Requests| Express[Express.js Server]
+    Express --> |Validation (Zod)| Controllers[Controllers]
+    Controllers --> |Business Logic| Services[Application Services]
+    Services --> |Data Access| Repositories[Repositories]
+    Repositories --> |ORM| Prisma[Prisma ORM]
+    Prisma --> |SQL| MariaDB[(MariaDB Database)]
 
-- **Backend:** Node.js con Express.js.
-- **Base de Datos:** MariaDB (gestión local recomendada vía XAMPP).
-- **ORM:** Prisma para un acceso a datos tipado y seguro.
-- **Frontend (Views):** Nunjucks, estilizado con TailwindCSS y componentes de DaisyUI.
-- **Validación y Utilidades:** Zod (esquemas), Neverthrow (manejo de resultados/errores).
-- **Calidad y Testing:** Jest, Supertest, ESLint, Prettier y Husky para pre-commit hooks.
+    subgraph "Error Handling"
+        Results[Neverthrow: Result Object]
+        GlobalHandler[Global Error Middleware]
+    end
 
-## 📚 Documentación Técnica
+    Services -.-> Results
+    Controllers -.-> GlobalHandler
+```
 
-Para conocer a fondo el modelado de datos y las decisiones detrás de la construcción de este sistema, puedes consultar nuestra documentación extendida:
+---
 
-// TODO: Enlazar Notion Page
+## 📁 Estructura del Proyecto
 
-En esta documentación encontrarás:
+Organización inspirada en los principios de "Screaming Architecture", donde la estructura revela la intención del sistema:
 
-- Consigna del proyecto.
-- Decisiones de Arquitectura (Trade-offs, pros y contras).
-- Diagramas Entidad-Relación (DER) y de Clases.
-- Requisitos Funcionales y No Funcionales.
+```text
+src/
+├── _assets/          # Recursos estáticos (CSS, JS cliente, imágenes)
+├── _shared/          # Código compartido (Errores, Middleware, Layouts)
+│   ├── application/  # Lógica de aplicación transversal
+│   ├── infrastructure/ # Implementaciones técnicas (Env, DB config)
+│   └── views/        # Plantillas base y componentes compartidos
+├── [modulo]/         # Módulos por dominio (auth, patients, schedules, etc.)
+│   ├── domain/       # Entidades e interfaces de repositorio
+│   ├── application/  # Casos de uso y servicios del dominio
+│   ├── infrastructure/ # Rutas, Controladores e implementaciones Prisma
+│   └── views/        # Plantillas Nunjucks específicas del dominio
+├── app.js            # Configuración principal de Express
+└── server.js         # Entry point del servidor
+```
 
-## 🚀 Instalación y Despliegue Local
+---
+
+## 🚀 Excelencia Técnica
+
+Para garantizar un código de grado industrial, implementamos:
+
+- **Validación Estricta (Zod):** Todo dato externo (Request Body, Env Vars) es validado contra esquemas rígidos antes de entrar al dominio.
+- **Manejo Funcional de Errores (Neverthrow):** Eliminamos el uso de `try/catch` para lógica de negocio, utilizando objetos `Result` que fuerzan el manejo de errores de forma explícita y tipada.
+- **Manejo Seguro de Sesiones:** Autenticación mediante JWT con almacenamiento persistente en cookies `HttpOnly` y `Secure`.
+- **UI Reactiva:** Vistas rápidas mediante Nunjucks (SSR) potenciadas con TailwindCSS y DaisyUI para una experiencia premium.
+
+---
+
+## 🔧 Configuración y Despliegue
 
 ### Requisitos Previos
 
-- [Node.js](https://nodejs.org/) (**estrictamente** v20.19.6 o superior)
-- [XAMPP](https://www.apachefriends.org/) (o cualquier servidor local de MariaDB/MySQL)
-- [pnpm](https://pnpm.io/) (Gestor de paquetes utilizado en el proyecto, aunque también funciona con otros como npm y bun).
+- **Node.js**: v20.19.6+
+- **Database**: MariaDB / MySQL (XAMPP recomendado)
+- **Gestor de Paquetes**: `pnpm` (recomendado)
 
-### Pasos de Ejecución
+### Variables de Entorno (.env)
 
-1. **Clonar el repositorio:**
+| Variable                  | Descripción                        | Ejemplo                                      |
+| :------------------------ | :--------------------------------- | :------------------------------------------- |
+| `PORT`                    | Puerto de escucha                  | `3000`                                       |
+| `MYSQL_CONNECTION_STRING` | URL de conexión Prisma             | `mysql://root:@localhost:3306/clinica_angel` |
+| `JWT_SECRET`              | Secreto para tokens (Min 32 chars) | `tu_secreto_super_seguro_minimo_32`          |
+| `JWT_EXPIRES`             | Tiempo de expiración del token     | `1h`, `7d`                                   |
 
-```bash
-git clone https://github.com/EmanuelAngel/clinica-angel.git
-cd clinica-angel
-```
+### Pasos de Instalación
 
-2. **Instalar dependencias:**
-
-```bash
-pnpm install
-```
-
-3. **Configurar la Base de Datos:**
-   - Inicia el módulo de **MySQL/MariaDB** desde el panel de control de XAMPP.
-   - Copia el archivo de variables de entorno y ajusta las credenciales:
-     ```bash
-         cp .env.example .env
-     ```
-     _(Asegúrate de que `DATABASE_URL` apunte a tu instancia local de XAMPP, por ejemplo: `mysql://root:@localhost:3306/clinica_angel`)_
-
-4. **Ejecutar migraciones y poblar la base de datos (Seed):**
-
-```bash
-npx prisma migrate dev
-pnpm run db:seed
-```
-
-5. **Compilar los estilos e Iniciar el servidor:**
-   Para compilar Tailwind y correr el servidor en modo desarrollo:
+1. **Clonar e Instalar:**
 
    ```bash
-   pnpm run css:build
-   pnpm run dev
+   git clone https://github.com/EmanuelAngel/clinica-angel.git
+   cd clinica-angel
+   pnpm install
    ```
 
-   La aplicación estará disponible en `http://localhost:3000` (o el puerto configurado).
+2. **Base de Datos:**
 
-## 🧪 Testing
+   ```bash
+   cp .env.example .env
+   # Ajustar credenciales en .env
+   npx prisma migrate dev
+   pnpm run db:seed
+   ```
 
-El proyecto cuenta con una suite de pruebas automatizadas. Para ejecutarlas:
+3. **Ejecución:**
+   ```bash
+   pnpm run css:build # Generar output.css
+   pnpm run dev       # Modo desarrollo con Nodemon
+   ```
+
+---
+
+## 🧪 Testing y Calidad
+
+Mantenemos la integridad del sistema mediante:
+
+- **Integration Tests:** Pruebas de extremo a extremo en rutas críticas.
+- **Unit Tests:** Validación de lógica de servicios y utilidades.
+- **Linting & Formatting:** Reglas estrictas con ESLint y Prettier.
 
 ```bash
-pnpm run test         # Ejecutar tests una vez
-pnpm run test:watch   # Ejecutar en modo observación
-pnpm run test:cov     # Generar reporte de cobertura
+pnpm run test         # Ejecutar suite completa
+pnpm run test:cov     # Reporte de cobertura
+pnpm run lint         # Análisis estático
 ```
+
+---
 
 ## 👨‍💻 Autor
 
 - **Angel Emanuel** - _Desarrollo Fullstack_ - [GitHub](https://github.com/EmanuelAngel)
+
+---
+
+_Proyecto desarrollado para Laboratorio 2 - Universidad de La Punta, San Luis, Argentina._

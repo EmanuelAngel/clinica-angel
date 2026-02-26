@@ -2,38 +2,202 @@
 
 {% block pageInfo %}
   {% import "partials/page-info.njk" as PageInfo %}
-  {{ PageInfo.titleAndDescription(patient.fullName, "Viendo el perfil de " + patient.fullName + " [" + patient.role + "].") }}
+  {{ PageInfo.titleAndDescription(patient.fullName, "Perfil de paciente") }}
 {% endblock %}
 
 {% block content %}
-  <div class="w-full max-w-3xl mx-auto space-y-8">
+  <div class="w-full max-w-5xl mx-auto space-y-8">
+
+    {# Header Card #}
     <div class="card bg-base-200 shadow-md">
       <div class="card-body">
-        <h2 class="card-title">Información Personal</h2>
-        <p><strong>Nombres:</strong> {{ patient.firstNames }}</p>
-        <p><strong>Apellidos:</strong> {{ patient.lastNames }}</p>
-        <p><strong>DNI:</strong> {{ patient.nationalId }}</p>
-        <p><strong>Correo Electrónico:</strong> {{ patient.email }}</p>
-        <p><strong>Teléfono:</strong> {{ patient.phone }}</p>
-        <p><strong>Dirección:</strong> {{ patient.address }}</p>
-        <p>
-          <strong>Obras Sociales:</strong>
-          {% if patient.healthInsurances.length < 1 %}
-            No hay obras sociales vinculadas.
-          {% else %}
-            {% for healthInsurance in patient.healthInsurances %}
-              <span class="badge badge-soft">
-              {{ healthInsurance.insuranceName }}
-              -
-              {{ healthInsurance.memberNumber }}
-              </span>
-            {% endfor %}
-          {% endif %}
-        </p>
-        <p><strong>Imagen del DNI:</strong></p>
-        <img src="{{ patient.nationalIdImageUrl }}"
-             alt="Imagen del DNI del paciente {{ patient.fullName }}">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="avatar placeholder">
+              <div class="bg-primary text-primary-content rounded-full w-16">
+                <span class="text-2xl">{{ patient.firstNames[0] }}{{ patient.lastNames[0] }}</span>
+              </div>
+            </div>
+            <div>
+              <h2 class="card-title text-2xl">{{ patient.fullName }}</h2>
+              <p class="text-sm text-base-content/60">Paciente ID: {{ patient.id }}</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <a href="/patients/{{ patient.id }}/edit" class="btn btn-primary">
+              <i data-lucide="pencil" class="w-4 h-4"></i>
+              Editar perfil
+            </a>
+          </div>
+        </div>
       </div>
     </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      {# Left Column - Info #}
+      <div class="lg:col-span-1 space-y-8">
+        
+        {# Personal Details #}
+        <div class="card bg-base-200 shadow-sm border border-base-300">
+          <div class="card-body p-6">
+            <h3 class="card-title text-lg mb-4 flex items-center gap-2">
+              <i data-lucide="user" class="w-5 h-5 text-primary"></i>
+              Datos Personales
+            </h3>
+            <div class="space-y-4">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">Email</p>
+                <p class="font-medium break-all">{{ patient.email }}</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">DNI</p>
+                <p class="font-medium">{{ patient.nationalId }}</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">Teléfono</p>
+                <p class="font-medium">{{ patient.phone }}</p>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">Dirección</p>
+                <p class="font-medium">{{ patient.address }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# Health Insurance #}
+        <div class="card bg-base-200 shadow-sm border border-base-300">
+          <div class="card-body p-6">
+            <h3 class="card-title text-lg mb-4 flex items-center gap-2">
+              <i data-lucide="credit-card" class="w-5 h-5 text-secondary"></i>
+              Obra Social
+            </h3>
+            {% if patient.healthInsurances.length > 0 %}
+              {% set insurance = patient.healthInsurances[0] %}
+              <div class="bg-base-100 p-4 rounded-xl border border-secondary/20 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-2 opacity-10">
+                  <i data-lucide="shield" class="w-12 h-12"></i>
+                </div>
+                <p class="text-sm font-bold text-secondary">{{ insurance.insuranceName | upper }}</p>
+                <p class="text-lg font-mono tracking-tight mt-1">{{ insurance.memberNumber }}</p>
+                <p class="text-[10px] text-base-content/40 mt-4">Credencial de Paciente</p>
+              </div>
+            {% else %}
+              <div class="alert alert-soft text-sm">
+                <i data-lucide="info" class="w-4 h-4"></i>
+                Sin obra social vinculada.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {# Identity Document #}
+        <div class="card bg-base-200 shadow-sm border border-base-300">
+          <div class="card-body p-6">
+            <h3 class="card-title text-lg mb-4 flex items-center gap-2">
+              <i data-lucide="image" class="w-5 h-5 text-accent"></i>
+              Documento de Identidad
+            </h3>
+            <div class="bg-base-300 rounded-xl overflow-hidden aspect-[3/2] flex items-center justify-center border border-base-100">
+              {% if patient.nationalIdImageUrl %}
+                <img src="{{ patient.nationalIdImageUrl }}" 
+                     alt="DNI de {{ patient.fullName }}"
+                     class="w-full h-full object-cover">
+              {% else %}
+                <div class="text-center text-base-content/30 p-4">
+                  <i data-lucide="file-question" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                  <p class="text-xs">Imagen no disponible</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {# Right Column - Turns #}
+      <div class="lg:col-span-2">
+        <div class="card bg-base-200 shadow-sm border border-base-300 h-full">
+          <div class="card-body p-0">
+            <div class="p-6 pb-0">
+              <h3 class="card-title text-xl flex items-center gap-3">
+                <i data-lucide="calendar" class="w-6 h-6 text-primary"></i>
+                Turnos Médicos
+              </h3>
+            </div>
+
+            <div class="tabs tabs-lifted tabs-lg mt-6">
+              {# Macro for rendering slot list #}
+              {% macro renderSlotList(slots, emptyMessage) %}
+                {% if slots.length > 0 %}
+                  <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                      <thead>
+                        <tr>
+                          <th>Fecha</th>
+                          <th>Hora</th>
+                          <th>Profesional</th>
+                          <th>Especialidad</th>
+                          <th>Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for slot in slots %}
+                          <tr>
+                            <td>
+                              <div class="flex flex-col">
+                                <span class="font-medium">{{ slot.startsAt | date("DD/MM/YYYY") }}</span>
+                                <span class="text-[10px] opacity-50">{{ slot.location }}</span>
+                              </div>
+                            </td>
+                            <td class="font-mono text-sm">{{ slot.startsAt | time }}</td>
+                            <td>
+                              <div class="text-sm font-medium">{{ slot.professionalName }}</div>
+                            </td>
+                            <td>
+                              <span class="text-xs opacity-70">{{ slot.specialty }}</span>
+                            </td>
+                            <td>
+                              {% import "macros/slot-status-badge.njk" as StatusBadge %}
+                              {{ StatusBadge.renderStatusBadge(slot.status) }}
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="p-12 text-center text-base-content/50">
+                    <i data-lucide="calendar-off" class="w-16 h-16 mx-auto mb-4 opacity-20"></i>
+                    <p>{{ emptyMessage }}</p>
+                  </div>
+                {% endif %}
+              {% endmacro %}
+
+              {# Tab 1: Hoy #}
+              <input type="radio" name="turnos_tabs" role="tab" class="tab" aria-label="Hoy" checked="checked" />
+              <div role="tabpanel" class="tab-content bg-base-100 border-base-300 p-6">
+                {{ renderSlotList(slotsToday, "No tienes turnos programados para hoy.") }}
+              </div>
+
+              {# Tab 2: Futuros #}
+              <input type="radio" name="turnos_tabs" role="tab" class="tab" aria-label="Futuros" />
+              <div role="tabpanel" class="tab-content bg-base-100 border-base-300 p-6">
+                {{ renderSlotList(slotsFuture, "No tienes turnos futuros pendientes.") }}
+              </div>
+
+              {# Tab 3: Pasados #}
+              <input type="radio" name="turnos_tabs" role="tab" class="tab" aria-label="Pasados" />
+              <div role="tabpanel" class="tab-content bg-base-100 border-base-300 p-6">
+                {{ renderSlotList(slotsPast, "No hay historial de turnos pasados.") }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 {% endblock %}
