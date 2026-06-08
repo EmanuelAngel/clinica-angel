@@ -11,7 +11,7 @@ import {
   UnauthorizedSlotActionError,
   SlotNotFreeError,
   FulfilledSlotImmutableError,
-  OverbookSlotNotBookedError,
+  OverbookSourceNotProposedError,
   OverbookPerSlotLimitError,
   OverbookPerDayLimitError,
 } from "../domain/slot.errors.js";
@@ -292,7 +292,7 @@ export class SlotService {
    * @param {string} consultationReason - Consultation reason.
    * @returns {Promise<Result<number,
    *   SlotNotFoundError |
-   *   OverbookSlotNotBookedError |
+   *   OverbookSourceNotProposedError |
    *   OverbookPerSlotLimitError |
    *   OverbookPerDayLimitError
    * >>}
@@ -306,7 +306,7 @@ export class SlotService {
 
     // Source slot must be PROPOSED
     if (sourceSlot.status !== SlotStatus.PROPOSED) {
-      return err(new OverbookSlotNotBookedError());
+      return err(new OverbookSourceNotProposedError());
     }
 
     // Get schedule limits

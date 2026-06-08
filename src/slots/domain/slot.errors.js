@@ -89,9 +89,9 @@ export class SlotNotFreeError extends CustomError {
 }
 
 /**
- * Source slot is not in BOOKED status for overbook creation.
+ * Source slot is not in PROPOSED status — required for overbook creation.
  */
-export class OverbookSlotNotBookedError extends CustomError {
+export class OverbookSourceNotProposedError extends CustomError {
   constructor() {
     super(
       "Solo se pueden crear sobreturnos a partir de turnos en estado Propuesto.",
