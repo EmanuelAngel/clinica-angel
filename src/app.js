@@ -15,6 +15,7 @@ import { Roles } from "./auth/domain/roles.js";
 import { links } from "./_shared/infrastructure/links.js";
 import { globalErrorHandler } from "./_shared/infrastructure/global-error-handler.js";
 import { notFoundHandler } from "./_shared/infrastructure/not-found.middleware.js";
+import { registerNunjucksFilters } from "./_shared/infrastructure/nunjucks-filters.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -63,64 +64,7 @@ njkEnv.addGlobal("Roles", Roles);
 njkEnv.addGlobal("links", links);
 njkEnv.addGlobal("isDev", env.NODE_ENV === "development");
 
-njkEnv.addFilter("date", (date, format = "DD/MM/YYYY", locale = "es") => {
-  if (!date) return "";
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return date;
-
-  const day = d.getDate().toString().padStart(2, "0");
-  const month = (d.getMonth() + 1).toString().padStart(2, "0");
-  const year = d.getFullYear();
-
-  if (format === "DD/MM/YYYY") return `${day}/${month}/${year}`;
-  if (format === "yyyy-MM-dd") return `${year}-${month}-${day}`;
-  if (format === "EEEE, d MMMM yyyy") {
-    return d.toLocaleDateString(locale, {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }
-  if (format === "H") return d.getHours().toString();
-  if (format === "m") return d.getMinutes().toString();
-
-  return d.toLocaleDateString();
-});
-
-njkEnv.addFilter("dateAdd", (date, amount, unit) => {
-  if (!date) return new Date();
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return new Date();
-
-  if (unit === "days") {
-    d.setDate(d.getDate() + amount);
-  } else if (unit === "months") {
-    d.setMonth(d.getMonth() + amount);
-  } else if (unit === "years") {
-    d.setFullYear(d.getFullYear() + amount);
-  }
-
-  return d;
-});
-
-njkEnv.addFilter("padStart", (value, length, char = "0") => {
-  return String(value).padStart(length, char);
-});
-
-njkEnv.addFilter("upper", (value) => {
-  if (!value) return "";
-  return String(value).toUpperCase();
-});
-
-njkEnv.addFilter("time", (date) => {
-  if (!date) return "";
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return date;
-  const h = d.getHours().toString().padStart(2, "0");
-  const m = d.getMinutes().toString().padStart(2, "0");
-  return `${h}:${m}`;
-});
+registerNunjucksFilters(njkEnv);
 
 app.use("/", viewsRouter);
 app.use("/api/v1", apiV1Router);
