@@ -20,6 +20,20 @@ jobs:
           - 3306:3306
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
 
+    # Definimos las variables de entorno de prueba directamente para que no dependa de .env.test (ignorado por git)
+    env:
+      NODE_ENV: test
+      PORT: 8080
+      JWT_SECRET: aK9pL2mNx7vB3qWtY8rF5eD1cH6jZ0uIoP4sGvMnQwErTyUjKlOcXfSbNhAgVdR
+      JWT_EXPIRES: 1h
+      SALT_ROUNDS: 4
+      MYSQL_CONNECTION_STRING: mysql://root:@127.0.0.1:3306/clinica_angel_test
+      MYSQL_DATABASE_HOST: 127.0.0.1
+      MYSQL_DATABASE_USER: root
+      MYSQL_DATABASE_PASSWORD: ""
+      MYSQL_DATABASE_NAME: clinica_angel_test
+      MYSQL_DATABASE_CONNECTION_LIMIT: 4
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -42,7 +56,7 @@ jobs:
         run: pnpm exec prisma generate
 
       - name: Push Database Schema
-        run: pnpm exec dotenv -e .env.test -- prisma db push
+        run: pnpm exec prisma db push
 
       - name: Run Tests with Coverage
         run: pnpm run test:cov
