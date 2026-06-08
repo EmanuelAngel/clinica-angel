@@ -39,7 +39,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
-        run: pnpm dlx prisma generate
+        run: pnpm exec prisma generate
 
       - name: Push Database Schema
         run: pnpm exec dotenv -e .env.test -- prisma db push
