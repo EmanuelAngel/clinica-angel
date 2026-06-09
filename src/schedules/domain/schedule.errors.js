@@ -18,11 +18,7 @@ export class ScheduleOverlapError extends CustomError {
    */
   constructor(newDay, newRange, existingConfig) {
     super();
-    this.message = `
-      Conflicto detectado: El día ${newDay} intentas agendar de
-      ${newRange.start} a ${newRange.end}, pero ya existe una agenda de ${existingConfig.startTime} a
-      ${existingConfig.endTime}.
-    `;
+    this.message = `El horario del día ${newDay} (${newRange.start}–${newRange.end}) se solapa con una agenda existente (${existingConfig.startTime}–${existingConfig.endTime}).`;
     this.statusCode = 409;
   }
 }
