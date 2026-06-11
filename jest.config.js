@@ -16,6 +16,7 @@ const config = {
     "!src/**/infrastructure/*.routes.js",
     "!src/**/infrastructure/prisma-*.repository.js",
     "!src/**/views/**",
+    "!src/_assets/js/**",
     "!**/generated/**",
     "!**/node_modules/**",
     "!**/vendor/**",
