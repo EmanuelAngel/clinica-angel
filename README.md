@@ -6,6 +6,7 @@
 ![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)
+![Coverage](https://img.shields.io/badge/Coverage-84.5%25-44bb44?style=for-the-badge&logo=jest&logoColor=white)
 
 Plataforma integral enfocada en la **autogestión de pacientes** y la **administración eficiente** de turnos médicos. Este sistema ha sido diseñado bajo principios de Arquitectura Limpia, priorizando la robustez mediante validación estricta y manejo funcional de errores.
 
