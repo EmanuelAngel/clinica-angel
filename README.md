@@ -177,13 +177,13 @@ erDiagram
 
 **Pre-commit automatizado:** husky + lint-staged ejecutan ESLint y Prettier antes de cada commit; commitlint fuerza el formato Conventional Commits.
 
-**Tests:** integración con Jest + Supertest contra una base de datos de test real. 84.5% de cobertura en las rutas críticas.
+**Tests:** integración con Jest + Supertest contra una base de datos de test real, más unit tests para lógica de dominio pura (máquina de estados de turnos, filtros de templates). 84.5% de cobertura de statements sobre el código de aplicación.
 
 ---
 
 ## Ejecución local
 
-**Requisitos:** Node.js v20+, MariaDB/MySQL, pnpm.
+**Requisitos:** Node.js v22+, MariaDB/MySQL, pnpm.
 
 ```bash
 # 1. Instalar dependencias
@@ -194,7 +194,7 @@ cp .env.example .env
 # Editar .env con las credenciales de la base de datos
 
 # 3. Migrar la base de datos
-npx prisma migrate dev
+pnpm exec prisma migrate dev
 
 # 4. Seed inicial (opcional)
 pnpm run db:seed
