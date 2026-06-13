@@ -27,6 +27,7 @@
     "test:debug": "set LOG_ERRORS=true&& pnpm run test",
     "test:watch": "pnpm run test -- --watch",
     "test:cov": "dotenv -e .env.test -- node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "postinstall": "prisma generate",
     "prepare": "husky",
     "db:seed": "node prisma/seed.js",
     "db:clean": "dotenv node scripts/clean-db.js"
