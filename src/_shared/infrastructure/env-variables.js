@@ -38,6 +38,9 @@ const envSchema = z
       .string()
       .min(1, "El nombre de la base de datos es requerido"),
 
+    MYSQL_DATABASE_PORT: z.coerce.number().positive().default(3306),
+    MYSQL_DATABASE_SSL: z.coerce.boolean().default(false),
+
     MYSQL_DATABASE_CONNECTION_LIMIT: z.coerce
       .number()
       .positive("El límite de conexiones debe ser positivo")

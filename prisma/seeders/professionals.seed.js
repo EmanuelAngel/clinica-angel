@@ -1,8 +1,10 @@
+const DEMO_PASSWORD_HASH =
+  "$2b$04$6kdx3DmVl.j6iltZWtGmZOIm26TonhJuXYiFJR67N1OfkSVxyDyRu"; // Demo1234!
+
 export const professionals = [
   {
     email: "nikolai.belinski@professional.clinica-angel.com",
-    passwordHash:
-      "$2b$04$A2tyxFR4vAHs2DwBB2RG9.Ow1sQvhzkBFOFlzOpIUNP3VBrnak/2S",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PROFESSIONAL",
     nationalId: "24935935",
     firstNames: "Nikolai",
@@ -28,8 +30,7 @@ export const professionals = [
   },
   {
     email: "carla.montelli@professional.clinica-angel.com",
-    passwordHash:
-      "$2b$04$CY1w5c.lZ3Ikjg3/HSPzse9FuNzy9IcKNCdaCdhP5DFnH2gO74RQe",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PROFESSIONAL",
     nationalId: "37213287",
     firstNames: "Carla",
@@ -49,8 +50,7 @@ export const professionals = [
   },
   {
     email: "sofia.phoebe@professional.clinica-angel.com",
-    passwordHash:
-      "$2b$04$XIWIExHuKNycUpk8KwpOkO2pc3SMjOiEdjvq3CYXk8dL4U6EGxlCC",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PROFESSIONAL",
     nationalId: "38214288",
     firstNames: "Sofia",
@@ -70,8 +70,7 @@ export const professionals = [
   },
   {
     email: "takeo.masaki@professional.clinica-angel.com",
-    passwordHash:
-      "$2b$04$A2tyxFR4vAHs2DwBB2RG9.Ow1sQvhzkBFOFlzOpIUNP3VBrnak/2S",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PROFESSIONAL",
     nationalId: "11500935",
     firstNames: "Takeo",
@@ -91,8 +90,7 @@ export const professionals = [
   },
   {
     email: "tank.dempsey@professional.clinica-angel.com",
-    passwordHash:
-      "$2b$04$A2tyxFR4vAHs2DwBB2RG9.Ow1sQvhzkBFOFlzOpIUNP3VBrnak/2S",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PROFESSIONAL",
     nationalId: "34115935",
     firstNames: "Tank",
@@ -112,8 +110,7 @@ export const professionals = [
   },
   {
     email: "samantha.maxis@professional.clinica-angel.com",
-    passwordHash:
-      "$2b$04$A2tyxFR4vAHs2DwBB2RG9.Ow1sQvhzkBFOFlzOpIUNP3VBrnak/2S",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PROFESSIONAL",
     nationalId: "11511511",
     firstNames: "Samantha",

@@ -6,36 +6,104 @@
 {% endblock %}
 
 {% block content %}
-  <form action="/auth/login" method="post" class="mx-auto max-w-fit">
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-      <legend class="fieldset-legend">Credenciales</legend>
-      <label class="label">Email</label>
-      <input type="email"
-             name="email"
-             value="{{ values.email }}"
-             class="input validator {{ 'input-error' if errors.properties.email }}"
-             required
-             placeholder="correoelectronico@sitio.com" />
-      {% if errors.email %}
-        <div class="text-error">{{ errors.properties.email[0] }}</div>
-      {% endif %}
-      <div class="validator-hint">Ingrese un email válido</div>
-      <label class="label">Contraseña</label>
-      <input type="password"
-             name="password"
-             class="input {{ 'input-error' if errors.properties.password }}"
-             placeholder="Contraseña" />
-      <div class="validator-hint">Ingrese una contraseña válida</div>
-      {% if errors.properties.password %}
-        <div class="text-error mt-1">{{ errors.properties.password.errors[0] }}</div>
-      {% endif %}
+  <div class="mx-auto max-w-sm space-y-4">
+    <!-- Demo Quick Login Card -->
+    <div class="card bg-base-200 border border-base-300 shadow-sm">
+      <div class="card-body p-4">
+        <h3 class="card-title text-sm flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
+          Acceso Rápido para Demostración
+        </h3>
+        <p class="text-xs text-base-content/70">
+          Haz clic en cualquier rol para ingresar automáticamente:
+        </p>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button type="button" class="btn btn-xs sm:btn-sm btn-outline btn-primary demo-btn"
+                  data-email="emanuel.angel@admin.clinica-angel.com"
+                  data-password="Demo1234!">
+            <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+            Admin
+          </button>
+          <button type="button" class="btn btn-xs sm:btn-sm btn-outline btn-secondary demo-btn"
+                  data-email="rias.gremory@staff.clinica-angel.com"
+                  data-password="Demo1234!">
+            <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
+            Secretaria
+          </button>
+          <button type="button" class="btn btn-xs sm:btn-sm btn-outline btn-accent demo-btn"
+                  data-email="nikolai.belinski@professional.clinica-angel.com"
+                  data-password="Demo1234!">
+            <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i>
+            Médico
+          </button>
+          <button type="button" class="btn btn-xs sm:btn-sm btn-outline btn-info demo-btn"
+                  data-email="lupita.silva@gmail.com"
+                  data-password="Demo1234!">
+            <i data-lucide="user" class="w-3.5 h-3.5"></i>
+            Paciente
+          </button>
+        </div>
+      </div>
+    </div>
 
-      <p>
-        ¿Aún no tienes cuenta?
-        <a href="/patients/register" class="link link-primary">Registrarse</a>
-      </p>
+    <!-- Login Form -->
+    <form id="login-form" action="/auth/login" method="post" class="w-full">
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+        <legend class="fieldset-legend font-semibold">Credenciales</legend>
+        <label class="label">Email</label>
+        <input type="email"
+               id="email-input"
+               name="email"
+               value="{{ values.email }}"
+               class="input validator w-full {{ 'input-error' if errors.properties.email }}"
+               required
+               placeholder="correoelectronico@sitio.com" />
+        {% if errors.email %}
+          <div class="text-error">{{ errors.properties.email[0] }}</div>
+        {% endif %}
+        <div class="validator-hint">Ingrese un email válido</div>
 
-      <button class="btn btn-primary mt-4">Iniciar Sesión</button>
-    </fieldset>
-  </form>
+        <label class="label">Contraseña</label>
+        <input type="password"
+               id="password-input"
+               name="password"
+               class="input w-full {{ 'input-error' if errors.properties.password }}"
+               required
+               placeholder="Contraseña" />
+        <div class="validator-hint">Ingrese una contraseña válida</div>
+        {% if errors.properties.password %}
+          <div class="text-error mt-1">{{ errors.properties.password.errors[0] }}</div>
+        {% endif %}
+
+        <p class="mt-2 text-sm">
+          ¿Aún no tienes cuenta?
+          <a href="/patients/register" class="link link-primary">Registrarse</a>
+        </p>
+
+        <button type="submit" class="btn btn-primary mt-4 w-full">
+          <i data-lucide="log-in" class="w-4 h-4 mr-1"></i>
+          Iniciar Sesión
+        </button>
+      </fieldset>
+    </form>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    document.querySelectorAll(".demo-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var email = btn.dataset.email;
+        var password = btn.dataset.password;
+        var emailInput = document.getElementById("email-input");
+        var passwordInput = document.getElementById("password-input");
+        var form = document.getElementById("login-form");
+        if (emailInput && passwordInput && form) {
+          emailInput.value = email;
+          passwordInput.value = password;
+          form.submit();
+        }
+      });
+    });
+  </script>
 {% endblock %}

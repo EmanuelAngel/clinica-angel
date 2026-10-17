@@ -1,8 +1,10 @@
+const DEMO_PASSWORD_HASH =
+  "$2b$04$6kdx3DmVl.j6iltZWtGmZOIm26TonhJuXYiFJR67N1OfkSVxyDyRu"; // Demo1234!
+
 export const patients = [
   {
     email: "lupita.silva@gmail.com",
-    passwordHash:
-      "$2b$04$hzd7Jt7uyVCnZnxvw1izL.YS0fn17UI/wF/fNXjSW4IhZEcOWHOgW",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PATIENT",
     firstNames: "Lupita",
     lastNames: "Silva",
@@ -13,8 +15,7 @@ export const patients = [
   },
   {
     email: "melissa.duarte@gmail.com",
-    passwordHash:
-      "$2b$04$20y2gsz4oMUjxNpr2XZTMumm3jnqB2cKwlyRidXv3ssP2RTKvY.Ta",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PATIENT",
     firstNames: "Melissa",
     lastNames: "Duarte",
@@ -25,8 +26,7 @@ export const patients = [
   },
   {
     email: "walter.blanco@gmail.com",
-    passwordHash:
-      "$2b$04$RD3rXQcEbHCAaUo.6DPIGecyTKi2J/7oBe/6WNqXOOWLjZUZwxnSm",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PATIENT",
     firstNames: "Walter",
     lastNames: "Blanco",
@@ -37,8 +37,7 @@ export const patients = [
   },
   {
     email: "samuel.deluque@gmail.com",
-    passwordHash:
-      "$2b$04$SJ6CISgWsSZqfKa02zYCNeaPdMBLJHqMNkRcfHKFqhQQmsI.IFH26",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "PATIENT",
     firstNames: "Samuel",
     lastNames: "De Luque",

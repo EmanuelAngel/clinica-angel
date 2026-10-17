@@ -1,8 +1,10 @@
+const DEMO_PASSWORD_HASH =
+  "$2b$04$6kdx3DmVl.j6iltZWtGmZOIm26TonhJuXYiFJR67N1OfkSVxyDyRu"; // Demo1234!
+
 export const users = [
   {
     email: "emanuel.angel@admin.clinica-angel.com",
-    passwordHash:
-      "$2b$04$g19EB8NAU0McL2xVnIbV4.qDheDCQpgOiSk934GF0ovBKas9/XrHm",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "ADMIN",
     firstNames: "Emanuel",
     lastNames: "Angel",
@@ -12,8 +14,7 @@ export const users = [
   },
   {
     email: "eduardo.richtofen@admin.clinica-angel.com",
-    passwordHash:
-      "$2b$04$qttF6HLrzMcn9/VWgIlDS.oIyuMmr5PA8kwrYOkYIdqRWpzGYvyD.",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "ADMIN",
     firstNames: "Eduardo",
     lastNames: "Richtofen",
@@ -23,8 +24,7 @@ export const users = [
   },
   {
     email: "rias.gremory@staff.clinica-angel.com",
-    passwordHash:
-      "$2b$04$sp81n1zegOI.MH.sE3T7EeGHb1W9ZefvK1MDaA/GVqMe5j3CpVt.K",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "SECRETARY",
     firstNames: "Rias",
     lastNames: "Gremory",
@@ -34,8 +34,7 @@ export const users = [
   },
   {
     email: "valentina.gonzales@staff.clinica-angel.com",
-    passwordHash:
-      "$2b$04$vElHtoQ/zVoHAR14edOo3uUxa9YTdJ0oF3a7lu4kkoNzrPuigIWUG",
+    passwordHash: DEMO_PASSWORD_HASH,
     role: "SECRETARY",
     firstNames: "Valentina",
     lastNames: "Gonzáles",
