@@ -12,11 +12,11 @@ Preparation and implementation of clinica-angel for production deployment on Ren
 
 ## Tasks
 
-- [x] T1: (S1) Add `build` script to package.json for Prisma generate and Tailwind CSS build. | route: inline | commit: pending
-- [x] T2: (S2) Update Prisma adapter and env validation to support TiDB Cloud SSL connection string and port. | route: inline | commit: pending
-- [x] T3: (S3) Ensure uploads directory auto-creation on server boot. | route: inline | commit: pending
-- [x] T4: (S4) Add 1-Click Demo Login buttons in `src/auth/views/login.njk`. | route: inline | commit: pending
-- [x] T5: (S5) Document TiDB Cloud setup, Render environment variables, database seed commands, and 60-90s video showcase script. | route: inline | commit: pending
+- [x] T1: (S1) Add `build` script to package.json for Prisma generate and Tailwind CSS build. | route: inline | commit: 181532a
+- [x] T2: (S2) Update Prisma adapter and env validation to support TiDB Cloud SSL connection string and port. | route: inline | commit: 181532a
+- [x] T3: (S3) Ensure uploads directory auto-creation on server boot. | route: inline | commit: 181532a
+- [x] T4: (S4) Add 1-Click Demo Login buttons in `src/auth/views/login.njk`. | route: inline | commit: 181532a
+- [x] T5: (S5) Document TiDB Cloud setup, Render environment variables, database seed commands, and 60-90s video showcase script. | route: inline | commit: 181532a
 
 ## Log
 
