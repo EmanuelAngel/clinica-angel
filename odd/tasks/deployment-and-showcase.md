@@ -24,3 +24,8 @@ Preparation and implementation of clinica-angel for production deployment on Ren
 - L2: Decided hybrid strategy (Video Showcase + Live Demo), Render Web Service (native Node, no Docker), TiDB Cloud Serverless MySQL, and 1-Click Demo Login.
 - L3: User asked "¿odd?" -> initialized ODD task tracking.
 - L4: Implemented T1-T4 inline. Verified build pipeline passes cleanly. Created DEPLOYMENT_AND_SHOWCASE.md guide with 3-act video script.
+- L5: Fixed husky exit in CI (commit `c224663`).
+- L6: Moved build tools (`prisma`, `@tailwindcss/cli`, `daisyui`, `tailwindcss`) to dependencies and updated lockfile (commit `d247cae`).
+- L7: Updated `.nvmrc` to Node 22 (`22.14.0`) to resolve Prisma 7 ESM compatibility in Render (commit `9ce1562`).
+- L8: Deployed successfully to Render (`https://clinica-angel.onrender.com`). Verified production HTTP 200 on login and HTTP 302 on demo admin authentication.
+
