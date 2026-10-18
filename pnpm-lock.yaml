@@ -17,12 +17,18 @@ importers:
       '@prisma/client-runtime-utils':
         specifier: 7.2.0
         version: 7.2.0
+      '@tailwindcss/cli':
+        specifier: 4.1.18
+        version: 4.1.18
       bcrypt:
         specifier: 6.0.0
         version: 6.0.0
       cookie-parser:
         specifier: 1.4.7
         version: 1.4.7
+      daisyui:
+        specifier: 5.5.14
+        version: 5.5.14
       dotenv:
         specifier: 17.2.3
         version: 17.2.3
@@ -50,6 +56,12 @@ importers:
       nunjucks:
         specifier: 3.2.4
         version: 3.2.4(chokidar@3.6.0)
+      prisma:
+        specifier: 7.2.0
+        version: 7.2.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+      tailwindcss:
+        specifier: 4.1.18
+        version: 4.1.18
       zod:
         specifier: 4.2.1
         version: 4.2.1
@@ -69,9 +81,6 @@ importers:
       '@eslint/json':
         specifier: 0.14.0
         version: 0.14.0
-      '@tailwindcss/cli':
-        specifier: 4.1.18
-        version: 4.1.18
       '@types/cookie-parser':
         specifier: 1.4.10
         version: 1.4.10(@types/express@4.17.25)
@@ -84,9 +93,6 @@ importers:
       '@types/node':
         specifier: 25.0.3
         version: 25.0.3
-      daisyui:
-        specifier: 5.5.14
-        version: 5.5.14
       dotenv-cli:
         specifier: 11.0.0
         version: 11.0.0
@@ -123,15 +129,9 @@ importers:
       prettier:
         specifier: 3.7.4
         version: 3.7.4
-      prisma:
-        specifier: 7.2.0
-        version: 7.2.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       supertest:
         specifier: 7.1.4
         version: 7.1.4
-      tailwindcss:
-        specifier: 4.1.18
-        version: 4.1.18
 
 packages:
 
