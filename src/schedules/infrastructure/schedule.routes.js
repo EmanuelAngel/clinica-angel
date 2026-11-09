@@ -10,11 +10,6 @@ scheduleRouter.post("/", auth(Roles.ADMIN), scheduleController.create);
 scheduleRouter.get("/create", auth(Roles.ADMIN), scheduleController.showCreate);
 scheduleRouter.get("/list", auth(Roles.ADMIN), scheduleController.renderList);
 scheduleRouter.get(
-  "/details/:id",
-  auth(Roles.ADMIN),
-  scheduleController.showDetails
-);
-scheduleRouter.get(
   "/reschedule",
   auth(Roles.ADMIN, Roles.SECRETARY),
   scheduleController.showRescheduleInbox

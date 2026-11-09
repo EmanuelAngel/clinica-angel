@@ -124,8 +124,7 @@ describe("Schedule drilldown view (GET /schedules/:id/agenda)", () => {
     // Blocks
     expect(res.text).toContain("Vacaciones Test");
 
-    // Admin actions: the detail link is secondary, the editor is primary
-    expect(res.text).toContain("Ver detalles de agenda");
+    // Admin actions: the editor is the only primary action
     expect(res.text).toContain("Editar configuración");
   });
 

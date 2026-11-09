@@ -23,7 +23,7 @@
             {% for schedule in schedules %}
               <tr class="border-base-300 hover:bg-base-200">
                 <td>
-                  <a href="/schedules/details/{{ schedule.id }}"
+                  <a href="/schedules/{{ schedule.id }}/agenda"
                      class="font-medium text-base-content link-hover">
                     {{ schedule.professionalName }}
                   </a>
@@ -52,7 +52,7 @@
                   {% endif %}
                 </td>
                 <td class="text-right">
-                  <a href="/schedules/details/{{ schedule.id }}"
+                  <a href="/schedules/{{ schedule.id }}/agenda"
                      class="btn btn-ghost btn-xs"
                      aria-label="Ver agenda de {{ schedule.professionalName }}">
                     <i data-lucide="chevron-right" class="h-4 w-4"></i>

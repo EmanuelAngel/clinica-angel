@@ -109,32 +109,6 @@ export class ScheduleController {
   }
 
   /**
-   * Renders the schedule details page.
-   * @param {import("express").Request} req
-   * @param {import("express").Response} res
-   * @returns {Promise<void>}
-   */
-  async showDetails(req, res) {
-    const id = parseInt(req.params.id);
-
-    if (isNaN(id)) {
-      return res.status(400).render("errors/not-found", {
-        error: { message: "ID de agenda inválido", statusCode: 400 },
-      });
-    }
-
-    const result = await services.scheduleService.getScheduleDetails(id);
-
-    result.match(
-      (schedule) => res.render("show-schedule", { schedule }),
-      (error) =>
-        res.status(error.statusCode).render("errors/not-found", {
-          error: { message: error.message, statusCode: error.statusCode },
-        })
-    );
-  }
-
-  /**
    * Renders the schedule comparison view.
    * @param {import("express").Request} req
    * @param {import("express").Response} res
