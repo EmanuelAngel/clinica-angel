@@ -35,8 +35,9 @@
   --color-primary-content: oklch(99% 0.004 205);
   --color-secondary: oklch(40% 0.018 260);
   --color-secondary-content: oklch(99% 0 0);
-  /* Accent is clay: the one warm gesture, reserved for "today" and highlights. */
-  --color-accent: oklch(58% 0.12 50);
+  /* Accent is clay: the one warm gesture, reserved for "today" and highlights.
+     L is 56%, not 58%: at 58% accent-content on accent was 4.34:1, below AA. */
+  --color-accent: oklch(56% 0.12 50);
   --color-accent-content: oklch(99% 0.005 50);
   --color-neutral: oklch(30% 0.012 260);
   --color-neutral-content: oklch(99% 0 0);
@@ -45,7 +46,11 @@
   --color-info-content: oklch(99% 0.005 240);
   --color-success: oklch(50% 0.1 155);
   --color-success-content: oklch(99% 0.005 155);
-  --color-warning: oklch(66% 0.13 72);
+  /* Warning doubles as badge background and as inline text. At 66% the badge
+     read well (5.70:1 for warning-content) but text-warning on white was only
+     3.19:1. 62% keeps the badge above AA (4.87:1) and lifts the text to 3.73:1.
+     A dedicated text token is the real fix; tracked for the shell phase. */
+  --color-warning: oklch(62% 0.13 72);
   --color-warning-content: oklch(20% 0.04 72);
   --color-error: oklch(52% 0.17 25);
   --color-error-content: oklch(99% 0.005 25);

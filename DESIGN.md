@@ -67,6 +67,23 @@ Criterio de construcción:
 - `base-100 → base-200 → base-300` es una escalera de **superficies y bordes**: cada salto tiene que ser visible a ojo. Un `base-300` a 2 puntos de luminancia del `base-200` no es un borde, es una ilusión.
 - Los semánticos se eligen por **contraste sobre la superficie**, no por saturación. Verde neón sobre blanco es ilegible; verde profundo no.
 
+### Contraste verificado (WCAG AA)
+
+Medido con conversión oklch → sRGB → luminancia relativa, no estimado a ojo:
+
+| Par | Claro | Oscuro |
+| --- | --- | --- |
+| `base-content` sobre `base-100` | 16.9:1 | 15.4:1 |
+| `base-content` sobre `base-200` | 15.6:1 | 14.3:1 |
+| `primary-content` sobre `primary` | 6.1:1 | 7.8:1 |
+| `accent-content` sobre `accent` | 4.7:1 | 7.7:1 |
+| `warning-content` sobre `warning` | 4.9:1 | 8.9:1 |
+| `error-content` sobre `error` | 5.8:1 | 5.4:1 |
+
+Deuda conocida: `text-warning` sobre superficie clara da 3.7:1, por debajo de AA. `warning` tiene que funcionar a la vez como fondo de badge y como texto, y un solo token no puede satisfacer ambos. **Mientras no exista un token de texto dedicado, advertencias en texto se escriben en `base-content` con icono `alert-triangle` en `text-warning`, no en `text-warning` puro.**
+
+Restricción de construcción para el futuro: `accent` en claro no puede bajar de `L 56%` ni subir de `L 58%` sin recalcular `accent-content`; a 58% el par quedaba en 4.34:1.
+
 ---
 
 ## 3. Superficie, borde y elevación
