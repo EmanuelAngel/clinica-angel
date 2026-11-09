@@ -145,3 +145,6 @@ src/_assets/css/output.css
 
 # Patients national ID image uploads
 src/_assets/uploads
+
+# Agent skills installed per machine; skills-lock.json is the manifest
+.agents/
