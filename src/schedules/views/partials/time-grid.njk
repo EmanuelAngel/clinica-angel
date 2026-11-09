@@ -7,7 +7,7 @@
   Features sticky headers for schedule info and time labels.
 #}
 
-<div class="card bg-base-100 shadow-sm overflow-hidden">
+<div class="overflow-hidden rounded-box border border-base-300 bg-base-100">
   <div class="overflow-x-auto">
     <div class="time-grid-container overflow-y-auto max-h-[90vh]">
       <table class="table table-xs table-pin-rows table-pin-cols">
@@ -33,7 +33,7 @@
                     <i data-lucide="map-pin" class="w-3 h-3"></i>
                     {{ schedule.locationName }}
                   </div>
-                  <div class="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wider text-base-content/60">
+                  <div class="flex items-center justify-center gap-1 text-xs text-base-content/60">
                     <i data-lucide="tag" class="size-3"></i>
                     {{ schedule.classificationName }}
                     {% if schedule.isPaused %}
@@ -66,18 +66,27 @@
                 
                 {# Schedule Cells #}
                 {% for schedule in schedules %}
-                  <td class="p-1 border-l border-base-200">
+                  <td class="border-l border-base-300/70 p-0.5">
                     {% if schedule.dayBlock %}
                       {# Day is blocked #}
                       {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
-                        <div class="bg-error/20 text-error text-xs p-1 rounded text-center" title="{{ schedule.dayBlock.reason }}">
-                          <i data-lucide="ban" class="w-3 h-3 inline"></i>
-                          Bloqueado
-                        </div>
+                        {% if minute == 0 %}
+                          <div class="bg-error/15 text-error text-xs p-0.5 rounded text-center" title="{{ schedule.dayBlock.reason }}">
+                            <i data-lucide="ban" class="w-3 h-3 inline"></i>
+                            Bloqueado
+                          </div>
+                        {% else %}
+                          {# La etiqueta va una vez por hora; el resto solo sostiene el tinte de la columna #}
+                          <div class="h-4 rounded bg-error/10"></div>
+                        {% endif %}
                       {% else %}
-                        <div class="bg-base-300 text-base-content/50 text-xs p-1 rounded text-center">
-                          No disponible
-                        </div>
+                        {% if minute == 0 %}
+                          <div class="bg-base-300/70 text-base-content/60 text-xs p-0.5 rounded text-center">
+                            No disponible
+                          </div>
+                        {% else %}
+                          <div class="h-4 rounded bg-base-300/40"></div>
+                        {% endif %}
                       {% endif %}
                     {% else %}
                       {# Find slot for this time #}
@@ -92,9 +101,9 @@
                       {% endfor %}
                       
                       {% if not slotFound %}
-                        {# No slot at this time - not available #}
-                        <div class="bg-base-300/50 text-base-content/30 text-xs p-1 rounded text-center">
-                          -
+                        {# Sin turno en este horario: solo un guion tenue, sin fondo #}
+                        <div class="py-0.5 text-center text-xs text-base-content/20">
+                          ·
                         </div>
                       {% endif %}
                     {% endif %}
