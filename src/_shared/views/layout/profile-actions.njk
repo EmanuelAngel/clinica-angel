@@ -5,13 +5,31 @@
   </div>
   <ul
     tabindex="-1"
-    class="menu dropdown-content bg-base-200 rounded-box z-1 mt-4 w-52 p-2 shadow-sm">
+    class="menu dropdown-content bg-base-100 rounded-box z-1 mt-4 w-52 border border-base-300 p-2 shadow-lg">
     <li>
-      <a href="/profile" class="link link-primary">Ir a mi perfil</a>
+      {% if user.role === Roles.PATIENT %}
+        <a href="/patients/{{ user.sub }}">
+          <i data-lucide="user"></i>
+          Ir a mi perfil
+        </a>
+      {% elif user.role === Roles.PROFESSIONAL %}
+        <a href="/professionals/{{ user.sub }}/profile">
+          <i data-lucide="stethoscope"></i>
+          Ir a mi perfil
+        </a>
+      {% else %}
+        <a href="/users/{{ user.sub }}">
+          <i data-lucide="user"></i>
+          Ir a mi perfil
+        </a>
+      {% endif %}
     </li>
     <li>
       <form action="/auth/logout" method="post">
-        <button type="submit" class="link link-error">Cerrar sesión</button>
+        <button type="submit" class="text-error">
+          <i data-lucide="log-out"></i>
+          Cerrar sesión
+        </button>
       </form>
     </li>
   </ul>

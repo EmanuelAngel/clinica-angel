@@ -118,9 +118,9 @@ export class ScheduleController {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res
-        .status(400)
-        .render("404", { message: "ID de agenda inválido" });
+      return res.status(400).render("errors/not-found", {
+        error: { message: "ID de agenda inválido", statusCode: 400 },
+      });
     }
 
     const result = await services.scheduleService.getScheduleDetails(id);
@@ -128,7 +128,9 @@ export class ScheduleController {
     result.match(
       (schedule) => res.render("show-schedule", { schedule }),
       (error) =>
-        res.status(error.statusCode).render("404", { message: error.message })
+        res.status(error.statusCode).render("errors/not-found", {
+          error: { message: error.message, statusCode: error.statusCode },
+        })
     );
   }
 
@@ -328,6 +330,7 @@ export class ScheduleController {
    * Registers a schedule block (unforeseen event) via JSON API.
    * @param {import("express").Request} req
    * @param {import("express").Response} res
+   * @returns {Promise<void>}
    */
   async registerBlock(req, res) {
     const scheduleId = parseInt(req.params.id);
@@ -374,6 +377,7 @@ export class ScheduleController {
    * Updates a schedule configuration via JSON API.
    * @param {import("express").Request} req
    * @param {import("express").Response} res
+   * @returns {Promise<void>}
    */
   async update(req, res) {
     const id = parseInt(req.params.id);

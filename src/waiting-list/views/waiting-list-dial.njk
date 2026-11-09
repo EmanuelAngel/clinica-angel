@@ -11,26 +11,26 @@
 
   {# Close button — not focusable so clicking it blurs the FAB #}
   <div class="fab-close">
-    Cerrar
+    <span class="rounded-box border border-base-300 bg-base-100 px-2 py-1 text-xs font-medium shadow-lg">Cerrar</span>
     <span class="btn btn-circle btn-lg btn-error">✕</span>
   </div>
 
   {# Speed dial actions with labels #}
   <div>
-    Agregar a Lista de Espera
+    <span class="rounded-box border border-base-300 bg-base-100 px-2 py-1 text-xs font-medium shadow-lg">Agregar a Lista de Espera</span>
     <button class="btn btn-lg btn-circle" onclick="document.getElementById('wl-add-modal').showModal()">
       <i data-lucide="user-plus" class="w-5 h-5"></i>
     </button>
   </div>
   <div>
-    Ver Lista de Espera
+    <span class="rounded-box border border-base-300 bg-base-100 px-2 py-1 text-xs font-medium shadow-lg">Ver Lista de Espera</span>
     <button class="btn btn-lg btn-circle" onclick="WaitingList.openListModal()">
       <i data-lucide="list" class="w-5 h-5"></i>
     </button>
   </div>
   {% if user.role == Roles.ADMIN %}
   <div>
-    Gestionar Bloqueos Globales
+    <span class="rounded-box border border-base-300 bg-base-100 px-2 py-1 text-xs font-medium shadow-lg">Gestionar Bloqueos Globales</span>
     <a href="/global-blocks" class="btn btn-lg btn-circle">
       <i data-lucide="calendar-off" class="w-5 h-5"></i>
     </a>

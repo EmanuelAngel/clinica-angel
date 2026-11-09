@@ -40,6 +40,16 @@
           </li>
         {% endif %}
       {% endfor %}
+
+      {# Bandeja de reprogramación: ADMIN y SECRETARY solamente #}
+      {% if user and (user.role === Roles.ADMIN or user.role === Roles.SECRETARY) %}
+        <li>
+          <a href="/schedules/reschedule" class="rounded-field">
+            <i data-lucide="refresh-cw"></i>
+            Reprogramaciones
+          </a>
+        </li>
+      {% endif %}
     </ul>
   </nav>
 
