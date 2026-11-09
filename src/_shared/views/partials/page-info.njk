@@ -1,6 +1,8 @@
 {% macro titleAndDescription(pageTitle, description) %}
-  <hgroup class="my-4">
-    <h1 class="text-5xl font-bold text-base-content">{{ pageTitle }}</h1>
-    <p>{{ description }}</p>
+  <hgroup class="mb-6">
+    <h1 class="text-2xl font-semibold tracking-tight text-base-content">{{ pageTitle }}</h1>
+    {% if description %}
+      <p class="mt-1 text-sm text-base-content/70">{{ description }}</p>
+    {% endif %}
   </hgroup>
 {% endmacro %}

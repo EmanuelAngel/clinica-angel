@@ -1,7 +1,8 @@
 {% macro badge(isActive) %}
+  {# Solo el estado que importa lleva color; el normal va en neutro. #}
   {% if isActive %}
-    <div class="badge badge-secondary">Activo</div>
+    <span class="badge badge-sm badge-success">Activo</span>
   {% else %}
-    <div class="badge badge-ghost">Inactivo</div>
+    <span class="badge badge-sm badge-ghost">Inactivo</span>
   {% endif %}
 {% endmacro %}

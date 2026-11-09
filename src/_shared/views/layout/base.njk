@@ -63,13 +63,11 @@
   <div class="drawer-content flex flex-col">
     {% include "layout/nav-bar.njk" %}
     
-    <div class="w-full px-2 py-4 sm:px-4 sm:py-8">
+    <main class="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
 
       {% block pageInfo %}{% endblock %}
 
-      <section class="max-w-fit mx-auto">
-        {% include "partials/result-alert.njk" %}
-      </section>
+      {% include "partials/result-alert.njk" %}
 
       {% block content %}{% endblock %}
 
@@ -80,7 +78,7 @@
           </a>
         </div>
       {% endif %}
-    </div>
+    </main>
   </div>
 
   <div class="drawer-side">

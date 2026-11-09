@@ -1,5 +1,5 @@
 {# Navbar #}
-<div class="navbar bg-base-200 w-full">
+<header class="navbar min-h-16 gap-2 border-b border-base-300 bg-base-200 px-2 sm:px-4">
   <div class="flex-none lg:hidden">
     <label for="my-drawer-2" aria-label="open sidebar" class="btn btn-square btn-ghost">
       <svg
@@ -18,22 +18,28 @@
     </label>
   </div>
 
+  {# Brand #}
+  <a href="/" class="flex flex-none items-center gap-2 font-semibold tracking-tight">
+    <span class="grid h-8 w-8 place-items-center rounded-field bg-primary text-primary-content">
+      <i data-lucide="hospital" class="h-4 w-4"></i>
+    </span>
+    <span class="hidden text-sm sm:inline">Clínica Ángel</span>
+  </a>
 
-
-  {# Links Section (Right side) #}
-  <div class="hidden flex-1 lg:block">
-    <ul class="menu menu-horizontal justify-end">
+  {# Links Section #}
+  <nav class="hidden min-w-0 flex-1 lg:block">
+    <ul class="menu menu-horizontal gap-1 px-0 text-sm">
       {% for link in links %}
         {% if link.title %}
           <li>
             <div class="dropdown dropdown-center p-0">
-              <div tabindex="0" role="button" class="btn btn-ghost rounded-field">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-sm rounded-field">
                 <i data-lucide="user-circle"></i>
                 {{ link.title }}
               </div>
               <ul
                 tabindex="-1"
-                class="menu dropdown-content bg-base-200 rounded-box z-1 w-52 p-2 shadow-sm">
+                class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 border border-base-300 p-2 shadow-lg">
                 {% for link in link.links %}
                   <li>
                     <a href="{{ link.url }}">
@@ -47,7 +53,7 @@
           </li>
         {% else %}
           <li>
-            <a href="{{ link.url }}">
+            <a href="{{ link.url }}" class="rounded-field">
               <i data-lucide="{{ link.icon }}"></i>
               {{ link.displayName }}
             </a>
@@ -55,22 +61,22 @@
         {% endif %}
       {% endfor %}
     </ul>
-  </div>
+  </nav>
 
-    {# Profile Actions and Theme Controller (Left side) #}
-  <div class="hidden flex-none lg:flex">
-    <ul class="menu menu-horizontal gap-2">
+  {# Profile Actions and Theme Controller #}
+  <div class="ml-auto flex flex-none items-center gap-1">
+    <ul class="menu menu-horizontal items-center gap-1 px-0 text-sm">
       {% if user %}
         {% include "layout/profile-actions.njk" %}
       {% else %}
         <li>
-          <a href="/auth/login" class="btn btn-primary">
+          <a href="/auth/login" class="btn btn-sm btn-outline">
             <i data-lucide="log-in"></i>
             Iniciar sesión
-            </a>
+          </a>
         </li>
       {% endif %}
       {% include "partials/theme-controller.njk" %}
     </ul>
   </div>
-</div>
+</header>

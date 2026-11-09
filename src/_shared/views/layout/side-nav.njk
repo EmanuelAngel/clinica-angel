@@ -1,20 +1,25 @@
 <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-<div class="flex h-full flex-col bg-base-200">
-  <!-- Header -->
-  <div class="mx-2 flex-none border-b border-base-300 px-2 py-4">{{ title }}</div>
+<div class="flex h-full w-64 flex-col border-r border-base-300 bg-base-200">
+  {# Brand #}
+  <div class="flex flex-none items-center gap-2 border-b border-base-300 px-4 py-4">
+    <span class="grid h-8 w-8 place-items-center rounded-field bg-primary text-primary-content">
+      <i data-lucide="hospital" class="h-4 w-4"></i>
+    </span>
+    <span class="text-sm font-semibold tracking-tight">Clínica Ángel</span>
+  </div>
 
-  <!-- Links Section -->
-  <div class="flex-1 overflow-y-auto">
-    <ul class="menu w-full p-4">
+  {# Links Section #}
+  <nav class="flex-1 overflow-y-auto">
+    <ul class="menu w-full gap-1 p-3 text-sm">
       {% for link in links %}
         {% if link.title %}
           <li>
             <details>
-              <summary class="btn btn-ghost rounded-field">
+              <summary class="rounded-field">
                 <i data-lucide="user-circle"></i>
                 {{ link.title }}
               </summary>
-              <ul class="bg-base-200 p-2">
+              <ul class="p-0">
                 {% for link in link.links %}
                   <li>
                     <a href="{{ link.url }}">
@@ -28,7 +33,7 @@
           </li>
         {% else %}
           <li>
-            <a href="{{ link.url }}">
+            <a href="{{ link.url }}" class="rounded-field">
               <i data-lucide="{{ link.icon }}"></i>
               {{ link.displayName }}
             </a>
@@ -36,26 +41,23 @@
         {% endif %}
       {% endfor %}
     </ul>
-  </div>
+  </nav>
 
-  <!-- Bottom Section: Profile Actions and Theme Controller -->
-  <div class="flex-none border-t border-base-300 p-4">
-    <ul class="menu w-full flex-col gap-2">
-      <!-- Profile Actions -->
+  {# Bottom Section: Profile Actions and Theme Controller #}
+  <div class="flex-none border-t border-base-300 p-3">
+    <ul class="menu w-full flex-col gap-1 text-sm">
       {% if user %}
         {% include "layout/profile-actions.njk" %}
       {% endif %}
-      
-      <!-- Theme Controller -->
+
       <li>
         {% include "partials/theme-controller-sidebar.njk" %}
       </li>
 
-      <!-- Auth Button -->
       {% if user %}
         <li>
           <form action="/auth/logout" method="post" class="w-full">
-            <button type="submit" class="btn btn-soft btn-error w-full justify-start">
+            <button type="submit" class="btn btn-sm btn-ghost w-full justify-start text-error">
               <i data-lucide="log-out"></i>
               Cerrar sesión
             </button>
@@ -63,7 +65,7 @@
         </li>
       {% else %}
         <li>
-          <a href="/auth/login" class="btn btn-primary w-full justify-start">
+          <a href="/auth/login" class="btn btn-sm btn-primary w-full justify-start">
             <i data-lucide="log-in"></i>
             Iniciar sesión
           </a>
