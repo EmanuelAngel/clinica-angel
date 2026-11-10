@@ -14,7 +14,11 @@
 {% import "macros/slot-cell.njk" as slotMacros %}
 
 {% macro render(columns, rows, userRole, emptyMessage) %}
-  {% if rows | length == 0 %}
+  {# Registering a day block deletes the free slots, so a blocked day can have
+     no rows at all: keep the grid so the block and its state stay visible. #}
+  {% set hasBlock = (columns | selectattr("dayBlock") | list | length) > 0 %}
+  {% set gridRows = rows if rows | length else [null] %}
+  {% if rows | length == 0 and not hasBlock %}
     <div class="rounded-box border border-base-300 bg-base-100 px-6 py-12 text-center">
       <p class="text-sm text-base-content/70">{{ emptyMessage or "No hay turnos para mostrar." }}</p>
     </div>
@@ -24,7 +28,7 @@
         <table class="table table-xs table-pin-rows">
           <thead>
             <tr class="border-b border-base-300">
-              <th class="min-w-20 bg-base-100 pr-2 text-right text-xs font-medium text-base-content/70">Hora</th>
+              <th class="sticky left-0 z-20 min-w-20 border-r border-base-300 bg-base-100 pr-2 text-right text-xs font-medium text-base-content/70">Hora</th>
               {% for col in columns %}
                 <th class="min-w-[180px] border-l border-base-300 bg-base-100 p-0 text-center align-top">
                   {% if col.url %}
@@ -48,12 +52,12 @@
           </thead>
 
           <tbody>
-            {% for row in rows %}
+            {% for row in gridRows %}
               {% set isFirstRow = loop.first %}
-              {% set isOnTheHour = (row | date('m')) == '00' %}
+              {% set isOnTheHour = row and (row | date('m')) == '00' %}
               <tr class="hover:bg-base-200/60">
-                <th class="w-20 bg-base-100 pr-2 text-right font-mono text-[11px] tabular-nums {{ 'font-semibold text-base-content' if isOnTheHour else 'text-base-content/40' }}">
-                  {{ row | time }}
+                <th class="sticky left-0 z-10 w-20 border-r border-base-300 bg-base-100 pr-2 text-right font-mono text-[11px] tabular-nums {{ 'font-semibold text-base-content' if isOnTheHour else 'text-base-content/40' }}">
+                  {{ (row | time) if row else '—' }}
                 </th>
 
                 {% for col in columns %}
@@ -79,7 +83,7 @@
                       {% endif %}
                     {% else %}
                       {# Se renderiza todo turno que empiece en esta fila; sin relleno decorativo #}
-                      {% for slot in col.slots %}
+                      {% for slot in (col.slots if row else []) %}
                         {% if (slot.startsAt | date('H')) == (row | date('H')) and (slot.startsAt | date('m')) == (row | date('m')) %}
                           {{ slotMacros.renderSlot(slot, userRole) }}
                         {% endif %}
