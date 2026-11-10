@@ -159,7 +159,7 @@ describe("Professional profile and specialty management", () => {
       expect(res.text).toContain('aria-label="Futuros"');
       expect(res.text).toContain('aria-label="Pasados"');
       // Admin sees the add specialty form
-      expect(res.text).toContain("Agregar Especialidad");
+      expect(res.text).toContain("Agregar especialidad");
       expect(res.text).toContain('name="specialtyId"');
       expect(res.text).toContain('name="licenseNumber"');
     });

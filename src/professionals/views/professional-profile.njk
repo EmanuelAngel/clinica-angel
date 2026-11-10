@@ -1,286 +1,223 @@
 {% extends "layout/base.njk" %}
 
-{% block pageInfo %}
-  {% import "partials/page-info.njk" as PageInfo %}
-  {{ PageInfo.titleAndDescription("Perfil del Profesional", professional.fullName) }}
-{% endblock %}
-
 {% block content %}
-  <div class="w-full max-w-5xl mx-auto space-y-8">
+  <div class="space-y-6">
 
-    {# Header Card #}
-    <div class="card bg-base-200 shadow-md">
-      <div class="card-body">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <div class="avatar placeholder">
-              <div class="bg-primary text-primary-content rounded-full w-16">
-                <span class="text-2xl">{{ professional.firstNames[0] }}{{ professional.lastNames[0] }}</span>
-              </div>
-            </div>
-            <div>
-              <h2 class="card-title text-2xl">{{ professional.fullName }}</h2>
-              <p class="text-sm text-base-content/60">Profesional ID: {{ professional.id }}</p>
+    {# Identidad: es el encabezado de la página, no una card que repite el título #}
+    <section class="rounded-box border border-base-300 bg-base-100 p-4 sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex min-w-0 items-center gap-4">
+          <div class="avatar placeholder">
+            <div class="w-12 rounded-full bg-primary text-primary-content">
+              <span class="text-lg">{{ professional.firstNames[0] }}{{ professional.lastNames[0] }}</span>
             </div>
           </div>
-          {% if isAdmin %}
-            <div class="flex gap-2">
-              <a href="/users/{{ professional.id }}/edit" class="btn btn-primary">
-                <i data-lucide="pencil" class="w-4 h-4"></i>
-                Editar perfil
-              </a>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="text-lg font-semibold tracking-tight">{{ professional.fullName }}</h1>
+              {% if professional.isActive %}
+                <span class="badge badge-sm badge-success">Activo</span>
+              {% else %}
+                <span class="badge badge-sm badge-ghost">Inactivo</span>
+              {% endif %}
             </div>
-          {% endif %}
+            <p class="text-sm text-base-content/70">Profesional #{{ professional.id }}</p>
+          </div>
         </div>
+        {% if isAdmin %}
+          <a href="/users/{{ professional.id }}/edit" class="btn btn-sm btn-primary">
+            <i data-lucide="pencil" class="h-4 w-4"></i>
+            Editar perfil
+          </a>
+        {% endif %}
       </div>
-    </div>
+    </section>
 
-    {# Alert for results (add specialty success/error) #}
+    {# Resultado de agregar especialidad #}
     {% if result %}
-      <div class="alert {{ 'alert-success' if result.type === 'success' else 'alert-error' }}">
-        <i data-lucide="{{ 'check-circle' if result.type === 'success' else 'alert-circle' }}" class="w-5 h-5"></i>
-        <span>{{ result.message }}</span>
+      <div role="alert" class="alert {{ 'alert-success' if result.type === 'success' else 'alert-error' }}">
+        <i data-lucide="{{ 'check-circle' if result.type === 'success' else 'alert-circle' }}" class="h-4 w-4"></i>
+        <span class="text-sm">{{ result.message }}</span>
       </div>
     {% endif %}
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-      {# Left Column - Info #}
-      <div class="lg:col-span-1 space-y-8">
+      {# Columna de datos #}
+      <div class="space-y-6 lg:col-span-1">
 
-        {# Personal Details #}
-        <div class="card bg-base-200 shadow-sm border border-base-300">
-          <div class="card-body p-6">
-            <h3 class="card-title text-lg mb-4 flex items-center gap-2">
-              <i data-lucide="user" class="w-5 h-5 text-primary"></i>
-              Datos Personales
-            </h3>
-            <div class="space-y-4">
-              <div>
-                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">Email</p>
-                <p class="font-medium break-all">{{ professional.email }}</p>
-              </div>
-              <div>
-                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">DNI</p>
-                <p class="font-medium">{{ professional.nationalId }}</p>
-              </div>
-              <div>
-                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">Teléfono</p>
-                <p class="font-medium">{{ professional.phone }}</p>
-              </div>
-              <div>
-                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">Dirección</p>
-                <p class="font-medium">{{ professional.address }}</p>
-              </div>
-              <div>
-                <p class="text-xs uppercase tracking-wider text-base-content/50 font-semibold">Estado</p>
-                <p>
-                  {% if professional.isActive %}
-                    <span class="badge badge-success">Activo</span>
-                  {% else %}
-                    <span class="badge badge-error">Inactivo</span>
-                  {% endif %}
-                </p>
-              </div>
+        <section class="rounded-box border border-base-300 bg-base-100 p-4">
+          <h2 class="text-xs font-medium text-base-content/70">Datos personales</h2>
+          <dl class="mt-3 space-y-2 text-sm">
+            <div>
+              <dt class="text-base-content/70">Email</dt>
+              <dd class="font-medium break-all">{{ professional.email }}</dd>
             </div>
-          </div>
-        </div>
+            <div>
+              <dt class="text-base-content/70">DNI</dt>
+              <dd class="font-medium tabular-nums">{{ professional.nationalId }}</dd>
+            </div>
+            <div>
+              <dt class="text-base-content/70">Teléfono</dt>
+              <dd class="font-medium tabular-nums">{{ professional.phone }}</dd>
+            </div>
+            <div>
+              <dt class="text-base-content/70">Dirección</dt>
+              <dd class="font-medium">{{ professional.address }}</dd>
+            </div>
+          </dl>
+        </section>
 
-        {# Specialties Card #}
-        <div class="card bg-base-200 shadow-sm border border-base-300">
-          <div class="card-body p-6">
-            <h3 class="card-title text-lg mb-4 flex items-center gap-2">
-              <i data-lucide="award" class="w-5 h-5 text-secondary"></i>
-              Especialidades y Matrículas
-            </h3>
+        <section class="rounded-box border border-base-300 bg-base-100 p-4">
+          <h2 class="text-xs font-medium text-base-content/70">Especialidades y matrículas</h2>
 
-            {% if specialties.length > 0 %}
-              <div class="overflow-x-auto">
-                <table class="table table-sm">
-                  <thead>
-                    <tr>
-                      <th>Especialidad</th>
-                      <th>Matrícula</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for cred in specialties %}
-                      <tr>
-                        <td>
-                          <span class="badge badge-primary badge-outline">{{ cred.specialtyName }}</span>
-                        </td>
-                        <td class="font-mono text-sm">{{ cred.licenseNumber }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+          {% if specialties.length > 0 %}
+            <dl class="mt-3 space-y-2 text-sm">
+              {% for cred in specialties %}
+                <div class="flex items-baseline justify-between gap-3">
+                  <dt class="font-medium">{{ cred.specialtyName }}</dt>
+                  <dd class="font-mono text-[13px] tabular-nums text-base-content/70">{{ cred.licenseNumber }}</dd>
+                </div>
+              {% endfor %}
+            </dl>
+          {% else %}
+            <p class="mt-3 text-sm text-base-content/70">No tiene especialidades registradas.</p>
+          {% endif %}
+
+          {% if isAdmin %}
+            <form action="/professionals/{{ professional.id }}/specialties" method="POST" class="mt-4 space-y-3 border-t border-base-300 pt-4">
+              <p class="text-xs font-medium text-base-content/70">Agregar especialidad</p>
+
+              <div>
+                <label for="specialtyId" class="text-xs font-medium text-base-content/70">Especialidad</label>
+                <select
+                  id="specialtyId"
+                  name="specialtyId"
+                  class="select select-sm mt-1 w-full {{ 'select-error' if errors and errors.properties.specialtyId }}"
+                  required
+                >
+                  <option value="" disabled selected>Seleccionar especialidad</option>
+                  {% for spec in allSpecialties %}
+                    <option value="{{ spec.id }}">{{ spec.name }}</option>
+                  {% endfor %}
+                </select>
+                {% if errors and errors.properties.specialtyId %}
+                  <p class="mt-1 text-xs text-error">{{ errors.properties.specialtyId[0] }}</p>
+                {% endif %}
               </div>
-            {% else %}
-              <p class="text-base-content/50 text-sm">No tiene especialidades registradas.</p>
-            {% endif %}
 
-            {# Admin-only: Add Specialty Form #}
-            {% if isAdmin %}
-              <div class="divider text-xs text-base-content/40">Agregar Especialidad</div>
-              <form action="/professionals/{{ professional.id }}/specialties" method="POST" class="space-y-3">
-                <div class="form-control w-full">
-                  <label class="label text-sm">Especialidad</label>
-                  <select name="specialtyId"
-                          class="select select-bordered select-sm w-full {{ 'select-error' if errors and errors.properties.specialtyId }}"
-                          required>
-                    <option value="" disabled selected>Seleccionar especialidad</option>
-                    {% for spec in allSpecialties %}
-                      <option value="{{ spec.id }}">{{ spec.name }}</option>
-                    {% endfor %}
-                  </select>
-                  {% if errors and errors.properties.specialtyId %}
-                    <div class="text-error text-xs mt-1">{{ errors.properties.specialtyId[0] }}</div>
-                  {% endif %}
-                </div>
+              <div>
+                <label for="licenseNumber" class="text-xs font-medium text-base-content/70">Número de matrícula</label>
+                <input
+                  type="text"
+                  id="licenseNumber"
+                  name="licenseNumber"
+                  class="input input-sm mt-1 w-full {{ 'input-error' if errors and errors.properties.licenseNumber }}"
+                  placeholder="MP-12345"
+                  required
+                  minlength="1"
+                  maxlength="50"
+                />
+                {% if errors and errors.properties.licenseNumber %}
+                  <p class="mt-1 text-xs text-error">{{ errors.properties.licenseNumber[0] }}</p>
+                {% endif %}
+              </div>
 
-                <div class="form-control w-full">
-                  <label class="label text-sm">Número de Matrícula</label>
-                  <input type="text"
-                         name="licenseNumber"
-                         class="input input-bordered input-sm w-full {{ 'input-error' if errors and errors.properties.licenseNumber }}"
-                         placeholder="MP-12345"
-                         required
-                         minlength="1"
-                         maxlength="50" />
-                  {% if errors and errors.properties.licenseNumber %}
-                    <div class="text-error text-xs mt-1">{{ errors.properties.licenseNumber[0] }}</div>
-                  {% endif %}
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-sm w-full">
-                  <i data-lucide="plus" class="w-4 h-4"></i>
-                  Agregar
-                </button>
-              </form>
-            {% endif %}
-          </div>
-        </div>
+              <button type="submit" class="btn btn-sm btn-primary w-full">
+                <i data-lucide="plus" class="h-4 w-4"></i>
+                Agregar
+              </button>
+            </form>
+          {% endif %}
+        </section>
 
       </div>
 
-      {# Right Column - Slot Agenda #}
+      {# Columna de agenda #}
       <div class="lg:col-span-2">
-        <div class="card bg-base-200 shadow-sm border border-base-300 h-full">
-          <div class="card-body p-0">
-            <div class="p-6 pb-0">
-              <h3 class="card-title text-xl flex items-center gap-3">
-                <i data-lucide="calendar" class="w-6 h-6 text-primary"></i>
-                Agenda de Turnos
-              </h3>
+        <section class="overflow-hidden rounded-box border border-base-300 bg-base-100">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 p-4">
+            <h2 class="text-sm font-semibold">Agenda de turnos</h2>
+            {% if schedules and schedules.length > 0 %}
+              <div class="flex flex-wrap gap-1">
+                {% for sched in schedules %}
+                  <a href="/schedules/{{ sched.id }}/agenda" class="btn btn-xs btn-ghost">
+                    <i data-lucide="calendar-days" class="h-3 w-3"></i>
+                    {{ sched.specialtyName }} — {{ sched.classificationName }}
+                  </a>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
 
-              {% if schedules and schedules.length > 0 %}
-                <div class="flex flex-wrap gap-2 mt-3">
-                  {% for sched in schedules %}
-                    <a href="/schedules/{{ sched.id }}/agenda"
-                       class="btn btn-sm btn-outline btn-primary">
-                      <i data-lucide="calendar-days" class="w-4 h-4"></i>
-                      {{ sched.specialtyName }} — {{ sched.classificationName }}
-                    </a>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            </div>
-
-            <div class="tabs tabs-lifted tabs-lg mt-6">
-
-              {# Macro for rendering slot cards #}
-              {% macro renderSlotList(slots, emptyMessage) %}
-                {% if slots.length > 0 %}
-                  <div class="space-y-4">
-                    {% for slot in slots %}
-                      <div class="card bg-base-100 border border-base-300 shadow-xs">
-                        <div class="card-body p-4">
-                          <div class="flex flex-wrap items-start justify-between gap-2">
-                            {# Left: Date & Time #}
-                            <div class="flex items-center gap-3">
-                              <div class="text-center bg-primary/10 rounded-lg p-2 min-w-[60px]">
-                                <div class="text-xs text-primary font-semibold">{{ slot.startsAt | date("DD/MM") }}</div>
-                                <div class="text-lg font-bold font-mono text-primary">{{ slot.startsAt | time }}</div>
-                              </div>
-                              <div>
-                                <div class="font-semibold">{{ slot.patientName }}</div>
-                                <div class="text-xs text-base-content/60">DNI: {{ slot.patientNationalId }}</div>
-                              </div>
-                            </div>
-                            {# Right: Status Badge #}
-                            <div>
-                              {% import "macros/slot-status-badge.njk" as StatusBadge %}
-                              {{ StatusBadge.renderStatusBadge(slot.status, slot.isOverbook) }}
-                            </div>
-                          </div>
-
-                          {# Schedule info: Specialty & Classification #}
-                          <div class="flex flex-wrap gap-2 mt-2">
-                            <span class="badge badge-outline badge-sm">
-                              <i data-lucide="stethoscope" class="w-3 h-3 mr-1"></i>
-                              {{ slot.specialty }}
-                            </span>
-                            <span class="badge badge-ghost badge-sm">
-                              <i data-lucide="tag" class="w-3 h-3 mr-1"></i>
-                              {{ slot.classification }}
-                            </span>
-                          </div>
-
-                          {# Insurance info #}
-                          <div class="flex items-center gap-2 mt-1">
-                            <i data-lucide="shield" class="w-4 h-4 text-secondary/60"></i>
+          <div class="tabs tabs-border px-4 pt-2">
+            {% macro renderSlotList(slots, emptyMessage) %}
+              {% if slots.length > 0 %}
+                <ul class="divide-y divide-base-300">
+                  {% for slot in slots %}
+                    <li class="flex flex-wrap items-start justify-between gap-3 p-4">
+                      <div class="flex min-w-0 items-start gap-3">
+                        <div class="min-w-14 rounded-field bg-base-200 px-2 py-1 text-center">
+                          <div class="text-xs text-base-content/70 tabular-nums">{{ slot.startsAt | date("DD/MM") }}</div>
+                          <div class="font-mono text-sm font-medium tabular-nums">{{ slot.startsAt | time }}</div>
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-sm font-medium">{{ slot.patientName }}</p>
+                          <p class="text-xs text-base-content/60 tabular-nums">DNI {{ slot.patientNationalId }}</p>
+                          <p class="mt-1 text-xs text-base-content/70">
+                            {{ slot.specialty }} · {{ slot.classification }}
                             {% if slot.insuranceName %}
-                              <span class="text-sm">{{ slot.insuranceName }} — <span class="font-mono text-xs">{{ slot.insuranceMemberNumber }}</span></span>
+                              · {{ slot.insuranceName }}
+                              <span class="font-mono">{{ slot.insuranceMemberNumber }}</span>
                             {% else %}
-                              <span class="text-sm text-base-content/50 italic">Particular</span>
+                              · Particular
                             {% endif %}
-                          </div>
-
-                          {# Consultation Reason #}
+                          </p>
                           {% if slot.consultationReason %}
-                            <blockquote class="bg-base-200 p-3 rounded-lg text-sm italic mt-2 line-clamp-3 border-l-4 border-primary/30">
-                              {{ slot.consultationReason }}
-                            </blockquote>
+                            <p class="mt-1 line-clamp-2 text-xs text-base-content/60">{{ slot.consultationReason }}</p>
                           {% endif %}
                         </div>
                       </div>
-                    {% endfor %}
-                  </div>
-                {% else %}
-                  <div class="p-12 text-center text-base-content/50">
-                    <i data-lucide="calendar-off" class="w-16 h-16 mx-auto mb-4 opacity-20"></i>
-                    <p>{{ emptyMessage }}</p>
-                  </div>
-                {% endif %}
-              {% endmacro %}
+                      <div>
+                        {% import "macros/slot-status-badge.njk" as StatusBadge %}
+                        {{ StatusBadge.renderStatusBadge(slot.status, slot.isOverbook) }}
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="px-6 py-12 text-center">
+                  <p class="text-sm text-base-content/70">{{ emptyMessage }}</p>
+                </div>
+              {% endif %}
+            {% endmacro %}
 
-              {# Tab 1: Hoy #}
-              <input type="radio" name="agenda_tabs" role="tab" class="tab" aria-label="Hoy" checked="checked" />
-              <div role="tabpanel" class="tab-content bg-base-100 border-base-300 p-6">
-                {{ renderSlotList(slotsToday, "No hay turnos programados para hoy.") }}
-              </div>
+            {# Tab 1: Hoy #}
+            <input type="radio" name="agenda_tabs" role="tab" class="tab" aria-label="Hoy" checked="checked" />
+            <div role="tabpanel" class="tab-content p-0 pt-2">
+              {{ renderSlotList(slotsToday, "No hay turnos programados para hoy.") }}
+            </div>
 
-              {# Tab 2: Futuros #}
-              <input type="radio" name="agenda_tabs" role="tab" class="tab" aria-label="Futuros" />
-              <div role="tabpanel" class="tab-content bg-base-100 border-base-300 p-6">
-                {{ renderSlotList(slotsFuture, "No hay turnos futuros pendientes.") }}
-              </div>
+            {# Tab 2: Futuros #}
+            <input type="radio" name="agenda_tabs" role="tab" class="tab" aria-label="Futuros" />
+            <div role="tabpanel" class="tab-content p-0 pt-2">
+              {{ renderSlotList(slotsFuture, "No hay turnos futuros pendientes.") }}
+            </div>
 
-              {# Tab 3: Pasados #}
-              <input type="radio" name="agenda_tabs" role="tab" class="tab" aria-label="Pasados" />
-              <div role="tabpanel" class="tab-content bg-base-100 border-base-300 p-6">
-                {{ renderSlotList(slotsPast, "No hay historial de turnos pasados.") }}
-              </div>
+            {# Tab 3: Pasados #}
+            <input type="radio" name="agenda_tabs" role="tab" class="tab" aria-label="Pasados" />
+            <div role="tabpanel" class="tab-content p-0 pt-2">
+              {{ renderSlotList(slotsPast, "No hay historial de turnos pasados.") }}
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
     </div>
 
-    <div class="flex gap-4">
-      <a href="/professionals" class="btn btn-neutral">
-        <i data-lucide="arrow-left"></i>
+    <div>
+      <a href="/professionals" class="btn btn-sm btn-ghost">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i>
         Volver a la lista
       </a>
     </div>
