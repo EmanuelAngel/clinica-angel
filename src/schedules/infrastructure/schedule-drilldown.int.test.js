@@ -124,8 +124,8 @@ describe("Schedule drilldown view (GET /schedules/:id/agenda)", () => {
     // Blocks
     expect(res.text).toContain("Vacaciones Test");
 
-    // Admin button
-    expect(res.text).toContain("Modificar agenda");
+    // Admin actions: the editor is the only primary action
+    expect(res.text).toContain("Editar configuración");
   });
 
   test("defaults to vista=hoy when no query param provided", async () => {

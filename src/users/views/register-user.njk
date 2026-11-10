@@ -1,183 +1,135 @@
 {% extends "layout/base.njk" %}
+{% import "partials/form-field.njk" as Field %}
 
 {% block pageInfo %}
   {% import "partials/page-info.njk" as PageInfo %}
-  {{ PageInfo.titleAndDescription("Registro de Usuario", "Registra tu cuenta.") }}
+  {{ PageInfo.titleAndDescription("Registro de usuario", "Registra tu cuenta.") }}
 {% endblock %}
 
 {% block content %}
-  <form action="/users" method="POST" class="w-full max-w-3xl mx-auto space-y-12">
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-      <legend>Datos personales</legend>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <label class="label">Nombres (requerido)</label>
-          <input type="text"
-                 name="firstNames"
-                 value="{{ values.firstNames }}"
-                 class="input validator {{ 'input-error' if errors.properties.firstNames }}"
-                 required
-                 minlength="2"
-                 maxlength="100"
-                 pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
-                 title="Solo letras, espacios, guiones o apóstrofes." 
-                 placeholder="Nombre completo" />
-          {% if errors.properties.firstNames %}
-            <div class="text-error">{{ errors.properties.firstNames[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Ingrese nombres válidos.
-            <br /> Solo letras, espacios, guiones o apóstrofes.
-            <br /> Mínimo 2 caracteres.
-            <br /> Máximo 100 caracteres.
-          </div>
-        </div>
+  {% set roleOptions = [
+    { value: Roles.SECRETARY, label: "Secretaría" },
+    { value: Roles.ADMIN, label: "Administrador" }
+  ] %}
 
-        <div>
-          <label class="label">Apellido (requerido)</label>
-          <input type="text"
-                 name="lastNames"
-                 value="{{ values.lastNames }}"
-                 class="input validator {{ 'input-error' if errors.properties.lastNames }}"
-                 required
-                 minlength="2"
-                 maxlength="100"
-                 pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
-                 title="Solo letras, espacios, guiones o apóstrofes."
-                 placeholder="Apellido" />
-          {% if errors.properties.lastNames %}
-            <div class="text-error">{{ errors.properties.lastNames[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Ingrese apellidos válidos.
-            <br /> Solo letras, espacios, guiones o apóstrofes.
-            <br /> Mínimo 2 caracteres.
-            <br /> Máximo 100 caracteres.
-          </div>
-        </div>
+  <form action="/users" method="POST" class="max-w-3xl space-y-6">
+    <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4">
+      <legend class="text-sm font-semibold">Datos personales</legend>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {{ Field.text({
+          name: "firstNames",
+          label: "Nombres",
+          value: values.firstNames,
+          error: errors.properties.firstNames[0] if errors.properties.firstNames else null,
+          required: true,
+          minlength: 2,
+          maxlength: 100,
+          pattern: "[a-zA-ZÀ-ÿñÑ\\s'-]+",
+          title: "Solo letras, espacios, guiones o apóstrofes.",
+          placeholder: "Nombre completo",
+          hint: "Solo letras, espacios, guiones o apóstrofes. Entre 2 y 100 caracteres."
+        }) }}
 
-        <div>
-          <label class="label">Número de DNI (requerido)</label>
-          <input type="text"
-                name="nationalId"
-                value="{{ values.nationalId }}"
-                class="input validator {{ 'input-error' if errors.properties.nationalId }}"
-                required
-                minlength="7"
-                maxlength="9"
-                pattern="[0-9]{7,9}"
-                title="El DNI debe tener entre 7 y 9 números sin puntos ni letras."
-                placeholder="Número de DNI" />
-            {% if errors.properties.nationalId %}
-              <div class="text-error">{{ errors.properties.nationalId[0] }}</div>
-            {% endif %}
-          <div class="validator-hint">
-            Ingrese un número de DNI válido
-            <br /> El DNI debe tener entre 7 y 9 números sin puntos ni letras.
-          </div>
-        </div>
+        {{ Field.text({
+          name: "lastNames",
+          label: "Apellido",
+          value: values.lastNames,
+          error: errors.properties.lastNames[0] if errors.properties.lastNames else null,
+          required: true,
+          minlength: 2,
+          maxlength: 100,
+          pattern: "[a-zA-ZÀ-ÿñÑ\\s'-]+",
+          title: "Solo letras, espacios, guiones o apóstrofes.",
+          placeholder: "Apellido",
+          hint: "Solo letras, espacios, guiones o apóstrofes. Entre 2 y 100 caracteres."
+        }) }}
+
+        {{ Field.text({
+          name: "nationalId",
+          label: "Número de DNI",
+          value: values.nationalId,
+          error: errors.properties.nationalId[0] if errors.properties.nationalId else null,
+          required: true,
+          minlength: 7,
+          maxlength: 9,
+          pattern: "[0-9]{7,9}",
+          title: "El DNI debe tener entre 7 y 9 números sin puntos ni letras.",
+          placeholder: "Número de DNI",
+          hint: "Entre 7 y 9 números, sin puntos ni letras."
+        }) }}
       </div>
     </fieldset>
 
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-      <legend>Datos de cuenta</legend>
+    <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4">
+      <legend class="text-sm font-semibold">Datos de cuenta</legend>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {{ Field.select({
+          name: "role",
+          label: "Rol",
+          value: values.role,
+          options: roleOptions,
+          placeholder: "Seleccione un rol",
+          error: errors.properties.role[0] if errors.properties.role else null,
+          required: true,
+          hint: "Seleccione un rol válido."
+        }) }}
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <label class="label">Rol (requerido)</label>
-          <select name="role"
-                  class="select validator {{ 'input-error' if errors.properties.role }}"
-                  required>
-            <option value="" disabled selected>Seleccione un rol</option>
-            <option value="{{ Roles.SECRETARY }}">Secretaría</option>
-            <option value="{{ Roles.ADMIN }}">Administrador</option>
-          </select>
-          {% if errors.properties.role %}
-            <div class="text-error">{{ errors.properties.role[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Seleccione un rol válido
-        </div>
+        {{ Field.text({
+          name: "email",
+          type: "email",
+          label: "Email",
+          value: values.email,
+          error: errors.properties.email[0] if errors.properties.email else null,
+          required: true,
+          placeholder: "correoelectronico@sitio.com",
+          hint: "Ingrese un email válido."
+        }) }}
 
-        <div>
-          <label class="label">Email (requerido)</label>
-          <input type="email"
-                 name="email"
-                 value="{{ values.email }}"
-                 class="input validator {{ 'input-error' if errors.properties.email }}"
-                 required
-                 placeholder="correoelectronico@sitio.com" />
-          {% if errors.properties.email %}
-            <div class="text-error">{{ errors.properties.email[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Ingrese un email válido
-          </div>
-        </div>
-
-        <div>
-          <label class="label">Contraseña (requerido)</label>
-          <input type="password"
-                 name="password"
-                 class="input validator {{ 'input-error' if errors.properties.password }}"
-                 required
-                 minlength="8"
-                 maxlength="100"
-                 placeholder="Contraseña" />
-          {% if errors.properties.password %}
-            <div class="text-error">{{ errors.properties.password[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Ingrese una contraseña válida
-            <br /> Mínimo 8 caracteres.
-            <br /> Máximo 100 caracteres.
-          </div>
-        </div>
+        {{ Field.text({
+          name: "password",
+          type: "password",
+          label: "Contraseña",
+          error: errors.properties.password[0] if errors.properties.password else null,
+          required: true,
+          minlength: 8,
+          maxlength: 100,
+          placeholder: "Contraseña",
+          hint: "Entre 8 y 100 caracteres."
+        }) }}
       </div>
     </fieldset>
 
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-      <legend>Datos de contacto</legend>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <label class="label">Teléfono (requerido)</label>
-          <input type="tel"
-                 name="phone"
-                 value="{{ values.phone }}"
-                 class="input validator {{ 'input-error' if errors.properties.phone }}"
-                 required
-                 placeholder="Número de teléfono" />
-            {% if errors.properties.phone %}
-              <div class="text-error">{{ errors.properties.phone[0] }}</div>
-            {% endif %}
-          <div class="validator-hint">Ingrese un número de teléfono válido</div>
-        </div>
+    <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4">
+      <legend class="text-sm font-semibold">Datos de contacto</legend>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {{ Field.text({
+          name: "phone",
+          type: "tel",
+          label: "Teléfono",
+          value: values.phone,
+          error: errors.properties.phone[0] if errors.properties.phone else null,
+          required: true,
+          placeholder: "Número de teléfono",
+          hint: "Ingrese un número de teléfono válido."
+        }) }}
 
-        <div>
-          <label class="label">Dirección (requerido)</label>
-          <input type="text"
-                 name="address"
-                 value="{{ values.address }}"
-                 class="input validator {{ 'input-error' if errors.properties.address }}"
-                 required
-                 minlength="5"
-                 maxlength="180"
-                 placeholder="Dirección" />
-            {% if errors.properties.address %}
-              <div class="text-error">{{ errors.properties.address[0] }}</div>
-            {% endif %}
-          <div class="validator-hint">Ingrese una dirección válida</div>
-        </div>
+        {{ Field.text({
+          name: "address",
+          label: "Dirección",
+          value: values.address,
+          error: errors.properties.address[0] if errors.properties.address else null,
+          required: true,
+          minlength: 5,
+          maxlength: 180,
+          placeholder: "Dirección",
+          hint: "Ingrese una dirección válida."
+        }) }}
       </div>
     </fieldset>
 
-    <div class="mt-8 flex flex-col lg:flex-row gap-4">
-      <button type="submit" class="btn btn-primary flex-1">
-        Registrar
-      </button>
-      <button type="reset" class="btn btn-neutral flex-1">
-        Limpiar formulario
-      </button>
+    <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+      <button type="reset" class="btn btn-ghost">Limpiar formulario</button>
+      <button type="submit" class="btn btn-primary">Registrar</button>
     </div>
   </form>
 {% endblock %}

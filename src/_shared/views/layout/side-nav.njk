@@ -1,61 +1,78 @@
 <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-<div class="flex h-full flex-col bg-base-200">
-  <!-- Header -->
-  <div class="mx-2 flex-none border-b border-base-300 px-2 py-4">{{ title }}</div>
-
-  <!-- Links Section -->
-  <div class="flex-1 overflow-y-auto">
-    <ul class="menu w-full p-4">
-      {% for link in links %}
-        {% if link.title %}
-          <li>
-            <details>
-              <summary class="btn btn-ghost rounded-field">
-                <i data-lucide="user-circle"></i>
-                {{ link.title }}
-              </summary>
-              <ul class="bg-base-200 p-2">
-                {% for link in link.links %}
-                  <li>
-                    <a href="{{ link.url }}">
-                      <i data-lucide="{{ link.icon }}"></i>
-                      {{ link.displayName }}
-                    </a>
-                  </li>
-                {% endfor %}
-              </ul>
-            </details>
-          </li>
-        {% else %}
-          <li>
-            <a href="{{ link.url }}">
-              <i data-lucide="{{ link.icon }}"></i>
-              {{ link.displayName }}
-            </a>
-          </li>
-        {% endif %}
-      {% endfor %}
-    </ul>
+<div class="flex h-full w-64 flex-col border-r border-base-300 bg-base-200">
+  {# Brand #}
+  <div class="flex flex-none items-center gap-2 border-b border-base-300 px-4 py-4">
+    <span class="grid h-8 w-8 place-items-center rounded-field bg-primary text-primary-content">
+      <i data-lucide="hospital" class="h-4 w-4"></i>
+    </span>
+    <span class="text-sm font-semibold tracking-tight">Clínica Ángel</span>
   </div>
 
-  <!-- Bottom Section: Profile Actions and Theme Controller -->
-  <div class="flex-none border-t border-base-300 p-4">
-    <ul class="menu w-full flex-col gap-2">
-      <!-- Profile Actions -->
+  {# Links Section — filtered by role #}
+  <nav class="flex-1 overflow-y-auto">
+    <ul class="menu w-full gap-1 p-3 text-sm">
+      {% for link in links %}
+        {% if not link.roles or (user and user.role in link.roles) %}
+          {% if link.title %}
+            <li>
+              <details>
+                <summary class="rounded-field">
+                  <i data-lucide="{{ link.icon }}"></i>
+                  {{ link.title }}
+                </summary>
+                <ul class="p-0">
+                  {% for sub in link.links %}
+                    {% if not sub.roles or (user and user.role in sub.roles) %}
+                      <li>
+                        <a href="{{ sub.url }}">
+                          <i data-lucide="{{ sub.icon }}"></i>
+                          {{ sub.displayName }}
+                        </a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </details>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ link.url }}" class="rounded-field">
+                <i data-lucide="{{ link.icon }}"></i>
+                {{ link.displayName }}
+              </a>
+            </li>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {# El paciente va a su propio perfil: /schedules/compare le responde 403
+         en las APIs que alimentan sus filtros. #}
+      {% if user and user.role === Roles.PATIENT %}
+        <li>
+          <a href="/patients/{{ user.sub }}" class="rounded-field">
+            <i data-lucide="calendar-check"></i>
+            Mis turnos
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  {# Bottom Section: Profile Actions and Theme Controller #}
+  <div class="flex-none border-t border-base-300 p-3">
+    <ul class="menu w-full flex-col gap-1 text-sm">
       {% if user %}
         {% include "layout/profile-actions.njk" %}
       {% endif %}
-      
-      <!-- Theme Controller -->
+
       <li>
         {% include "partials/theme-controller-sidebar.njk" %}
       </li>
 
-      <!-- Auth Button -->
       {% if user %}
         <li>
           <form action="/auth/logout" method="post" class="w-full">
-            <button type="submit" class="btn btn-soft btn-error w-full justify-start">
+            <button type="submit" class="btn btn-sm btn-ghost w-full justify-start text-error">
               <i data-lucide="log-out"></i>
               Cerrar sesión
             </button>
@@ -63,7 +80,7 @@
         </li>
       {% else %}
         <li>
-          <a href="/auth/login" class="btn btn-primary w-full justify-start">
+          <a href="/auth/login" class="btn btn-sm btn-primary w-full justify-start">
             <i data-lucide="log-in"></i>
             Iniciar sesión
           </a>

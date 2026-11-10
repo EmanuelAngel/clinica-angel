@@ -1,17 +1,18 @@
 {% macro badge(role) %}
+  {# El rol es un dato descriptivo, no un estado: un solo tratamiento visual. #}
   {% if role === Roles.ADMIN %}
-    <div class="badge badge-accent">Administrador</div>
+    <span class="badge badge-sm badge-ghost">Administrador</span>
   {% endif %}
 
   {% if role === Roles.SECRETARY %}
-    <div class="badge badge-info">Secretaria</div>
+    <span class="badge badge-sm badge-ghost">Secretaria</span>
   {% endif %}
 
   {% if role === Roles.PROFESSIONAL %}
-    <div class="badge badge-primary">Profesional</div>
+    <span class="badge badge-sm badge-ghost">Profesional</span>
   {% endif %}
 
   {% if role === Roles.PATIENT %}
-    <div class="badge badge-neutral">Paciente</div>
+    <span class="badge badge-sm badge-ghost">Paciente</span>
   {% endif %}
 {% endmacro %}

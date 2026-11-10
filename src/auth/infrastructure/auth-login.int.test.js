@@ -38,6 +38,32 @@ describe("Auth login integration", () => {
     expect(response.headers["set-cookie"][0]).toContain("access_token=");
   });
 
+  test("redirects a PROFESSIONAL to their own profile, not to /users", async () => {
+    const passwordHash = await bcrypt.hash(testPassword, 10);
+    const professional = await prisma.user.create({
+      data: {
+        email: "doctor@example.com",
+        passwordHash,
+        role: Roles.PROFESSIONAL,
+        firstNames: "Doc",
+        lastNames: "Tor",
+        nationalId: "87654321",
+        phone: "123456789",
+        address: "Test Address",
+      },
+    });
+
+    const response = await request(app).post("/auth/login").send({
+      email: professional.email,
+      password: testPassword,
+    });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.location).toBe(
+      `/professionals/${professional.id}/profile`
+    );
+  });
+
   test("returns 422 when email is invalid", async () => {
     const response = await request(app).post("/auth/login").send({
       email: "invalid-email",

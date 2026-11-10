@@ -469,6 +469,11 @@ function setupListControls() {
  *
  */
 function init() {
+  // El marcado del dial solo existe para ADMIN y SECRETARY. Sin él no hay nada
+  // que cablear, y pedir los datos de referencia dispara 403 para el resto de
+  // los roles sin que nadie los use.
+  if (!document.getElementById("wl-dial")) return;
+
   loadReferenceData();
   setupBidirectionalFiltering();
   setupDniSearch();

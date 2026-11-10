@@ -14,6 +14,7 @@ import {
   VISTA_STEPS,
   VALID_VISTAS,
 } from "./date-range.utils.js";
+import { buildTimeRows } from "../domain/time-grid-rows.js";
 
 export class ScheduleController {
   /**
@@ -109,30 +110,6 @@ export class ScheduleController {
   }
 
   /**
-   * Renders the schedule details page.
-   * @param {import("express").Request} req
-   * @param {import("express").Response} res
-   * @returns {Promise<void>}
-   */
-  async showDetails(req, res) {
-    const id = parseInt(req.params.id);
-
-    if (isNaN(id)) {
-      return res
-        .status(400)
-        .render("404", { message: "ID de agenda inválido" });
-    }
-
-    const result = await services.scheduleService.getScheduleDetails(id);
-
-    result.match(
-      (schedule) => res.render("show-schedule", { schedule }),
-      (error) =>
-        res.status(error.statusCode).render("404", { message: error.message })
-    );
-  }
-
-  /**
    * Renders the schedule comparison view.
    * @param {import("express").Request} req
    * @param {import("express").Response} res
@@ -187,6 +164,7 @@ export class ScheduleController {
       filters,
       hasFilters,
       schedules,
+      rows: buildTimeRows(schedules.map((schedule) => schedule.slots)),
       date: filters.date,
       userRole: req.user?.role,
     });
@@ -258,6 +236,7 @@ export class ScheduleController {
     res.render("schedule-drilldown", {
       schedule,
       days,
+      rows: buildTimeRows(days.map((day) => day.slots)),
       vista,
       fecha,
       vistaSteps: VISTA_STEPS,
@@ -328,6 +307,7 @@ export class ScheduleController {
    * Registers a schedule block (unforeseen event) via JSON API.
    * @param {import("express").Request} req
    * @param {import("express").Response} res
+   * @returns {Promise<void>}
    */
   async registerBlock(req, res) {
     const scheduleId = parseInt(req.params.id);
@@ -374,6 +354,7 @@ export class ScheduleController {
    * Updates a schedule configuration via JSON API.
    * @param {import("express").Request} req
    * @param {import("express").Response} res
+   * @returns {Promise<void>}
    */
   async update(req, res) {
     const id = parseInt(req.params.id);

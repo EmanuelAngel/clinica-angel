@@ -1,0 +1,97 @@
+{#
+  Campos de formulario. Un solo lugar para la relación etiqueta↔campo, el
+  marcador de requerido y los DOS canales de error:
+
+    - validator-hint: restricción nativa del navegador, aparece solo cuando el
+      campo es inválido después de que el usuario interactuó (`:user-invalid`).
+    - error: mensaje del servidor (Zod), visible siempre.
+
+  El <input> y su .validator-hint tienen que quedar como hermanos contiguos:
+  el CSS de DaisyUI los enlaza con `~`.
+
+  Uso:
+    {% import "partials/form-field.njk" as Field %}
+    {{ Field.text({ name: "name", label: "Nombre", value: values.name,
+                    error: errors.properties.name[0], required: true,
+                    minlength: 2, maxlength: 100, placeholder: "Ej: Primera vez" }) }}
+#}
+
+{% macro label(opts) %}
+  <label for="{{ opts.id or opts.name }}" class="text-xs font-medium text-base-content/70">
+    {{ opts.label }}{% if opts.required %}<span class="ml-0.5 text-error" aria-hidden="true">*</span>{% endif %}
+  </label>
+{% endmacro %}
+
+{% macro text(opts) %}
+  <div>
+    {{ label(opts) }}
+    <input
+      type="{{ opts.type or 'text' }}"
+      id="{{ opts.id or opts.name }}"
+      name="{{ opts.name }}"
+      class="input validator mt-1 w-full {{ 'input-error' if opts.error }}"
+      {% if opts.value is defined and opts.value != null %}value="{{ opts.value }}"{% endif %}
+      {% if opts.required %}required{% endif %}
+      {% if opts.minlength %}minlength="{{ opts.minlength }}"{% endif %}
+      {% if opts.maxlength %}maxlength="{{ opts.maxlength }}"{% endif %}
+      {% if opts.inputmode %}inputmode="{{ opts.inputmode }}"{% endif %}
+      {% if opts.pattern %}{{ ('pattern="' + opts.pattern + '"') | safe }}{% endif %}
+      {% if opts.title %}{{ ('title="' + opts.title + '"') | safe }}{% endif %}
+      {% if opts.placeholder %}placeholder="{{ opts.placeholder }}"{% endif %}
+    />
+    {% if opts.error %}
+      <p class="mt-1 text-xs text-error">{{ opts.error }}</p>
+    {% endif %}
+    {% if opts.hint %}
+      <div class="validator-hint">{{ opts.hint }}</div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro select(opts) %}
+  <div>
+    {{ label(opts) }}
+    <select
+      id="{{ opts.id or opts.name }}"
+      name="{{ opts.name }}"
+      class="select validator mt-1 w-full {{ 'select-error' if opts.error }}"
+      {% if opts.required %}required{% endif %}
+    >
+      {% if opts.placeholder %}
+        <option value="" disabled {{ 'selected' if not opts.value }}>{{ opts.placeholder }}</option>
+      {% endif %}
+      {% for option in opts.options %}
+        <option value="{{ option.value }}" {{ 'selected' if opts.value == option.value }}>
+          {{ option.label }}
+        </option>
+      {% endfor %}
+    </select>
+    {% if opts.error %}
+      <p class="mt-1 text-xs text-error">{{ opts.error }}</p>
+    {% endif %}
+    {% if opts.hint %}
+      <div class="validator-hint">{{ opts.hint }}</div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro textarea(opts) %}
+  <div>
+    {{ label(opts) }}
+    <textarea
+      id="{{ opts.id or opts.name }}"
+      name="{{ opts.name }}"
+      class="textarea validator mt-1 w-full {{ 'textarea-error' if opts.error }}"
+      {% if opts.rows %}rows="{{ opts.rows }}"{% endif %}
+      {% if opts.required %}required{% endif %}
+      {% if opts.maxlength %}maxlength="{{ opts.maxlength }}"{% endif %}
+      {% if opts.placeholder %}placeholder="{{ opts.placeholder }}"{% endif %}
+    >{% if opts.value is defined and opts.value != null %}{{ opts.value }}{% endif %}</textarea>
+    {% if opts.error %}
+      <p class="mt-1 text-xs text-error">{{ opts.error }}</p>
+    {% endif %}
+    {% if opts.hint %}
+      <div class="validator-hint">{{ opts.hint }}</div>
+    {% endif %}
+  </div>
+{% endmacro %}

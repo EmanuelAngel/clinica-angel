@@ -158,7 +158,7 @@ describe("Patient profile extended features integration", () => {
       .set("Cookie", `access_token=${token}`);
 
     expect(res.status).toBe(200);
-    expect(res.text).toContain("TEST INSURANCE"); // View uses uppercase for name
+    expect(res.text).toContain("Test Insurance"); // Case preserved: values are not uppercased
     expect(res.text).toContain("MEM-123");
     expect(res.text).toContain("/uploads/test-id.png");
     expect(res.text).toContain("Test Clinic");

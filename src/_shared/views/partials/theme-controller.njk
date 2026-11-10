@@ -1,19 +1,26 @@
 <div class="dropdown dropdown-end">
-  <div tabindex="0" role="button" id="theme-dropdown-btn" class="btn btn-ghost rounded-btn">
+  <div
+    tabindex="0"
+    role="button"
+    id="theme-dropdown-btn"
+    class="btn btn-ghost btn-square rounded-field"
+    aria-label="Cambiar tema"
+  >
     <span id="theme-current-icon" class="flex items-center">
       <i data-lucide="sun"></i>
     </span>
-    <span class="ml-2">Tema</span>
-    <i data-lucide="chevron-down" class="h-4 w-4 ml-1"></i>
   </div>
-  <ul tabindex="-1" class="dropdown-content menu bg-base-200 rounded-box z-[1] w-52 p-2 shadow-sm">
+  <ul
+    tabindex="-1"
+    class="dropdown-content menu bg-base-100 rounded-box z-[1] mt-2 w-44 border border-base-300 p-2 shadow-lg"
+  >
     <li>
       <input
         type="radio"
         name="theme-dropdown"
         class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
         aria-label="Claro"
-        value="clinic-light" 
+        value="clinic-light"
       />
       <div class="flex items-center gap-2 pointer-events-none">
         <i data-lucide="sun" class="h-4 w-4"></i>
@@ -26,7 +33,7 @@
         name="theme-dropdown"
         class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
         aria-label="Oscuro"
-        value="clinic-dark" 
+        value="clinic-dark"
       />
       <div class="flex items-center gap-2 pointer-events-none">
         <i data-lucide="moon" class="h-4 w-4"></i>
@@ -39,7 +46,7 @@
         name="theme-dropdown"
         class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
         aria-label="Sistema"
-        value="system" 
+        value="system"
       />
       <div class="flex items-center gap-2 pointer-events-none">
         <i data-lucide="monitor" class="h-4 w-4"></i>

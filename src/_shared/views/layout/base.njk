@@ -9,7 +9,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Source+Code+Pro:wght@200..900&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
@@ -56,20 +56,18 @@
 
   {% block head %}{% endblock %}
 </head>
-<body class="font-serif">
+<body class="font-sans antialiased">
 
 <div class="drawer">
   <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content flex flex-col">
     {% include "layout/nav-bar.njk" %}
     
-    <div class="w-full px-2 py-4 sm:px-4 sm:py-8">
+    <main class="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
 
       {% block pageInfo %}{% endblock %}
 
-      <section class="max-w-fit mx-auto">
-        {% include "partials/result-alert.njk" %}
-      </section>
+      {% include "partials/result-alert.njk" %}
 
       {% block content %}{% endblock %}
 
@@ -80,7 +78,7 @@
           </a>
         </div>
       {% endif %}
-    </div>
+    </main>
   </div>
 
   <div class="drawer-side">
@@ -95,7 +93,10 @@
   </script>
 
   <script type="module" src="/js/main.js"></script>
-  <script src="/js/waiting-list.js"></script>
+  {# Solo los roles con dial necesitan este script #}
+  {% if user and (user.role == Roles.SECRETARY or user.role == Roles.ADMIN) %}
+    <script src="/js/waiting-list.js"></script>
+  {% endif %}
 
   {% block scripts %}
   {% endblock %}

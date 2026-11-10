@@ -11,26 +11,26 @@
 
   {# Close button — not focusable so clicking it blurs the FAB #}
   <div class="fab-close">
-    Cerrar
+    <span class="rounded-box border border-base-300 bg-base-100 px-2 py-1 text-xs font-medium shadow-lg">Cerrar</span>
     <span class="btn btn-circle btn-lg btn-error">✕</span>
   </div>
 
   {# Speed dial actions with labels #}
   <div>
-    Agregar a Lista de Espera
+    <span class="rounded-box border border-base-300 bg-base-100 px-2 py-1 text-xs font-medium shadow-lg">Agregar a Lista de Espera</span>
     <button class="btn btn-lg btn-circle" onclick="document.getElementById('wl-add-modal').showModal()">
       <i data-lucide="user-plus" class="w-5 h-5"></i>
     </button>
   </div>
   <div>
-    Ver Lista de Espera
+    <span class="rounded-box border border-base-300 bg-base-100 px-2 py-1 text-xs font-medium shadow-lg">Ver Lista de Espera</span>
     <button class="btn btn-lg btn-circle" onclick="WaitingList.openListModal()">
       <i data-lucide="list" class="w-5 h-5"></i>
     </button>
   </div>
   {% if user.role == Roles.ADMIN %}
   <div>
-    Gestionar Bloqueos Globales
+    <span class="rounded-box border border-base-300 bg-base-100 px-2 py-1 text-xs font-medium shadow-lg">Gestionar Bloqueos Globales</span>
     <a href="/global-blocks" class="btn btn-lg btn-circle">
       <i data-lucide="calendar-off" class="w-5 h-5"></i>
     </a>
@@ -52,12 +52,12 @@
 
     <form id="wl-add-form" class="space-y-4">
       {# Patient search by DNI #}
-      <div class="form-control w-full">
+      <div class="w-full">
         <label class="label">Paciente (buscar por DNI)</label>
         <input type="text"
                id="wl-dni-input"
                name="dni"
-               class="input input-bordered w-full"
+               class="input w-full"
                placeholder="Ingrese DNI del paciente..."
                autocomplete="off"
                required />
@@ -71,17 +71,17 @@
       </div>
 
       {# Professional select #}
-      <div class="form-control w-full">
+      <div class="w-full">
         <label class="label">Profesional (opcional)</label>
-        <select id="wl-professional-select" name="professionalId" class="select select-bordered w-full">
+        <select id="wl-professional-select" name="professionalId" class="select w-full">
           <option value="">— Cualquier profesional —</option>
         </select>
       </div>
 
       {# Specialty select #}
-      <div class="form-control w-full">
+      <div class="w-full">
         <label class="label">Especialidad (opcional)</label>
-        <select id="wl-specialty-select" name="specialtyId" class="select select-bordered w-full">
+        <select id="wl-specialty-select" name="specialtyId" class="select w-full">
           <option value="">— Cualquier especialidad —</option>
         </select>
       </div>
@@ -118,10 +118,10 @@
 
     {# Filters row #}
     <div class="flex flex-wrap gap-3 mb-4">
-      <select id="wl-filter-professional" class="select select-bordered select-sm">
+      <select id="wl-filter-professional" class="select select-sm">
         <option value="">Todos los profesionales</option>
       </select>
-      <select id="wl-filter-specialty" class="select select-bordered select-sm">
+      <select id="wl-filter-specialty" class="select select-sm">
         <option value="">Todas las especialidades</option>
       </select>
       <button class="btn btn-sm btn-ghost" id="wl-sort-toggle" title="Cambiar orden">

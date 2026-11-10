@@ -4,57 +4,72 @@
   {% import "partials/page-info.njk" as PageInfo %}
   {{ PageInfo.titleAndDescription("Agendas", "Lista de agendas configuradas en el sistema.") }}
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for schedule in schedules %}
-      <a href="/schedules/details/{{ schedule.id }}" class="card bg-base-100 shadow-xl border border-base-200 hover:border-primary transition-colors">
-        <div class="card-body">
-          <div class="flex justify-between items-start mb-2">
-            <h2 class="card-title text-xl font-bold">{{ schedule.professionalName }}</h2>
-            <div class="flex flex-wrap gap-2 justify-end">
-              <span class="badge badge-soft">{{ schedule.specialtyName }}</span>
-              {% if schedule.isPaused %}
-                <span class="badge badge-soft badge-primary">Pausada</span>
-              {% else %}
-                <span class="badge badge-soft badge-warning">En servicio</span>
-              {% endif %}
-              
-              {% if schedule.isDeleted %}
-                <span class="badge">Inactiva</span>
-              {% else %}
-                <span class="badge badge-soft badge-success">Activa</span>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="space-y-3 mt-4">
-            <div>
-              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Tipo</p>
-              <p class="font-medium">{{ schedule.classificationName }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Ubicación</p>
-              <p class="font-medium">{{ schedule.locationName }}</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Duración de turno</p>
-                <p class="font-medium">{{ schedule.slotDurationMinutes }} minutos</p>
-              </div>
-              <div>
-                <p class="text-xs uppercase tracking-wider text-base-content/60 font-semibold mb-1">Sobreturnos</p>
-                <p class="font-medium">{{ schedule.maxOverbooksPerDay }} por día</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </a>
-    {% else %}
-      <div class="col-span-full py-12 text-center bg-base-200 rounded-box">
-        <p class="text-lg text-base-content/50">No hay agendas configuradas.</p>
-        <a href="/schedules/create" class="btn btn-primary mt-4">Configurar primera agenda</a>
+  {% if schedules | length %}
+    <div class="overflow-hidden rounded-box border border-base-300 bg-base-100">
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+            <tr class="border-base-300">
+              <th class="text-xs font-medium text-base-content/70">Profesional</th>
+              <th class="hidden text-xs font-medium text-base-content/70 md:table-cell">Tipo</th>
+              <th class="hidden text-xs font-medium text-base-content/70 md:table-cell">Sede</th>
+              <th class="hidden text-right text-xs font-medium text-base-content/70 sm:table-cell">Turno</th>
+              <th class="hidden text-right text-xs font-medium text-base-content/70 lg:table-cell">Sobret.</th>
+              <th class="text-xs font-medium text-base-content/70">Estado</th>
+              <th class="w-0"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for schedule in schedules %}
+              <tr class="border-base-300 hover:bg-base-200">
+                <td>
+                  <a href="/schedules/{{ schedule.id }}/agenda"
+                     class="font-medium text-base-content link-hover">
+                    {{ schedule.professionalName }}
+                  </a>
+                  <div class="text-xs text-base-content/60">{{ schedule.specialtyName }}</div>
+                </td>
+                <td class="hidden md:table-cell">
+                  <span class="badge badge-sm badge-ghost">{{ schedule.classificationName }}</span>
+                </td>
+                <td class="hidden text-sm text-base-content/80 md:table-cell">
+                  {{ schedule.locationName }}
+                </td>
+                <td class="hidden text-right font-mono text-[13px] tabular-nums sm:table-cell">
+                  {{ schedule.slotDurationMinutes }} min
+                </td>
+                <td class="hidden text-right font-mono text-[13px] tabular-nums lg:table-cell">
+                  {{ schedule.maxOverbooksPerDay }}
+                </td>
+                <td>
+                  {# Solo la excepción lleva color: pausada. Activa e inactiva, en neutro. #}
+                  {% if schedule.isDeleted %}
+                    <span class="badge badge-sm badge-ghost text-base-content/50">Inactiva</span>
+                  {% elif schedule.isPaused %}
+                    <span class="badge badge-sm badge-warning">Pausada</span>
+                  {% else %}
+                    <span class="badge badge-sm badge-ghost">Activa</span>
+                  {% endif %}
+                </td>
+                <td class="text-right">
+                  <a href="/schedules/{{ schedule.id }}/agenda"
+                     class="btn btn-ghost btn-xs"
+                     aria-label="Ver agenda de {{ schedule.professionalName }}">
+                    <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-    {% endfor %}
-  </div>
+    </div>
+  {% else %}
+    <div class="rounded-box border border-base-300 bg-base-100 px-6 py-12 text-center">
+      <p class="text-sm text-base-content/70">No hay agendas configuradas todavía.</p>
+      <a href="/schedules/create" class="btn btn-primary btn-sm mt-4">
+        Configurar la primera agenda
+      </a>
+    </div>
+  {% endif %}
 {% endblock %}

@@ -8,12 +8,12 @@
 
 {% macro renderSlot(slot, userRole) %}
   {% set statusBadge = {
-    'FREE': 'badge-success',
-    'BOOKED': 'badge-warning',
+    'FREE': 'badge-ghost text-base-content/70',
+    'BOOKED': 'badge-neutral',
     'CANCELLED': 'badge-error',
     'PROPOSED': 'badge-primary',
     'IN_PROGRESS': 'badge-info',
-    'FULFILLED': 'badge-neutral',
+    'FULFILLED': 'badge-ghost',
     'ARRIVED': 'badge-accent',
     'NO_SHOW': 'badge-error',
     'NEEDS_RESCHEDULE': 'badge-warning'
@@ -31,8 +31,8 @@
     'NEEDS_RESCHEDULE': 'A reasignar'
   } %}
   
-  <div class="flex flex-col gap-0.5 slot-trigger cursor-pointer hover:opacity-80" data-slot-id="{{ slot.id }}">
-    {# Status Badge #}
+  <div class="flex flex-col gap-0.5 slot-trigger cursor-pointer rounded hover:bg-base-200" data-slot-id="{{ slot.id }}">
+    {# Status Badge — el estado normal no lleva color #}
     <span class="badge badge-xs {{ statusBadge[slot.status] or 'badge-neutral' }} w-full justify-center pointer-events-none">
       {% if slot.isOverbook %}
         <i data-lucide="layers" class="w-3 h-3 mr-1" title="Sobreturno"></i>

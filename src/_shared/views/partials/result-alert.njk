@@ -1,20 +1,20 @@
-{% set alertClasses = {
-  "failure": "alert-error",
-  "success": "alert-success",
-  "info": "alert-info",
-  "warning": "alert-warning"
-} %}
-
-{% set alertIcons = {
-  "failure": "alert-circle",
-  "success": "check-circle",
-  "info": "info-circle",
-  "warning": "alert-triangle"
-} %}
-
 {% if result %}
-<div role="alert" class="alert {{ alertClasses[result.type] }}">
-  <i data-lucide="{{ alertIcons[result.type] }}"></i>
-  <span>{{ result.message }}</span>
-</div>
+  {% set alertClasses = {
+    "failure": "alert-error",
+    "success": "alert-success",
+    "info": "alert-info",
+    "warning": "alert-warning"
+  } %}
+
+  {% set alertIcons = {
+    "failure": "alert-circle",
+    "success": "check-circle",
+    "info": "info-circle",
+    "warning": "alert-triangle"
+  } %}
+
+  <div role="alert" class="alert {{ alertClasses[result.type] }} mb-6">
+    <i data-lucide="{{ alertIcons[result.type] }}" class="w-4 h-4"></i>
+    <span class="text-sm">{{ result.message }}</span>
+  </div>
 {% endif %}

@@ -2,7 +2,7 @@
 
 {% block pageInfo %}
   {% import "partials/page-info.njk" as PageInfo %}
-  {{ PageInfo.titleAndDescription("Registro de Paciente", "Registra tu cuenta.") }}
+  {{ PageInfo.titleAndDescription("Registro de paciente", "Registra tu cuenta.") }}
 {% endblock %}
 
 {% block scripts %}
@@ -16,7 +16,7 @@
     if (fileInput) {
       fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
-        
+
         if (file) {
           // Validate file size
           if (file.size > maxFileSize) {
@@ -37,7 +37,7 @@
 
           // Read and display the image
           const reader = new FileReader();
-          
+
           reader.onload = function(e) {
             previewImage.src = e.target.result;
             previewContainer.classList.remove('hidden');
@@ -68,234 +68,175 @@
 {% endblock scripts %}
 
 {% block content %}
+  {% import "partials/form-field.njk" as Field %}
+
+  {% set insuranceOptions = [] %}
+  {% for healthInsurance in healthInsurances %}
+    {% set insuranceOptions = insuranceOptions.concat([{ value: healthInsurance.id, label: healthInsurance.name }]) %}
+  {% endfor %}
+
   <form action="/patients"
         method="POST"
-        class="w-full max-w-3xl mx-auto space-y-12"
+        class="max-w-3xl space-y-6"
         enctype="multipart/form-data">
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-      <legend>Datos personales</legend>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <label class="label">Nombres (requerido)</label>
-          <input type="text"
-                 name="firstNames"
-                 value="{{ values.firstNames }}"
-                 class="input validator {{ 'input-error' if errors.properties.firstNames }}"
-                 required
-                 minlength="2"
-                 maxlength="100"
-                 pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
-                 title="Solo letras, espacios, guiones o apóstrofes." 
-                 placeholder="Nombre completo" />
-          {% if errors.properties.firstNames %}
-            <div class="text-error">{{ errors.properties.firstNames[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Ingrese nombres válidos.
-            <br /> Solo letras, espacios, guiones o apóstrofes.
-            <br /> Mínimo 2 caracteres.
-            <br /> Máximo 100 caracteres.
-          </div>
-        </div>
+    <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4">
+      <legend class="text-sm font-semibold">Datos personales</legend>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {{ Field.text({
+          name: "firstNames",
+          label: "Nombres",
+          value: values.firstNames,
+          error: errors.properties.firstNames[0] if errors.properties.firstNames else null,
+          required: true,
+          minlength: 2,
+          maxlength: 100,
+          pattern: "[a-zA-ZÀ-ÿñÑ\\s'-]+",
+          title: "Solo letras, espacios, guiones o apóstrofes.",
+          placeholder: "Nombre completo",
+          hint: "Solo letras, espacios, guiones o apóstrofes. Entre 2 y 100 caracteres."
+        }) }}
 
-        <div>
-          <label class="label">Apellido (requerido)</label>
-          <input type="text"
-                 name="lastNames"
-                 value="{{ values.lastNames }}"
-                 class="input validator {{ 'input-error' if errors.properties.lastNames }}"
-                 required
-                 minlength="2"
-                 maxlength="100"
-                 pattern="[a-zA-ZÀ-ÿ\u00f1\u00d1\s'-]+"
-                 title="Solo letras, espacios, guiones o apóstrofes."
-                 placeholder="Apellido" />
-          {% if errors.properties.lastNames %}
-            <div class="text-error">{{ errors.properties.lastNames[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Ingrese apellidos válidos.
-            <br /> Solo letras, espacios, guiones o apóstrofes.
-            <br /> Mínimo 2 caracteres.
-            <br /> Máximo 100 caracteres.
-          </div>
-        </div>
+        {{ Field.text({
+          name: "lastNames",
+          label: "Apellido",
+          value: values.lastNames,
+          error: errors.properties.lastNames[0] if errors.properties.lastNames else null,
+          required: true,
+          minlength: 2,
+          maxlength: 100,
+          pattern: "[a-zA-ZÀ-ÿñÑ\\s'-]+",
+          title: "Solo letras, espacios, guiones o apóstrofes.",
+          placeholder: "Apellido",
+          hint: "Solo letras, espacios, guiones o apóstrofes. Entre 2 y 100 caracteres."
+        }) }}
 
-        <div>
-          <label class="label">Número de DNI (requerido)</label>
-          <input type="text"
-                name="nationalId"
-                value="{{ values.nationalId }}"
-                class="input validator {{ 'input-error' if errors.properties.nationalId }}"
-                required
-                minlength="7"
-                maxlength="9"
-                pattern="[0-9]{7,9}"
-                title="El DNI debe tener entre 7 y 9 números sin puntos ni letras."
-                placeholder="Número de DNI" />
-            {% if errors.properties.nationalId %}
-              <div class="text-error">{{ errors.properties.nationalId[0] }}</div>
-            {% endif %}
-          <div class="validator-hint">
-            Ingrese un número de DNI válido
-            <br /> El DNI debe tener entre 7 y 9 números sin puntos ni letras.
-          </div>
-        </div>
-        
+        {{ Field.text({
+          name: "nationalId",
+          label: "Número de DNI",
+          value: values.nationalId,
+          error: errors.properties.nationalId[0] if errors.properties.nationalId else null,
+          required: true,
+          minlength: 7,
+          maxlength: 9,
+          pattern: "[0-9]{7,9}",
+          title: "El DNI debe tener entre 7 y 9 números sin puntos ni letras.",
+          placeholder: "Número de DNI",
+          hint: "Entre 7 y 9 números, sin puntos ni letras."
+        }) }}
       </div>
 
-      <div class="grid grid-cols-1 gap-4">
-        <div class="w-full">
-          <label class="label">Imagen de DNI (requerido)</label>
-          <input type="file"
-                 name="nationalIdImage"
-                 id="nationalIdImage"
-                 value="{{ values.nationalIdImage }}"
-                 class="w-full file-input validator {{ 'input-error' if errors.properties.nationalIdImage }}"
-                 required
-                 accept=".png, .jpg, .jpeg"
-                 title="Debe ingresar una imagen de su DNI."
-                 placeholder="Imagen de su DNI" />
-            {% if errors.properties.nationalIdImage %}
-              <div class="text-error">
-                {{ errors.properties.nationalIdImage.errors[0] }}
-              </div>
-            {% endif %}
-          <div id="imagePreviewContainer" class="mt-4 hidden">
-            <label class="label text-sm">Vista previa:</label>
-            <div class="border border-base-300 rounded-box p-4 bg-base-100">
-              <img id="imagePreview" src="" alt="Vista previa de DNI" class="max-w-full max-h-96 mx-auto rounded-box" />
-            </div>
-          </div>
-          <div class="validator-hint">
-            La imagen de su DNI tiene que cumplir:
-            <br> Máximo 5MB.
-            <br> Formatos aceptados: .png, .jpg, .jpeg
-          </div>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-      <legend>Datos de cuenta</legend>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <label class="label">Email (requerido)</label>
-          <input type="email"
-                  name="email"
-                  value="{{ values.email }}"
-                  class="input validator {{ 'input-error' if errors.properties.email }}"
-                  required
-                  placeholder="correoelectronico@sitio.com" />
-          {% if errors.properties.email %}
-            <div class="text-error">{{ errors.properties.email[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Ingrese un email válido
-          </div>
-        </div>
-
-        <div>
-          <label class="label">Contraseña (requerido)</label>
-          <input type="password"
-                  name="password"
-                  class="input validator {{ 'input-error' if errors.properties.password }}"
-                  required
-                  minlength="8"
-                  maxlength="100"
-                  placeholder="Contraseña" />
-          {% if errors.properties.password %}
-            <div class="text-error">{{ errors.properties.password[0] }}</div>
-          {% endif %}
-          <div class="validator-hint">
-            Ingrese una contraseña válida
-            <br /> Mínimo 8 caracteres.
-            <br /> Máximo 100 caracteres.
-          </div>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-      <legend>Datos de contacto</legend>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <label class="label">Teléfono (requerido)</label>
-          <input type="tel"
-                 name="phone"
-                 value="{{ values.phone }}"
-                 class="input validator {{ 'input-error' if errors.properties.phone }}"
-                 required
-                 placeholder="Número de teléfono" />
-            {% if errors.properties.phone %}
-              <div class="text-error">{{ errors.properties.phone[0] }}</div>
-            {% endif %}
-          <div class="validator-hint">Ingrese un número de teléfono válido</div>
-        </div>
-
-        <div>
-          <label class="label">Dirección (requerido)</label>
-          <input type="text"
-                 name="address"
-                 value="{{ values.address }}"
-                 class="input validator {{ 'input-error' if errors.properties.address }}"
-                 required
-                 minlength="5"
-                 maxlength="180"
-                 placeholder="Dirección" />
-            {% if errors.properties.address %}
-              <div class="text-error">{{ errors.properties.address[0] }}</div>
-            {% endif %}
-          <div class="validator-hint">Ingrese una dirección válida</div>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-      <legend>Datos de Obras Sociales</legend>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <label class="label">Obra Social (requerido)</label>
-          <select name="healthInsuranceId"
-                  class="select validator {{ 'select-error' if errors.properties.healthInsurance }}">
-            <option disabled selected>Seleccione una obra social</option>
-            {% for healthInsurance in healthInsurances %}
-              <option value="{{ healthInsurance.id }}"
-                      {{'selected' if values.healthInsuranceId == healthInsurance.id }}>
-                {{ healthInsurance.name }}
-              </option>
-            {% endfor %}
-          </select>
-          {% if errors.properties.healthInsurances.items[0].properties.insuranceId %}
-            <div class="text-error">
-              {{ errors.properties.healthInsurances.items[0].properties.insuranceId.errors[0] }}
-            </div>
-          {% endif %}
-          <div class="validator-hint">Ingrese una obra social válida.</div>
-        </div>
-
-      <div>
-        <label class="label">Número de Afiliado</label>
-        <input type="text"
-               name="memberNumber"
-               value="{{ values.memberNumber }}"
-               class="input" />
-        {% if errors.properties.healthInsurances.items[0].properties.memberNumber %}
-          <div class="text-error text-sm">
-            {{ errors.properties.healthInsurances.items[0].properties.memberNumber.errors[0] }}
-          </div>
+      {# El input de archivo conserva su marcado: tiene vista previa propia por JS #}
+      <div class="mt-4">
+        <label for="nationalIdImage" class="text-xs font-medium text-base-content/70">
+          Imagen de DNI<span class="ml-0.5 text-error" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="file"
+          name="nationalIdImage"
+          id="nationalIdImage"
+          class="file-input validator mt-1 w-full {{ 'input-error' if errors.properties.nationalIdImage }}"
+          required
+          accept=".png, .jpg, .jpeg"
+          title="Debe ingresar una imagen de su DNI."
+        />
+        {% if errors.properties.nationalIdImage %}
+          <p class="mt-1 text-xs text-error">{{ errors.properties.nationalIdImage.errors[0] }}</p>
         {% endif %}
+        <div id="imagePreviewContainer" class="mt-3 hidden">
+          <p class="text-xs font-medium text-base-content/70">Vista previa</p>
+          <div class="mt-1 rounded-box border border-base-300 bg-base-100 p-4">
+            <img id="imagePreview" src="" alt="Vista previa de DNI" class="mx-auto max-h-96 max-w-full rounded-box" />
+          </div>
+        </div>
+        <div class="validator-hint">
+          Máximo 5MB. Formatos aceptados: .png, .jpg, .jpeg.
+        </div>
       </div>
     </fieldset>
 
-    <div class="mt-8 flex flex-col lg:flex-row gap-4">
-      <button type="submit" class="btn btn-primary flex-1">
-        Registrar
-      </button>
-      <button type="reset" class="btn btn-neutral flex-1">
-        Limpiar formulario
-      </button>
+    <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4">
+      <legend class="text-sm font-semibold">Datos de cuenta</legend>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {{ Field.text({
+          name: "email",
+          type: "email",
+          label: "Email",
+          value: values.email,
+          error: errors.properties.email[0] if errors.properties.email else null,
+          required: true,
+          placeholder: "correoelectronico@sitio.com",
+          hint: "Ingrese un email válido."
+        }) }}
+
+        {{ Field.text({
+          name: "password",
+          type: "password",
+          label: "Contraseña",
+          error: errors.properties.password[0] if errors.properties.password else null,
+          required: true,
+          minlength: 8,
+          maxlength: 100,
+          placeholder: "Contraseña",
+          hint: "Entre 8 y 100 caracteres."
+        }) }}
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4">
+      <legend class="text-sm font-semibold">Datos de contacto</legend>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {{ Field.text({
+          name: "phone",
+          type: "tel",
+          label: "Teléfono",
+          value: values.phone,
+          error: errors.properties.phone[0] if errors.properties.phone else null,
+          required: true,
+          placeholder: "Número de teléfono",
+          hint: "Ingrese un número de teléfono válido."
+        }) }}
+
+        {{ Field.text({
+          name: "address",
+          label: "Dirección",
+          value: values.address,
+          error: errors.properties.address[0] if errors.properties.address else null,
+          required: true,
+          minlength: 5,
+          maxlength: 180,
+          placeholder: "Dirección",
+          hint: "Ingrese una dirección válida."
+        }) }}
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4">
+      <legend class="text-sm font-semibold">Obra social</legend>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {{ Field.select({
+          name: "healthInsuranceId",
+          label: "Obra social",
+          value: values.healthInsuranceId,
+          options: insuranceOptions,
+          placeholder: "Seleccione una obra social",
+          error: errors.properties.healthInsurances.items[0].properties.insuranceId.errors[0] if errors.properties.healthInsurances else null,
+          hint: "Opcional. Si la elegís, cargá también el número de afiliado."
+        }) }}
+
+        {{ Field.text({
+          name: "memberNumber",
+          label: "Número de afiliado",
+          value: values.memberNumber,
+          error: errors.properties.healthInsurances.items[0].properties.memberNumber.errors[0] if errors.properties.healthInsurances else null,
+          placeholder: "Número de afiliado",
+          hint: "Requerido solo si elegís una obra social."
+        }) }}
+      </div>
+    </fieldset>
+
+    <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+      <button type="reset" class="btn btn-ghost">Limpiar formulario</button>
+      <button type="submit" class="btn btn-primary">Registrar</button>
     </div>
   </form>
 {% endblock %}

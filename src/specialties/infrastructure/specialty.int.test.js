@@ -40,7 +40,7 @@ describe("Specialty integration tests", () => {
         .set("Cookie", `access_token=${adminToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.text).toContain("Nueva Especialidad");
+      expect(response.text).toContain("Nueva especialidad");
     });
   });
 

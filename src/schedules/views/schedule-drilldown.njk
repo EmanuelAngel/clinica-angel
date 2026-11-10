@@ -3,34 +3,30 @@
 {% set title = "Agenda — " + schedule.professionalName %}
 
 {% block pageInfo %}
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-  <div>
-    <h1 class="text-2xl font-bold">{{ schedule.professionalName }}</h1>
-    <p class="text-base-content/70">
-      <span class="inline-flex items-center gap-1"><i data-lucide="star" class="w-4 h-4"></i> {{ schedule.specialtyName }}</span>
-      ·
-      <span class="inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-4 h-4"></i> {{ schedule.locationName }}</span>
-      ·
-      <span class="inline-flex items-center gap-1"><i data-lucide="tag" class="w-4 h-4"></i> {{ schedule.classificationName | upper }}</span>
+<div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-start sm:justify-between">
+  <div class="min-w-0">
+    <div class="flex flex-wrap items-center gap-2">
+      <h1 class="text-2xl font-semibold tracking-tight text-base-content">{{ schedule.professionalName }}</h1>
       {% if schedule.isPaused %}
-        <span class="badge badge-xs badge-warning ml-1">Pausada</span>
+        <span class="badge badge-sm badge-warning">Pausada</span>
       {% endif %}
+    </div>
+    <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/70">
+      <span class="inline-flex items-center gap-1"><i data-lucide="stethoscope" class="h-3.5 w-3.5"></i>{{ schedule.specialtyName }}</span>
+      <span class="inline-flex items-center gap-1"><i data-lucide="map-pin" class="h-3.5 w-3.5"></i>{{ schedule.locationName }}</span>
+      <span class="inline-flex items-center gap-1"><i data-lucide="tag" class="h-3.5 w-3.5"></i>{{ schedule.classificationName }}</span>
     </p>
   </div>
   {% if userRole == 'ADMIN' %}
-    <div class="flex items-center gap-2">
-      <button class="btn btn-sm btn-outline btn-primary gap-2" onclick="document.getElementById('edit_config_modal').showModal()">
-        <i data-lucide="settings-2" class="w-4 h-4"></i>
-        Editar Configuración
+    <div class="flex flex-wrap items-center gap-2">
+      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('block_modal').showModal()">
+        <i data-lucide="calendar-x" class="h-4 w-4"></i>
+        Registrar imprevisto
       </button>
-      <button class="btn btn-sm btn-outline btn-error gap-2" onclick="document.getElementById('block_modal').showModal()">
-        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-        Registrar Imprevisto
+      <button class="btn btn-sm btn-primary" onclick="document.getElementById('edit_config_modal').showModal()">
+        <i data-lucide="settings-2" class="h-4 w-4"></i>
+        Editar configuración
       </button>
-      <a href="/schedules/details/{{ schedule.id }}" class="btn btn-sm btn-outline btn-warning gap-2">
-        <i data-lucide="edit-3" class="w-4 h-4"></i>
-        Modificar agenda
-      </a>
     </div>
   {% endif %}
 </div>
@@ -39,50 +35,47 @@
 {% block content %}
 <div class="space-y-4">
 
-  {# Compact Agenda Info #}
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
-    {# Config Card #}
-    <div class="card bg-base-100 shadow-sm border border-base-200 p-3">
-      <h4 class="text-[10px] uppercase tracking-widest text-base-content/50 font-bold mb-2">Configuración</h4>
-      <div class="grid grid-cols-2 gap-y-1 text-xs">
-        <span class="text-base-content/70">Duración:</span>
-        <span class="font-bold text-right">{{ schedule.slotDuration }} min</span>
-        <span class="text-base-content/70">Día/Sobret.:</span>
-        <span class="font-bold text-right">{{ schedule.maxOverbooksPerDay }}</span>
-        <span class="text-base-content/70">Turno/Sobret.:</span>
-        <span class="font-bold text-right">{{ schedule.maxOverbooksPerSlot }}</span>
-      </div>
-    </div>
+  {# Tira de configuración: un solo contenedor con divisores, no tres cards flotantes #}
+  <div class="grid grid-cols-1 divide-y divide-base-300 rounded-box border border-base-300 bg-base-100 lg:grid-cols-4 lg:divide-x lg:divide-y-0">
+    <section class="p-4">
+      <h2 class="text-xs font-medium text-base-content/70">Configuración</h2>
+      <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+        <dt class="text-base-content/70">Duración</dt>
+        <dd class="text-right font-medium tabular-nums">{{ schedule.slotDuration }} min</dd>
+        <dt class="text-base-content/70">Día/Sobret.</dt>
+        <dd class="text-right font-medium tabular-nums">{{ schedule.maxOverbooksPerDay }}</dd>
+        <dt class="text-base-content/70">Turno/Sobret.</dt>
+        <dd class="text-right font-medium tabular-nums">{{ schedule.maxOverbooksPerSlot }}</dd>
+      </dl>
+    </section>
 
-    {# Weekly Schedule Card #}
-    <div class="card bg-base-100 shadow-sm border border-base-200 p-3 lg:col-span-2">
-      <h4 class="text-[10px] uppercase tracking-widest text-base-content/50 font-bold mb-2">Horarios de Atención</h4>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs">
+    <section class="p-4 lg:col-span-2">
+      <h2 class="text-xs font-medium text-base-content/70">Horarios de atención</h2>
+      <dl class="mt-2 grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
         {% for config in schedule.weeklySchedule %}
-          <div class="flex justify-between border-b border-base-content/5 pb-0.5">
-            <span class="font-semibold text-base-content/80">{{ config.day }}</span>
-            <span class="text-base-content/70 font-mono">{{ config.ranges }}</span>
+          <div class="flex items-baseline justify-between gap-3 border-b border-base-300/60 pb-1">
+            <dt class="text-base-content/70">{{ config.day }}</dt>
+            <dd class="font-mono text-[13px] tabular-nums text-base-content/80">{{ config.ranges }}</dd>
           </div>
         {% else %}
-          <p class="text-base-content/40 italic">No hay horarios configurados.</p>
+          <p class="text-sm text-base-content/70">No hay horarios configurados.</p>
         {% endfor %}
-      </div>
-    </div>
+      </dl>
+    </section>
 
-    {# Blocks Card #}
-    <div class="card bg-base-100 shadow-sm border border-base-200 p-3">
-      <h4 class="text-[10px] uppercase tracking-widest text-base-content/50 font-bold mb-2">Bloqueos</h4>
-      <div class="space-y-1 max-h-20 overflow-y-auto pr-1">
+    <section class="p-4">
+      <h2 class="text-xs font-medium text-base-content/70">Bloqueos</h2>
+      <div class="mt-2 max-h-24 space-y-2 overflow-y-auto pr-1">
         {% for block in schedule.blocks %}
-          <div class="text-[10px] leading-tight border-l-2 border-error/50 pl-2">
-            <p class="font-bold">{{ block.startDate | date('DD/MM') }} - {{ block.endDate | date('DD/MM') }}</p>
-            <p class="text-base-content/60 truncate" title="{{ block.reason }}">{{ block.reason }}</p>
+          <div class="border-l-2 border-warning pl-2 text-xs leading-tight">
+            <p class="font-medium tabular-nums">{{ block.startDate | date('DD/MM') }} – {{ block.endDate | date('DD/MM') }}</p>
+            <p class="truncate text-base-content/70" title="{{ block.reason }}">{{ block.reason }}</p>
           </div>
         {% else %}
-          <p class="text-xs text-base-content/40 italic">No hay bloqueos registrados.</p>
+          <p class="text-sm text-base-content/70">No hay bloqueos registrados.</p>
         {% endfor %}
       </div>
-    </div>
+    </section>
   </div>
 
   {# View Selector Tabs + Date Navigation #}
@@ -129,83 +122,19 @@
     </div>
   </div>
 
-  {# Time Grid #}
-  {% import "macros/slot-cell.njk" as slotMacros %}
+  {# Grilla compartida con compare-schedules #}
+  {% import "partials/time-grid.njk" as TimeGrid %}
+  {% set columns = [] %}
+  {% for day in days %}
+    {% set columns = columns.concat([{
+      label: day.dayLabel,
+      sub: day.date | date('DD/MM/YYYY'),
+      dayBlock: day.dayBlock,
+      slots: day.slots
+    }]) %}
+  {% endfor %}
 
-  <div class="card bg-base-100 shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-      <div class="time-grid-container overflow-y-auto max-h-[90vh]">
-        <table class="table table-xs table-pin-rows table-pin-cols">
-          <thead>
-            <tr class="bg-base-200">
-              <th class="bg-base-200 z-20 min-w-[80px]">Hora</th>
-              {% for day in days %}
-                <th class="bg-base-200 min-w-[160px] text-center">
-                  <div class="flex flex-col gap-0.5">
-                    <span class="text-sm font-semibold">{{ day.dayLabel }}</span>
-                    <span class="text-xs text-base-content/60">{{ day.date | date('DD/MM/YYYY') }}</span>
-                  </div>
-                </th>
-              {% endfor %}
-            </tr>
-          </thead>
-
-          <tbody>
-            {% set hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21] %}
-            {% set minutes = [0, 10, 20, 30, 40, 50] %}
-
-            {% for hour in hours %}
-              {% for minute in minutes %}
-                {% set timeLabel = (hour | padStart(2, '0')) + ':' + (minute | padStart(2, '0')) %}
-                <tr class="hover:bg-base-200/50">
-                  <th class="bg-base-100 font-mono text-xs text-right pr-2 w-[80px]">
-                    {% if minute == 0 %}
-                      <span class="font-bold">{{ timeLabel }}</span>
-                    {% else %}
-                      <span class="text-base-content/50">{{ timeLabel }}</span>
-                    {% endif %}
-                  </th>
-
-                  {% for day in days %}
-                    <td class="p-1 border-l border-base-200">
-                      {% if day.dayBlock %}
-                        {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
-                          <div class="bg-error/20 text-error text-xs p-1 rounded text-center" title="{{ day.dayBlock.reason }}">
-                            <i data-lucide="ban" class="w-3 h-3 inline"></i>
-                            Bloqueado
-                          </div>
-                        {% else %}
-                          <div class="bg-base-300 text-base-content/50 text-xs p-1 rounded text-center">
-                            No disponible
-                          </div>
-                        {% endif %}
-                      {% else %}
-                        {% set slotFound = false %}
-                        {% for slot in day.slots %}
-                          {% set slotHour = slot.startsAt | date('H') | int %}
-                          {% set slotMinute = slot.startsAt | date('m') | int %}
-                          {% if slotHour == hour and slotMinute == minute %}
-                            {% set slotFound = true %}
-                            {{ slotMacros.renderSlot(slot, userRole) }}
-                          {% endif %}
-                        {% endfor %}
-
-                        {% if not slotFound %}
-                          <div class="bg-base-300/50 text-base-content/30 text-xs p-1 rounded text-center">
-                            -
-                          </div>
-                        {% endif %}
-                      {% endif %}
-                    </td>
-                  {% endfor %}
-                </tr>
-              {% endfor %}
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+  {{ TimeGrid.render(columns, rows, userRole, "No hay turnos generados para este día.") }}
 </div>
 
 {# Slot Details Modal — Reused from compare-schedules #}
@@ -295,11 +224,11 @@
         <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Reservar Turno</h4>
         <form id="reservation_form" class="space-y-4">
           {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
-          <div class="form-control w-full">
+          <div class="w-full">
             <label class="label">
-              <span class="label-text font-semibold">Paciente</span>
+              <span class="font-semibold">Paciente</span>
             </label>
-            <select name="patientId" class="select select-bordered w-full select-sm" required>
+            <select name="patientId" class="select w-full select-sm" required>
               <option value="" disabled selected>Seleccione un paciente</option>
               {% for patient in patients %}
               <option value="{{ patient.id }}">{{ patient.firstNames }} {{ patient.lastNames }} (DNI: {{ patient.nationalId }})</option>
@@ -308,11 +237,11 @@
           </div>
           {% endif %}
 
-          <div class="form-control w-full">
+          <div class="w-full">
             <label class="label">
-              <span class="label-text font-semibold">Motivo de consulta</span>
+              <span class="font-semibold">Motivo de consulta</span>
             </label>
-            <textarea name="consultationReason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Control anual, Dolor de garganta..." required minlength="5"></textarea>
+            <textarea name="consultationReason" class="textarea h-20 textarea-sm" placeholder="Ej: Control anual, Dolor de garganta..." required minlength="5"></textarea>
           </div>
 
           <div class="flex justify-end">
@@ -347,11 +276,11 @@
           Crear Sobreturno
         </h4>
         <form id="overbook_form" class="space-y-4">
-          <div class="form-control w-full">
+          <div class="w-full">
             <label class="label">
-              <span class="label-text font-semibold">Paciente</span>
+              <span class="font-semibold">Paciente</span>
             </label>
-            <select name="patientId" class="select select-bordered w-full select-sm" required>
+            <select name="patientId" class="select w-full select-sm" required>
               <option value="" disabled selected>Seleccione un paciente</option>
               {% for patient in patients %}
               <option value="{{ patient.id }}">{{ patient.firstNames }} {{ patient.lastNames }} (DNI: {{ patient.nationalId }})</option>
@@ -359,11 +288,11 @@
             </select>
           </div>
 
-          <div class="form-control w-full">
+          <div class="w-full">
             <label class="label">
-              <span class="label-text font-semibold">Motivo de consulta</span>
+              <span class="font-semibold">Motivo de consulta</span>
             </label>
-            <textarea name="consultationReason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Control urgente, Derivación..." required minlength="5"></textarea>
+            <textarea name="consultationReason" class="textarea h-20 textarea-sm" placeholder="Ej: Control urgente, Derivación..." required minlength="5"></textarea>
           </div>
 
           <div class="flex justify-end">
@@ -399,23 +328,23 @@
     </h3>
 
     <form id="edit_config_form" class="space-y-4">
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Máx. Sobreturnos por Día</span>
+          <span class="font-semibold">Máx. Sobreturnos por Día</span>
         </label>
-        <input type="number" name="maxOverbooksPerDay" class="input input-bordered input-sm w-full" value="{{ schedule.maxOverbooksPerDay }}" min="0" max="20" required />
+        <input type="number" name="maxOverbooksPerDay" class="input input-sm w-full" value="{{ schedule.maxOverbooksPerDay }}" min="0" max="20" required />
       </div>
 
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Máx. Sobreturnos por Turno</span>
+          <span class="font-semibold">Máx. Sobreturnos por Turno</span>
         </label>
-        <input type="number" name="maxOverbooksPerSlot" class="input input-bordered input-sm w-full" value="{{ schedule.maxOverbooksPerSlot }}" min="0" max="2" required />
+        <input type="number" name="maxOverbooksPerSlot" class="input input-sm w-full" value="{{ schedule.maxOverbooksPerSlot }}" min="0" max="2" required />
       </div>
 
-      <div class="form-control">
+      <div>
         <label class="label cursor-pointer justify-start gap-4">
-          <span class="label-text font-semibold">Pausar Agenda</span>
+          <span class="font-semibold">Pausar Agenda</span>
           <input type="checkbox" name="isPaused" class="toggle toggle-warning toggle-sm" {% if schedule.isPaused %}checked{% endif %} />
         </label>
         <p class="text-[10px] text-base-content/50 italic mt-1">
@@ -451,25 +380,25 @@
     </h3>
 
     <form id="block_form" class="space-y-4">
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Fecha de inicio</span>
+          <span class="font-semibold">Fecha de inicio</span>
         </label>
-        <input type="date" name="startDate" class="input input-bordered input-sm w-full" required />
+        <input type="date" name="startDate" class="input input-sm w-full" required />
       </div>
 
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Fecha de fin</span>
+          <span class="font-semibold">Fecha de fin</span>
         </label>
-        <input type="date" name="endDate" class="input input-bordered input-sm w-full" required />
+        <input type="date" name="endDate" class="input input-sm w-full" required />
       </div>
 
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Motivo del bloqueo</span>
+          <span class="font-semibold">Motivo del bloqueo</span>
         </label>
-        <textarea name="reason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Enfermedad del profesional, feriado..." required minlength="3"></textarea>
+        <textarea name="reason" class="textarea h-20 textarea-sm" placeholder="Ej: Enfermedad del profesional, feriado..." required minlength="3"></textarea>
       </div>
 
       <div id="block_result" class="hidden"></div>
