@@ -56,6 +56,8 @@ export class AuthController {
         // Redirect based on user role
         if (user.role === Roles.PATIENT) {
           res.redirect(`/patients/${user.id}`);
+        } else if (user.role === Roles.PROFESSIONAL) {
+          res.redirect(`/professionals/${user.id}/profile`);
         } else {
           res.redirect("/users");
         }
