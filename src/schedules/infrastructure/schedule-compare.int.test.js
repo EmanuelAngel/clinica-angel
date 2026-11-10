@@ -5,20 +5,37 @@ import { generateToken } from "../../auth/infrastructure/jwt.js";
 import { Roles } from "../../auth/domain/roles.js";
 
 /**
- * The comparison view loads its filter dropdowns from /api/v1/professionals and
- * /api/v1/specialties, which are SECRETARY/ADMIN only. For a PATIENT the page
- * rendered with empty filters, so it was reachable but unusable. The route now
- * matches the roles the screen can actually serve.
+ * A PATIENT books for themselves, so the comparison view deliberately hides the
+ * patient selector for that role and slot.controller derives the patient from
+ * the session instead of the body. Restricting the route to SECRETARY/ADMIN
+ * would remove that self-service path, which is a defended behaviour.
  */
 describe("Schedule comparison access (GET /schedules/compare)", () => {
   const token = (role, sub) => `access_token=${generateToken({ sub, role })}`;
 
-  test("ADMIN gets 200", async () => {
+  test("PATIENT gets 200: self-service booking lives on this screen", async () => {
+    const res = await request(app)
+      .get("/schedules/compare")
+      .set("Cookie", token(Roles.PATIENT, 903));
+
+    expect(res.status).toBe(200);
+  });
+
+  test("PATIENT does not get the patient selector", async () => {
+    const res = await request(app)
+      .get("/schedules/compare")
+      .set("Cookie", token(Roles.PATIENT, 903));
+
+    expect(res.text).not.toContain('name="patientId"');
+  });
+
+  test("ADMIN gets the patient selector, because staff book for others", async () => {
     const res = await request(app)
       .get("/schedules/compare")
       .set("Cookie", token(Roles.ADMIN, 901));
 
     expect(res.status).toBe(200);
+    expect(res.text).toContain('name="patientId"');
   });
 
   test("SECRETARY gets 200", async () => {
@@ -29,19 +46,11 @@ describe("Schedule comparison access (GET /schedules/compare)", () => {
     expect(res.status).toBe(200);
   });
 
-  test("PATIENT is rejected with 403", async () => {
-    const res = await request(app)
-      .get("/schedules/compare")
-      .set("Cookie", token(Roles.PATIENT, 903));
-
-    expect(res.status).toBe(403);
-  });
-
-  test("PROFESSIONAL is rejected with 403", async () => {
+  test("PROFESSIONAL gets 200: the route is open to any signed-in user", async () => {
     const res = await request(app)
       .get("/schedules/compare")
       .set("Cookie", token(Roles.PROFESSIONAL, 904));
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
   });
 });
