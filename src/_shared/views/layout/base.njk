@@ -93,7 +93,10 @@
   </script>
 
   <script type="module" src="/js/main.js"></script>
-  <script src="/js/waiting-list.js"></script>
+  {# Solo los roles con dial necesitan este script #}
+  {% if user and (user.role == Roles.SECRETARY or user.role == Roles.ADMIN) %}
+    <script src="/js/waiting-list.js"></script>
+  {% endif %}
 
   {% block scripts %}
   {% endblock %}
