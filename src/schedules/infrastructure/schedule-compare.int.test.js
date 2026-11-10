@@ -54,3 +54,21 @@ describe("Schedule comparison access (GET /schedules/compare)", () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe("Navigation entry to slot search", () => {
+  const page = (role, sub) =>
+    request(app)
+      .get("/schedules/compare")
+      .set("Cookie", `access_token=${generateToken({ sub, role })}`);
+
+  test.each([
+    [Roles.PATIENT, 903],
+    [Roles.PROFESSIONAL, 904],
+    [Roles.SECRETARY, 902],
+    [Roles.ADMIN, 901],
+  ])("%s sees a link to /schedules/compare", async (role, sub) => {
+    const res = await page(role, sub);
+
+    expect(res.text).toContain('href="/schedules/compare"');
+  });
+});

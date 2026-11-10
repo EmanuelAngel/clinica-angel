@@ -104,4 +104,10 @@ export const links = [
     icon: "stethoscope",
     roles: ["PROFESSIONAL"],
   },
+  {
+    displayName: "Buscar turnos",
+    url: "/schedules/compare",
+    icon: "search",
+    roles: ["PATIENT", "PROFESSIONAL"],
+  },
 ];
