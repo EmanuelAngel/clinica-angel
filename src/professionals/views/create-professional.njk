@@ -202,15 +202,15 @@
       row.className = 'credential-row';
       row.innerHTML = `
         <div>
-          <label class="label label-text">Especialidad</label>
-          <select name="credentials[${index}][specialtyId]" class="select select-bordered w-full" required>
+          <label class="label">Especialidad</label>
+          <select name="credentials[${index}][specialtyId]" class="select w-full" required>
             <option value="" disabled selected>Seleccione...</option>
             ${specialties.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
           </select>
         </div>
         <div>
-          <label class="label label-text">Número de matrícula</label>
-          <input type="text" name="credentials[${index}][licenseNumber]" class="input input-bordered w-full" placeholder="Ej: MP-12345" required />
+          <label class="label">Número de matrícula</label>
+          <input type="text" name="credentials[${index}][licenseNumber]" class="input w-full" placeholder="Ej: MP-12345" required />
         </div>
         <div class="remove-btn">
           <button type="button" class="btn btn-error btn-sm" onclick="this.closest('.credential-row').remove()">

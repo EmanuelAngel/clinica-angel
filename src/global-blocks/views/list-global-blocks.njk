@@ -68,28 +68,28 @@
                   <h3 class="font-bold text-lg">Editar bloqueo global</h3>
                   <form action="/global-blocks/{{ block.id }}" method="POST">
                     <div class="py-4 space-y-4">
-                      <div class="form-control w-full">
+                      <div class="w-full">
                         <label class="label">Fecha de inicio</label>
                         <input type="date"
                                name="startDate"
                                value="{{ block.startDate | date('yyyy-MM-dd') }}"
-                               class="input input-bordered w-full"
+                               class="input w-full"
                                required />
                       </div>
-                      <div class="form-control w-full">
+                      <div class="w-full">
                         <label class="label">Fecha de fin</label>
                         <input type="date"
                                name="endDate"
                                value="{{ block.endDate | date('yyyy-MM-dd') }}"
-                               class="input input-bordered w-full"
+                               class="input w-full"
                                required />
                       </div>
-                      <div class="form-control w-full">
+                      <div class="w-full">
                         <label class="label">Motivo</label>
                         <input type="text"
                                name="reason"
                                value="{{ block.reason }}"
-                               class="input input-bordered w-full"
+                               class="input w-full"
                                required
                                minlength="3"
                                maxlength="500"

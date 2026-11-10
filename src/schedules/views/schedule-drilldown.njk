@@ -224,11 +224,11 @@
         <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Reservar Turno</h4>
         <form id="reservation_form" class="space-y-4">
           {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
-          <div class="form-control w-full">
+          <div class="w-full">
             <label class="label">
-              <span class="label-text font-semibold">Paciente</span>
+              <span class="font-semibold">Paciente</span>
             </label>
-            <select name="patientId" class="select select-bordered w-full select-sm" required>
+            <select name="patientId" class="select w-full select-sm" required>
               <option value="" disabled selected>Seleccione un paciente</option>
               {% for patient in patients %}
               <option value="{{ patient.id }}">{{ patient.firstNames }} {{ patient.lastNames }} (DNI: {{ patient.nationalId }})</option>
@@ -237,11 +237,11 @@
           </div>
           {% endif %}
 
-          <div class="form-control w-full">
+          <div class="w-full">
             <label class="label">
-              <span class="label-text font-semibold">Motivo de consulta</span>
+              <span class="font-semibold">Motivo de consulta</span>
             </label>
-            <textarea name="consultationReason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Control anual, Dolor de garganta..." required minlength="5"></textarea>
+            <textarea name="consultationReason" class="textarea h-20 textarea-sm" placeholder="Ej: Control anual, Dolor de garganta..." required minlength="5"></textarea>
           </div>
 
           <div class="flex justify-end">
@@ -276,11 +276,11 @@
           Crear Sobreturno
         </h4>
         <form id="overbook_form" class="space-y-4">
-          <div class="form-control w-full">
+          <div class="w-full">
             <label class="label">
-              <span class="label-text font-semibold">Paciente</span>
+              <span class="font-semibold">Paciente</span>
             </label>
-            <select name="patientId" class="select select-bordered w-full select-sm" required>
+            <select name="patientId" class="select w-full select-sm" required>
               <option value="" disabled selected>Seleccione un paciente</option>
               {% for patient in patients %}
               <option value="{{ patient.id }}">{{ patient.firstNames }} {{ patient.lastNames }} (DNI: {{ patient.nationalId }})</option>
@@ -288,11 +288,11 @@
             </select>
           </div>
 
-          <div class="form-control w-full">
+          <div class="w-full">
             <label class="label">
-              <span class="label-text font-semibold">Motivo de consulta</span>
+              <span class="font-semibold">Motivo de consulta</span>
             </label>
-            <textarea name="consultationReason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Control urgente, Derivación..." required minlength="5"></textarea>
+            <textarea name="consultationReason" class="textarea h-20 textarea-sm" placeholder="Ej: Control urgente, Derivación..." required minlength="5"></textarea>
           </div>
 
           <div class="flex justify-end">
@@ -328,23 +328,23 @@
     </h3>
 
     <form id="edit_config_form" class="space-y-4">
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Máx. Sobreturnos por Día</span>
+          <span class="font-semibold">Máx. Sobreturnos por Día</span>
         </label>
-        <input type="number" name="maxOverbooksPerDay" class="input input-bordered input-sm w-full" value="{{ schedule.maxOverbooksPerDay }}" min="0" max="20" required />
+        <input type="number" name="maxOverbooksPerDay" class="input input-sm w-full" value="{{ schedule.maxOverbooksPerDay }}" min="0" max="20" required />
       </div>
 
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Máx. Sobreturnos por Turno</span>
+          <span class="font-semibold">Máx. Sobreturnos por Turno</span>
         </label>
-        <input type="number" name="maxOverbooksPerSlot" class="input input-bordered input-sm w-full" value="{{ schedule.maxOverbooksPerSlot }}" min="0" max="2" required />
+        <input type="number" name="maxOverbooksPerSlot" class="input input-sm w-full" value="{{ schedule.maxOverbooksPerSlot }}" min="0" max="2" required />
       </div>
 
-      <div class="form-control">
+      <div>
         <label class="label cursor-pointer justify-start gap-4">
-          <span class="label-text font-semibold">Pausar Agenda</span>
+          <span class="font-semibold">Pausar Agenda</span>
           <input type="checkbox" name="isPaused" class="toggle toggle-warning toggle-sm" {% if schedule.isPaused %}checked{% endif %} />
         </label>
         <p class="text-[10px] text-base-content/50 italic mt-1">
@@ -380,25 +380,25 @@
     </h3>
 
     <form id="block_form" class="space-y-4">
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Fecha de inicio</span>
+          <span class="font-semibold">Fecha de inicio</span>
         </label>
-        <input type="date" name="startDate" class="input input-bordered input-sm w-full" required />
+        <input type="date" name="startDate" class="input input-sm w-full" required />
       </div>
 
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Fecha de fin</span>
+          <span class="font-semibold">Fecha de fin</span>
         </label>
-        <input type="date" name="endDate" class="input input-bordered input-sm w-full" required />
+        <input type="date" name="endDate" class="input input-sm w-full" required />
       </div>
 
-      <div class="form-control">
+      <div>
         <label class="label">
-          <span class="label-text font-semibold">Motivo del bloqueo</span>
+          <span class="font-semibold">Motivo del bloqueo</span>
         </label>
-        <textarea name="reason" class="textarea textarea-bordered h-20 textarea-sm" placeholder="Ej: Enfermedad del profesional, feriado..." required minlength="3"></textarea>
+        <textarea name="reason" class="textarea h-20 textarea-sm" placeholder="Ej: Enfermedad del profesional, feriado..." required minlength="3"></textarea>
       </div>
 
       <div id="block_result" class="hidden"></div>

@@ -162,6 +162,8 @@ Un badge dice **una** cosa. El patrón actual de `list-schedules.njk` apila 3 ba
 - Un formulario = una card (`bg-base-100 border border-base-300`). El bloque de demo-login **no** es otra card adentro: es contenido del mismo formulario.
 - Agrupación lógica con separadores, no con cards anidadas.
 - `input-error` + `validator-hint` para error; ver `.agents/skills/nunjucks-views/SKILL.md`.
+- Dos canales de error, los dos necesarios: `validator-hint` cubre las restricciones nativas del navegador y solo se muestra cuando el campo es inválido **después** de interactuar (`:user-invalid`); el error del servidor (`errors.properties.campo[0]` en `text-error`) cubre lo que solo el backend sabe, como un DNI duplicado.
+- **Excepción deliberada a la regla de color:** un campo válido se pinta en `success` vía `.validator:user-valid`. Es feedback de progreso, no una excepción del sistema, y se acepta a propósito porque reduce el esfuerzo de llenado de formularios largos. Aplica solo a controles con `class="validator"`.
 
 ### Tablas y grillas
 

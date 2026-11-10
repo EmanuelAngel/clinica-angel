@@ -41,18 +41,18 @@
             <form action="/classifications/{{ classification.id }}" method="POST">
               <div class="py-4">
                 <label class="label">
-                  <span class="label-text">Nombre</span>
+                  <span>Nombre</span>
                 </label>
                 <input type="text"
                        name="name"
                        value="{{ classification.name }}"
-                       class="input input-bordered w-full"
+                       class="input w-full"
                        required
                        minlength="2"
                        maxlength="100"
                        placeholder="Ej: Primera vez" />
                 <div class="label">
-                  <span class="label-text-alt">Mínimo 2 caracteres, máximo 100</span>
+                  <span>Mínimo 2 caracteres, máximo 100</span>
                 </div>
               </div>
               <div class="modal-action">

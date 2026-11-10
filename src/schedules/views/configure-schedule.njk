@@ -41,7 +41,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="label">Sucursal</label>
-          <select name="schedule[locationId]" class="select select-bordered w-full {{ 'select-error' if errors.properties.schedule.properties.locationId }}" required>
+          <select name="schedule[locationId]" class="select w-full {{ 'select-error' if errors.properties.schedule.properties.locationId }}" required>
             <option value="" disabled selected>Seleccione sucursal...</option>
             {% for location in locations %}
               <option value="{{ location.id }}" {{ 'selected' if values.schedule.locationId == location.id }}>
@@ -56,7 +56,7 @@
 
         <div>
           <label class="label">Matrícula</label>
-          <select name="schedule[licenseNumber]" class="select select-bordered w-full {{ 'select-error' if errors.properties.schedule.properties.licenseNumber }}" required>
+          <select name="schedule[licenseNumber]" class="select w-full {{ 'select-error' if errors.properties.schedule.properties.licenseNumber }}" required>
             <option value="" disabled selected>Seleccione matrícula...</option>
             {% for professional in professionals %}
               {% for credential in professional.credentials %}
@@ -73,7 +73,7 @@
 
         <div>
           <label class="label">Clasificación</label>
-          <select name="schedule[classificationId]" class="select select-bordered w-full {{ 'select-error' if errors.properties.schedule.properties.classificationId }}" required>
+          <select name="schedule[classificationId]" class="select w-full {{ 'select-error' if errors.properties.schedule.properties.classificationId }}" required>
             <option value="" disabled selected>Seleccione clasificación...</option>
             {% for classification in classifications %}
               <option value="{{ classification.id }}" {{ 'selected' if values.schedule.classificationId == classification.id }}>
@@ -103,7 +103,7 @@
                  id="validity-from"
                  name="config[validity][from]"
                  value="{{ values.config.validity.from }}"
-                 class="input input-bordered w-full {{ 'input-error' if errors.properties.config.properties.validity.properties.from }}"
+                 class="input w-full {{ 'input-error' if errors.properties.config.properties.validity.properties.from }}"
                  required />
           {% if errors.properties.config.properties.validity.properties.from %}
             <div class="text-error text-sm mt-1">{{ errors.properties.config.properties.validity.properties.from[0] }}</div>
@@ -115,7 +115,7 @@
                  id="validity-to"
                  name="config[validity][to]"
                  value="{{ values.config.validity.to }}"
-                 class="input input-bordered w-full {{ 'input-error' if errors.properties.config.properties.validity.properties.to }}"
+                 class="input w-full {{ 'input-error' if errors.properties.config.properties.validity.properties.to }}"
                  required />
           {% if errors.properties.config.properties.validity.properties.to %}
             <div class="text-error text-sm mt-1">{{ errors.properties.config.properties.validity.properties.to[0] }}</div>
@@ -137,7 +137,7 @@
           <label class="label">Máximos por día</label>
           <input type="number"
                  name="schedule[maxOverbooksPerDay]"
-                 class="input input-bordered w-full {{ 'input-error' if errors.properties.schedule.properties.maxOverbooksPerDay }}"
+                 class="input w-full {{ 'input-error' if errors.properties.schedule.properties.maxOverbooksPerDay }}"
                  min="0"
                  max="20"
                  value="{{ values.schedule.maxOverbooksPerDay | default(0) }}"
@@ -151,7 +151,7 @@
           <label class="label">Máximos por horario</label>
           <input type="number"
                  name="schedule[maxOverbooksPerSlot]"
-                 class="input input-bordered w-full {{ 'input-error' if errors.properties.schedule.properties.maxOverbooksPerSlot }}"
+                 class="input w-full {{ 'input-error' if errors.properties.schedule.properties.maxOverbooksPerSlot }}"
                  min="0"
                  max="2"
                  value="{{ values.schedule.maxOverbooksPerSlot | default(0) }}"
@@ -172,7 +172,7 @@
       <p class="text-sm text-base-content/70 mb-4">
         La duración en minutos que tendrá cada turno generado.
       </p>
-      <select name="schedule[slotDurationMinutes]" class="select select-bordered w-full max-w-xs {{ 'select-error' if errors.properties.schedule.properties.slotDurationMinutes }}" required>
+      <select name="schedule[slotDurationMinutes]" class="select w-full max-w-xs {{ 'select-error' if errors.properties.schedule.properties.slotDurationMinutes }}" required>
         <option value="" disabled selected>Seleccione duración...</option>
         {% for duration in [10, 15, 20, 25, 30, 35, 45, 50, 60] %}
           <option value="{{ duration }}" {{ 'selected' if values.schedule.slotDurationMinutes == duration }}>
@@ -222,17 +222,17 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
         <div>
           <label class="label">Fecha desde</label>
-          <input type="date" id="block-start" class="input input-bordered w-full" />
+          <input type="date" id="block-start" class="input w-full" />
         </div>
         <div>
           <label class="label">Fecha hasta</label>
-          <input type="date" id="block-end" class="input input-bordered w-full" />
+          <input type="date" id="block-end" class="input w-full" />
         </div>
         <div>
           <label class="label">Motivo</label>
           <input type="text"
                  id="block-motive"
-                 class="input input-bordered w-full"
+                 class="input w-full"
                  placeholder="Ej: Vacaciones" />
         </div>
         <div>
@@ -283,11 +283,11 @@
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label class="label">Hora desde</label>
-          <input type="time" id="modal-time-start" class="input input-bordered w-full" value="08:00" />
+          <input type="time" id="modal-time-start" class="input w-full" value="08:00" />
         </div>
         <div>
           <label class="label">Hora hasta</label>
-          <input type="time" id="modal-time-end" class="input input-bordered w-full" value="12:00" />
+          <input type="time" id="modal-time-end" class="input w-full" value="12:00" />
         </div>
       </div>
 
