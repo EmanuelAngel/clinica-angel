@@ -220,8 +220,7 @@
           options: insuranceOptions,
           placeholder: "Seleccione una obra social",
           error: errors.properties.healthInsurances.items[0].properties.insuranceId.errors[0] if errors.properties.healthInsurances else null,
-          required: true,
-          hint: "Ingrese una obra social válida."
+          hint: "Opcional. Si la elegís, cargá también el número de afiliado."
         }) }}
 
         {{ Field.text({
@@ -229,7 +228,8 @@
           label: "Número de afiliado",
           value: values.memberNumber,
           error: errors.properties.healthInsurances.items[0].properties.memberNumber.errors[0] if errors.properties.healthInsurances else null,
-          placeholder: "Número de afiliado"
+          placeholder: "Número de afiliado",
+          hint: "Requerido solo si elegís una obra social."
         }) }}
       </div>
     </fieldset>
