@@ -65,8 +65,21 @@
       </div>
     </div>
   {% else %}
-    {# Time Grid #}
-    {% include "partials/time-grid.njk" %}
+    {# Grilla compartida con schedule-drilldown #}
+    {% import "partials/time-grid.njk" as TimeGrid %}
+    {% set columns = [] %}
+    {% for schedule in schedules %}
+      {% set columns = columns.concat([{
+        label: schedule.professionalName,
+        sub: schedule.specialtyName,
+        meta: schedule.locationName,
+        url: "/schedules/" + schedule.id + "/agenda",
+        paused: schedule.isPaused,
+        dayBlock: schedule.dayBlock,
+        slots: schedule.slots
+      }]) %}
+    {% endfor %}
+    {{ TimeGrid.render(columns, rows, userRole, "No hay turnos para esta fecha.") }}
   {% endif %}
 </div>
 

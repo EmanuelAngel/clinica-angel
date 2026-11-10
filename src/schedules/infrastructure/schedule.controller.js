@@ -14,6 +14,7 @@ import {
   VISTA_STEPS,
   VALID_VISTAS,
 } from "./date-range.utils.js";
+import { buildTimeRows } from "../domain/time-grid-rows.js";
 
 export class ScheduleController {
   /**
@@ -163,6 +164,7 @@ export class ScheduleController {
       filters,
       hasFilters,
       schedules,
+      rows: buildTimeRows(schedules.map((schedule) => schedule.slots)),
       date: filters.date,
       userRole: req.user?.role,
     });
@@ -234,6 +236,7 @@ export class ScheduleController {
     res.render("schedule-drilldown", {
       schedule,
       days,
+      rows: buildTimeRows(days.map((day) => day.slots)),
       vista,
       fecha,
       vistaSteps: VISTA_STEPS,
