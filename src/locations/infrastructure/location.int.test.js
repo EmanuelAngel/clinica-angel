@@ -43,7 +43,7 @@ describe("Location integration tests", () => {
         .set("Cookie", `access_token=${adminToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.text).toContain("Nueva Sede");
+      expect(response.text).toContain("Nueva sede");
     });
   });
 

@@ -50,7 +50,7 @@ describe("GET /global-blocks/create", () => {
       .set("Cookie", `access_token=${adminToken}`);
 
     expect(res.status).toBe(200);
-    expect(res.text).toContain("Nuevo Bloqueo Global");
+    expect(res.text).toContain("Nuevo bloqueo global");
   });
 });
 

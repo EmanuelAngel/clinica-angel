@@ -40,7 +40,7 @@ describe("Classification integration tests", () => {
         .set("Cookie", `access_token=${adminToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.text).toContain("Nueva Clasificación");
+      expect(response.text).toContain("Nueva clasificación");
     });
   });
 

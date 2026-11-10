@@ -1,76 +1,53 @@
 {% extends "layout/base.njk" %}
+{% import "partials/form-field.njk" as Field %}
 
 {% block content %}
   {% import "partials/page-info.njk" as PageInfo %}
-  {{ PageInfo.titleAndDescription("Nuevo Bloqueo Global", "Definir un período de bloqueo para todas las agendas.") }}
+  {{ PageInfo.titleAndDescription("Nuevo bloqueo global", "Definir un período de bloqueo para todas las agendas.") }}
 
-  <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
-    <div class="card-body">
-      <form action="/global-blocks" method="POST" class="space-y-4">
-        <div class="w-full">
-          <label class="label">Fecha de inicio (requerido)</label>
-          <input type="date"
-                 name="startDate"
-                 value="{{ values.startDate }}"
-                 class="input validator {{ 'input-error' if errors.properties.startDate }}"
-                 required />
-          {% if errors.properties.startDate %}
-            <div class="text-error text-sm mt-1">
-              {{ errors.properties.startDate[0] }}
-            </div>
-          {% endif %}
-          <div class="validator-hint">
-            Seleccione la fecha de inicio del bloqueo.
-          </div>
-        </div>
+  <form action="/global-blocks" method="POST" class="max-w-2xl space-y-6">
+    <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-4">
+      <legend class="text-sm font-semibold">Período del bloqueo</legend>
 
-        <div class="w-full">
-          <label class="label">Fecha de fin (requerido)</label>
-          <input type="date"
-                 name="endDate"
-                 value="{{ values.endDate }}"
-                 class="input validator {{ 'input-error' if errors.properties.endDate }}"
-                 required />
-          {% if errors.properties.endDate %}
-            <div class="text-error text-sm mt-1">
-              {{ errors.properties.endDate[0] }}
-            </div>
-          {% endif %}
-          <div class="validator-hint">
-            Seleccione la fecha de fin del bloqueo (puede ser el mismo día).
-          </div>
-        </div>
+      {{ Field.text({
+        name: "startDate",
+        type: "date",
+        label: "Fecha de inicio",
+        value: values.startDate,
+        error: errors.properties.startDate[0] if errors.properties.startDate else null,
+        required: true,
+        hint: "Seleccione la fecha de inicio del bloqueo."
+      }) }}
 
-        <div class="w-full">
-          <label class="label">Motivo (requerido)</label>
-          <input type="text"
-                 name="reason"
-                 value="{{ values.reason }}"
-                 class="input validator {{ 'input-error' if errors.properties.reason }}"
-                 required
-                 minlength="3"
-                 maxlength="500"
-                 placeholder="Ej: Feriado nacional, Jornada de mantenimiento" />
-          {% if errors.properties.reason %}
-            <div class="text-error text-sm mt-1">
-              {{ errors.properties.reason[0] }}
-            </div>
-          {% endif %}
-          <div class="validator-hint">
-            Mínimo 3 caracteres, máximo 500.
-          </div>
-        </div>
+      {{ Field.text({
+        name: "endDate",
+        type: "date",
+        label: "Fecha de fin",
+        value: values.endDate,
+        error: errors.properties.endDate[0] if errors.properties.endDate else null,
+        required: true,
+        hint: "Seleccione la fecha de fin del bloqueo (puede ser el mismo día)."
+      }) }}
 
-        <div class="card-actions justify-end mt-6">
-          <a href="/global-blocks" class="btn btn-ghost">
-            Cancelar
-          </a>
-          <button type="submit" class="btn btn-primary">
-            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-            Crear bloqueo
-          </button>
-        </div>
-      </form>
+      {{ Field.text({
+        name: "reason",
+        label: "Motivo",
+        value: values.reason,
+        error: errors.properties.reason[0] if errors.properties.reason else null,
+        required: true,
+        minlength: 3,
+        maxlength: 500,
+        placeholder: "Ej: Feriado nacional, Jornada de mantenimiento",
+        hint: "Mínimo 3 caracteres, máximo 500."
+      }) }}
+    </fieldset>
+
+    <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+      <button type="submit" class="btn btn-primary">
+        <i data-lucide="save" class="h-4 w-4"></i>
+        Crear bloqueo
+      </button>
+      <a href="/global-blocks" class="btn btn-ghost">Cancelar</a>
     </div>
-  </div>
+  </form>
 {% endblock %}
