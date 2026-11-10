@@ -59,7 +59,7 @@ describe("Professional integration tests", () => {
         .set("Cookie", `access_token=${adminToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.text).toContain("Registrar Profesional");
+      expect(response.text).toContain("Registrar profesional");
     });
   });
 
