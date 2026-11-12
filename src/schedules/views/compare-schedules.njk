@@ -120,6 +120,12 @@
         </div>
       </div>
 
+      {# Consultation Reason - filled once the slot holds a booking #}
+      <div id="reason_section" class="hidden">
+        <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Motivo de consulta</h4>
+        <p class="whitespace-pre-line text-sm" id="slot_reason">-</p>
+      </div>
+
       {# Patient Info #}
       <div id="patient_section" class="hidden">
         <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Paciente</h4>
@@ -185,11 +191,13 @@
           </div>
           {% endif %}
           
-          <div class="w-full">
+          {# Label above the control: `.label` is inline-flex and a textarea is
+             inline-block, so without this column they render side by side #}
+          <div class="w-full flex flex-col gap-1">
             <label class="label">
               <span class="font-semibold">Motivo de consulta</span>
             </label>
-            <textarea name="consultationReason" class="textarea h-20 textarea-sm" placeholder="Ej: Control anual, Dolor de garganta..." required minlength="5"></textarea>
+            <textarea name="consultationReason" class="textarea w-full h-20 textarea-sm" placeholder="Ej: Control anual, Dolor de garganta..." required minlength="5"></textarea>
           </div>
 
           <div class="flex justify-end">
@@ -200,20 +208,23 @@
         </form>
       </div>
 
-      {# State Actions #}
-      <div id="actions_section">
-        <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Cambiar estado del horario a</h4>
-        <div id="action_buttons" class="flex flex-wrap gap-2">
-          <button id="btn_release" data-action="release" class="btn btn-xs btn-outline btn-success hidden">Libre</button>
-          <button id="btn_cancel" data-action="cancel" class="btn btn-xs btn-outline btn-error hidden">Cancelado</button>
-          <button id="btn_confirm" data-action="confirm" class="btn btn-xs btn-outline btn-primary hidden">Confirmado</button>
-          <button id="btn_arrive" data-action="arrive" class="btn btn-xs btn-outline btn-accent hidden">Presente</button>
-          <button id="btn_no_show" data-action="no-show" class="btn btn-xs btn-outline btn-secondary hidden">Ausente</button>
-          <button id="btn_start" data-action="start" class="btn btn-xs btn-outline btn-info hidden">En consulta</button>
-          <button id="btn_fulfill" data-action="fulfill" class="btn btn-xs btn-outline hidden">Atendido</button>
+      {# State Actions - staff only: the role permissions live in the server
+         state machine, so a patient must not be offered transitions #}
+      {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
+        <div id="actions_section">
+          <h4 class="text-sm font-semibold text-base-content/50 uppercase tracking-wider mb-3">Cambiar estado del horario a</h4>
+          <div id="action_buttons" class="flex flex-wrap gap-2">
+            <button id="btn_release" data-action="release" class="btn btn-xs btn-outline btn-success hidden">Libre</button>
+            <button id="btn_cancel" data-action="cancel" class="btn btn-xs btn-outline btn-error hidden">Cancelado</button>
+            <button id="btn_confirm" data-action="confirm" class="btn btn-xs btn-outline btn-primary hidden">Confirmado</button>
+            <button id="btn_arrive" data-action="arrive" class="btn btn-xs btn-outline btn-accent hidden">Presente</button>
+            <button id="btn_no_show" data-action="no-show" class="btn btn-xs btn-outline btn-secondary hidden">Ausente</button>
+            <button id="btn_start" data-action="start" class="btn btn-xs btn-outline btn-info hidden">En consulta</button>
+            <button id="btn_fulfill" data-action="fulfill" class="btn btn-xs btn-outline hidden">Atendido</button>
+          </div>
+          <p id="terminal_state_msg" class="text-[10px] text-base-content/40 mt-2 italic hidden">Este turno está en estado terminal y no puede ser modificado.</p>
         </div>
-        <p id="terminal_state_msg" class="text-[10px] text-base-content/40 mt-2 italic hidden">Este turno está en estado terminal y no puede ser modificado.</p>
-      </div>
+      {% endif %}
 
       {# Overbook Section - ADMIN/SECRETARY only, visible when slot is BOOKED #}
       {% if userRole == Roles.ADMIN or userRole == Roles.SECRETARY %}
@@ -264,6 +275,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="/js/schedule-grid.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Re-initialize lucide icons
@@ -393,6 +405,21 @@
     }
 
     /**
+     * Show the consultation reason recorded with the booking, if any.
+     */
+    function updateConsultationReason(reason) {
+      const section = document.getElementById('reason_section');
+      if (!section) return;
+
+      if (reason) {
+        document.getElementById('slot_reason').textContent = reason;
+        section.classList.remove('hidden');
+      } else {
+        section.classList.add('hidden');
+      }
+    }
+
+    /**
      * Render action buttons / reservation form based on status
      */
     function renderActionUI(status) {
@@ -405,19 +432,19 @@
 
       // Reset visibility
       allButtons.forEach(btn => btn.classList.add('hidden'));
-      terminalMsg.classList.add('hidden');
+      if (terminalMsg) terminalMsg.classList.add('hidden');
       reservationSection.classList.add('hidden');
-      actionsSection.classList.remove('hidden');
+      if (actionsSection) actionsSection.classList.remove('hidden');
       if (overbookSection) overbookSection.classList.add('hidden');
 
       if (status === 'FULFILLED') {
-        terminalMsg.classList.remove('hidden');
+        if (terminalMsg) terminalMsg.classList.remove('hidden');
         return;
       }
 
       if (status === 'FREE') {
         reservationSection.classList.remove('hidden');
-        actionsSection.classList.add('hidden');
+        if (actionsSection) actionsSection.classList.add('hidden');
         return;
       }
 
@@ -476,22 +503,15 @@
           statusBadge.className = `badge badge-lg ${statusBadges[currentSlot.status] || ''}`;
 
           updatePatientInfo(currentSlot.patient);
+
+          updateConsultationReason(currentSlot.consultationReason);
           renderActionUI(currentSlot.status);
         }
 
-        showToast(result.message || 'Turno reservado correctamente', 'success');
-
-        // Update grid
-        const gridCell = document.querySelector(`.slot-trigger[data-slot-id="${currentSlot.id}"]`);
-        if (gridCell) {
-          gridCell.className = gridCell.className
-            .replace(/slot-(free|proposed|booked|cancelled|arrived|no-show|in-progress|fulfilled)/gi, '')
-            .trim();
-          gridCell.classList.add(`slot-${currentSlot.status.toLowerCase().replace('_', '-')}`);
-        }
-
-        // Reset form
-        e.target.reset();
+        // The cell is rendered by the server (macros/slot-cell.njk): reload so
+        // badge, label and patient name come from that single template, and
+        // bring back the grid scroll and this slot's modal afterwards.
+        reloadScheduleGrid(currentSlot.id);
 
       } catch (error) {
         showToast(error.message, 'error');
@@ -541,20 +561,13 @@
           statusBadge.className = `badge badge-lg ${statusBadges[currentSlot.status] || ''}`;
 
           updatePatientInfo(currentSlot.patient);
+
+          updateConsultationReason(currentSlot.consultationReason);
           renderActionUI(currentSlot.status);
         }
 
-        showToast(data.message || 'Turno actualizado correctamente', 'success');
-
-        // Update grid
-        const gridCell = document.querySelector(`.slot-trigger[data-slot-id="${currentSlot.id}"]`);
-        if (gridCell) {
-          gridCell.className = gridCell.className
-            .replace(/slot-(free|proposed|booked|cancelled|arrived|no-show|in-progress|fulfilled)/gi, '')
-            .trim();
-          gridCell.classList.add(`slot-${currentSlot.status.toLowerCase().replace('_', '-')}`);
-        }
-
+        // Same as the reserve flow: the cell template owns the render.
+        reloadScheduleGrid(currentSlot.id);
       } catch (error) {
         showToast(error.message, 'error');
       } finally {
@@ -654,6 +667,8 @@
           document.getElementById('slot_location').textContent = currentSlot.schedule.location;
 
           updatePatientInfo(currentSlot.patient);
+
+          updateConsultationReason(currentSlot.consultationReason);
           renderActionUI(currentSlot.status);
 
         } catch (error) {

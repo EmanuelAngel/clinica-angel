@@ -263,9 +263,15 @@ export class ScheduleController {
 
     result.match(
       (slot) => {
-        // Redact personal info if not ADMIN/SECRETARY
+        // Redact personal info unless the requester is staff or the patient
+        // who owns the booking: a patient must read their own record after
+        // reserving, not a redacted copy of it.
         const userRole = req.user?.role;
-        if (userRole !== "ADMIN" && userRole !== "SECRETARY") {
+        const isStaff = userRole === "ADMIN" || userRole === "SECRETARY";
+        const isOwner =
+          slot.patientId !== null && slot.patientId === req.user?.sub;
+
+        if (!isStaff && !isOwner) {
           if (slot.patient) {
             slot.patient.email = "REDACTED";
             slot.patient.phone = "REDACTED";
@@ -274,6 +280,11 @@ export class ScheduleController {
             slot.patient.nationalIdImageUrl = null;
           }
         }
+
+        // Only the check above needs the owner id; it is not part of the
+        // payload the modal consumes.
+        delete slot.patientId;
+
         res.json(slot);
       },
       (error) => res.status(error.statusCode).json({ message: error.message })

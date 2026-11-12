@@ -31,21 +31,19 @@
     'NEEDS_RESCHEDULE': 'A reasignar'
   } %}
   
-  <div class="flex flex-col gap-0.5 slot-trigger cursor-pointer rounded hover:bg-base-200" data-slot-id="{{ slot.id }}">
+  {# The grid draws one row per start time, so a cell must stay a single line:
+     the patient name rides inside the badge instead of adding a second line
+     that would grow that row and break the time scale. #}
+  {% set showPatientName = slot.patientName and (userRole == 'ADMIN' or userRole == 'SECRETARY') %}
+  {% set statusText = statusLabel[slot.status] or slot.status %}
+  <div class="flex items-center slot-trigger cursor-pointer rounded hover:bg-base-200" data-slot-id="{{ slot.id }}" title="{{ (statusText ~ ' · ' ~ slot.patientName) if showPatientName else statusText }}">
     {# Status Badge — el estado normal no lleva color #}
     <span class="badge badge-xs {{ statusBadge[slot.status] or 'badge-neutral' }} w-full justify-center pointer-events-none">
       {% if slot.isOverbook %}
         <i data-lucide="layers" class="w-3 h-3 mr-1" title="Sobreturno"></i>
       {% endif %}
-      {{ statusLabel[slot.status] or slot.status }}
+      <span class="min-w-0 truncate">{{ statusText }}{% if showPatientName %} · {{ slot.patientName }}{% endif %}</span>
     </span>
-    
-    {# Patient Name - Only for ADMIN/SECRETARY #}
-    {% if slot.patientName and (userRole == 'ADMIN' or userRole == 'SECRETARY') %}
-      <span class="text-xs text-base-content/70 truncate max-w-[180px]" title="{{ slot.patientName }}">
-        {{ slot.patientName }}
-      </span>
-    {% endif %}
   </div>
 {% endmacro %}
 

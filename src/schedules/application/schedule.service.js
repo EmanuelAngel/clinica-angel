@@ -447,6 +447,10 @@ export class ScheduleService {
       id: slot.id,
       startsAt: slot.startsAt,
       status: slot.status,
+      // Lets the controller tell the owner of the booking apart from any other
+      // signed-in patient before it redacts contact data.
+      patientId: slot.patientId,
+      consultationReason: slot.consultationReason,
       patient: patientInfo,
       schedule: scheduleInfo,
     });
