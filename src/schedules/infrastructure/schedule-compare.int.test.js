@@ -29,6 +29,22 @@ describe("Schedule comparison access (GET /schedules/compare)", () => {
     expect(res.text).not.toContain('name="patientId"');
   });
 
+  test("PATIENT is not offered slot state transitions", async () => {
+    const res = await request(app)
+      .get("/schedules/compare")
+      .set("Cookie", token(Roles.PATIENT, 903));
+
+    expect(res.text).not.toContain('id="actions_section"');
+  });
+
+  test("staff still gets the slot state transitions", async () => {
+    const res = await request(app)
+      .get("/schedules/compare")
+      .set("Cookie", token(Roles.SECRETARY, 902));
+
+    expect(res.text).toContain('id="actions_section"');
+  });
+
   test("ADMIN gets the patient selector, because staff book for others", async () => {
     const res = await request(app)
       .get("/schedules/compare")
