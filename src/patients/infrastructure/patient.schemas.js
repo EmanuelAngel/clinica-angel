@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { commonUserFields } from "../../users/infrastructure/user.schemas.js";
+import {
+  NATIONAL_ID_IMAGE_MAX_SIZE_BYTES,
+  NATIONAL_ID_IMAGE_MIME_TYPES,
+} from "../domain/national-id-image.js";
 
 /**
  * Successfully validated patient registration data type.
@@ -15,12 +19,11 @@ export const patientRegistrationSchema = commonUserFields
         "La imagen es requerida"
       )
       .refine(
-        (file) => file?.size <= 5 * 1024 * 1024,
+        (file) => file?.size <= NATIONAL_ID_IMAGE_MAX_SIZE_BYTES,
         "El archivo no debe pesar más de 5MB"
       )
       .refine(
-        (file) =>
-          ["image/png", "image/jpeg", "image/jpg"].includes(file?.mimetype),
+        (file) => NATIONAL_ID_IMAGE_MIME_TYPES.includes(file?.mimetype),
         "Solo se aceptan formatos PNG, JPG o JPEG"
       ),
 

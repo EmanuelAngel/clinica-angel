@@ -5,7 +5,7 @@ import {
   checkOwnership,
 } from "../../auth/infrastructure/auth.middleware.js";
 import { Roles } from "../../auth/domain/roles.js";
-import { upload } from "./multer.middleware.js";
+import { uploadNationalIdImage } from "./multer.middleware.js";
 
 /**
  * @typedef {import('express').Request & { user?: import('../../auth/infrastructure/jwt.js').UserPayload }} AuthenticatedRequest
@@ -16,11 +16,7 @@ const patientController = new PatientController();
 
 patientRouter.get("/register", patientController.registerView);
 
-patientRouter.post(
-  "/",
-  upload.single("nationalIdImage"),
-  patientController.register
-);
+patientRouter.post("/", uploadNationalIdImage, patientController.register);
 
 patientRouter.get(
   "/:id",

@@ -2,8 +2,10 @@ import request from "supertest";
 import app from "../../app.js";
 import { prisma } from "../../_shared/infrastructure/prisma.js";
 import { Roles } from "../../auth/domain/roles.js";
-import { unlink } from "node:fs/promises";
+import { readdir, unlink, writeFile } from "node:fs/promises";
+import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { uploadDir } from "./multer.middleware.js";
 
 describe("Patient register integration", () => {
   const validPayload = {
@@ -36,7 +38,7 @@ describe("Patient register integration", () => {
       if (patient.nationalIdImageUrl) {
         // Convert /uploads/filename to actual file path
         const filename = patient.nationalIdImageUrl.replace(/^\/uploads\//, "");
-        const filePath = join("src", "_assets", "uploads", filename);
+        const filePath = join(uploadDir, filename);
         try {
           await unlink(filePath);
         } catch {
@@ -329,5 +331,127 @@ describe("Patient register integration", () => {
     expect(stored?.nationalIdImageUrl).toBeDefined();
     expect(typeof stored?.nationalIdImageUrl).toBe("string");
     expect(stored?.nationalIdImageUrl?.length).toBeGreaterThan(0);
+  });
+
+  // --- Upload hardening (issue #53) ---
+
+  /**
+   * Builds a registration request with every required text field filled in.
+   * @param {Record<string, string>} [body] Fields to send, defaults to the valid payload.
+   * @returns {import("supertest").Test} Request ready to receive the file.
+   */
+  function buildRegistrationRequest(body = validPayload) {
+    const requestBuilder = request(app).post("/patients");
+
+    for (const [field, value] of Object.entries(body)) {
+      requestBuilder.field(field, value);
+    }
+
+    return requestBuilder;
+  }
+
+  /**
+   * Counts the entries stored in the upload directory. A rejected upload must
+   * leave this number untouched, so the assertion proves nothing was written.
+   * @returns {Promise<number>} Number of entries currently stored.
+   */
+  async function countUploadedEntries() {
+    try {
+      return (await readdir(uploadDir)).length;
+    } catch {
+      return 0;
+    }
+  }
+
+  test("rejects an HTML upload and leaves no file on disk", async () => {
+    const entriesBefore = await countUploadedEntries();
+
+    const response = await buildRegistrationRequest().attach(
+      "nationalIdImage",
+      Buffer.from("<html><body><script>alert(1)</script></body></html>"),
+      { filename: "evil.html", contentType: "text/html" }
+    );
+
+    expect(response.status).toBe(422);
+    expect(await countUploadedEntries()).toBe(entriesBefore);
+  });
+
+  test("rejects an upload larger than 5MB and leaves no file on disk", async () => {
+    const entriesBefore = await countUploadedEntries();
+
+    const response = await buildRegistrationRequest().attach(
+      "nationalIdImage",
+      createLargeBuffer(),
+      { filename: "large-image.png", contentType: "image/png" }
+    );
+
+    expect(response.status).toBe(422);
+    expect(await countUploadedEntries()).toBe(entriesBefore);
+  });
+
+  test("derives the stored file extension from the MIME type, not from the client filename", async () => {
+    const response = await buildRegistrationRequest().attach(
+      "nationalIdImage",
+      createValidImageBuffer(),
+      { filename: "national-id.html", contentType: "image/png" }
+    );
+
+    expect(response.status).toBe(201);
+
+    const stored = await prisma.user.findUnique({
+      where: { email: validPayload.email.toLowerCase() },
+    });
+
+    expect(stored?.nationalIdImageUrl).toMatch(/^\/uploads\//);
+    expect(stored?.nationalIdImageUrl).toMatch(/\.png$/);
+    expect(stored?.nationalIdImageUrl).not.toMatch(/\.html$/);
+  });
+
+  test("never serves an uploaded HTML file as text/html and sends nosniff", async () => {
+    mkdirSync(uploadDir, { recursive: true });
+
+    const fileName = `hardening-${Date.now()}-${Math.round(Math.random() * 1e9)}.html`;
+    const filePath = join(uploadDir, fileName);
+    await writeFile(filePath, "<html><script>alert(1)</script></html>");
+
+    try {
+      const response = await request(app).get(`/uploads/${fileName}`);
+
+      expect(response.headers["content-type"] ?? "").not.toContain("text/html");
+      expect(response.headers["x-content-type-options"]).toBe("nosniff");
+      expect(response.status).toBe(404);
+      expect(response.text ?? "").not.toContain("alert(1)");
+    } finally {
+      await unlink(filePath).catch(() => {});
+    }
+  });
+
+  test("refuses path traversal attempts on the uploads route", async () => {
+    const response = await request(app).get("/uploads/..%2f..%2fpackage.json");
+
+    expect(response.status).not.toBe(200);
+    expect(response.text ?? "").not.toContain("clinica-angel");
+  });
+
+  test("serves the stored national ID image so the views can render it", async () => {
+    const response = await buildRegistrationRequest().attach(
+      "nationalIdImage",
+      createValidImageBuffer(),
+      { filename: "test-id.png", contentType: "image/png" }
+    );
+
+    expect(response.status).toBe(201);
+
+    const stored = await prisma.user.findUnique({
+      where: { email: validPayload.email.toLowerCase() },
+    });
+
+    expect(stored?.nationalIdImageUrl).toMatch(/^\/uploads\//);
+
+    const imageResponse = await request(app).get(stored.nationalIdImageUrl);
+
+    expect(imageResponse.status).toBe(200);
+    expect(imageResponse.headers["content-type"]).toContain("image/png");
+    expect(imageResponse.headers["x-content-type-options"]).toBe("nosniff");
   });
 });

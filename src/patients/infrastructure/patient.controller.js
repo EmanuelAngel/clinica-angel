@@ -1,6 +1,7 @@
 import z from "zod";
 import { services } from "../../_shared/infrastructure/services-container.js";
 import { validatePatientRegistration } from "./patient.schemas.js";
+import { uploadErrorMessage } from "./multer.middleware.js";
 import { unlink } from "node:fs/promises";
 
 import { sendNotFound } from "../../_shared/infrastructure/response-helpers.js";
@@ -29,6 +30,27 @@ export class PatientController {
       await services.healthInsuranceService.findAll();
 
     const { healthInsuranceId, memberNumber, ...restOfBody } = req.body;
+
+    // A file the upload middleware refused never reaches validation, so the
+    // form is rendered here with the reason instead of a generic error page.
+    if (res.locals.uploadError) {
+      res.status(422).render(res.locals.view, {
+        errors: {
+          properties: {
+            nationalIdImage: {
+              errors: [uploadErrorMessage(res.locals.uploadError)],
+            },
+          },
+        },
+        values: req.body,
+        result: {
+          type: "failure",
+          message: "Revise el formulario e intente nuevamente.",
+        },
+      });
+
+      return;
+    }
 
     const healthInsurances =
       healthInsuranceId || memberNumber
