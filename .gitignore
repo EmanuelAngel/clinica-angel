@@ -143,8 +143,8 @@ vite.config.ts.timestamp-*
 # Tailwind CSS output
 src/_assets/css/output.css
 
-# Patients national ID image uploads
-src/_assets/uploads
+# Patients national ID image uploads (outside the statically served tree)
+var/uploads
 
 # Agent skills installed per machine; skills-lock.json is the manifest
 .agents/
