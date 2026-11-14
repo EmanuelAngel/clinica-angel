@@ -1,8 +1,35 @@
+import nunjucks from "nunjucks";
+
 /**
  * Registers all custom Nunjucks filters on the given environment.
  * @param {import("nunjucks").Environment} njkEnv
  */
 export function registerNunjucksFilters(njkEnv) {
+  /**
+   * Serializes a value as JSON that is safe to embed inside a `<script>` block.
+   *
+   * Nunjucks' built-in `dump` is `JSON.stringify` and does not escape the
+   * `</script>` sequence, so pairing it with `safe` lets a stored or re-rendered
+   * value close the block and inject markup (JSON-in-HTML injection). This
+   * filter escapes every character that can close or comment the block and
+   * returns a `SafeString`, so templates use `{{ value | json }}` and never need
+   * `safe`.
+   * @param {unknown} value Value to serialize.
+   * @returns {import("nunjucks").runtime.SafeString} Escaped JSON literal.
+   */
+  njkEnv.addFilter("json", (value) => {
+    const json = JSON.stringify(value ?? null, null, 2) ?? "null";
+
+    const escaped = json
+      .replace(/</g, "\\u003c")
+      .replace(/>/g, "\\u003e")
+      .replace(/&/g, "\\u0026")
+      .replace(/\u2028/g, "\\u2028")
+      .replace(/\u2029/g, "\\u2029");
+
+    return new nunjucks.runtime.SafeString(escaped);
+  });
+
   /**
    * Formats a date value into a string using the given format.
    * @param {Date | string | null | undefined} date

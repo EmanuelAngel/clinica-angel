@@ -352,14 +352,14 @@
     // ═══════════════════════════════════════════════════════════════════════════
     // HYDRATION: Restore dynamic fields from server-side values
     // ═══════════════════════════════════════════════════════════════════════════
-    const initialWeeklyDays = {{ (values.config.weeklyDays | dump | safe) if values.config else '[]' }};
+    const initialWeeklyDays = {{ (values.config.weeklyDays if values and values.config else []) | json }};
     initialWeeklyDays.forEach(wd => {
       wd.ranges.forEach(r => {
         horarios.push({ days: [wd.day], start: r.start, end: r.end });
       });
     });
 
-    const initialBlocks = {{ (values.blocks | dump | safe) if values.blocks else '[]' }};
+    const initialBlocks = {{ (values.blocks if values and values.blocks else []) | json }};
     initialBlocks.forEach(b => {
       blocks.push(b);
     });

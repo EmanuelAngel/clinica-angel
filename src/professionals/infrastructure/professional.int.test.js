@@ -61,6 +61,19 @@ describe("Professional integration tests", () => {
       expect(response.status).toBe(200);
       expect(response.text).toContain("Registrar profesional");
     });
+
+    test("escapes specialty names that would break the script block", async () => {
+      const breakout = "</script><script>alert(1)</script>";
+      await prisma.specialty.create({ data: { name: breakout } });
+
+      const response = await request(app)
+        .get("/professionals/create")
+        .set("Cookie", `access_token=${adminToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.text).not.toContain(breakout);
+      expect(response.text).toContain("\\u003c/script\\u003e");
+    });
   });
 
   describe("POST /professionals", () => {

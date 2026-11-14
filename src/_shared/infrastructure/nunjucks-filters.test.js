@@ -138,3 +138,61 @@ describe("time filter", () => {
     expect(render("d | time", { d: "invalid" })).toBe("invalid");
   });
 });
+
+describe("json filter", () => {
+  /**
+   * The app configures autoescape: true, so this environment mirrors production.
+   * @type {nunjucks.Environment}
+   */
+  let escapedEnv;
+
+  beforeAll(() => {
+    escapedEnv = new nunjucks.Environment(null, { autoescape: true });
+    registerNunjucksFilters(escapedEnv);
+  });
+
+  /**
+   * Renders an inline expression with autoescape enabled.
+   * @param {string} expression
+   * @param {object} [context]
+   * @returns {string} Rendered output.
+   */
+  function renderEscaped(expression, context = {}) {
+    return escapedEnv.renderString(`{{ ${expression} }}`, context);
+  }
+
+  test("serializes with indentation and is not re-escaped by autoescape", () => {
+    const out = renderEscaped("data | json", { data: { name: "Carla" } });
+    expect(out).toBe('{\n  "name": "Carla"\n}');
+  });
+
+  test("round-trips: the parsed output equals the original value", () => {
+    const data = {
+      blocks: [
+        {
+          start: "2024-03-15",
+          end: "2024-03-16",
+          motive: 'Paro </script><script>alert("x")</script> & "comillas"',
+        },
+      ],
+    };
+    expect(JSON.parse(renderEscaped("data | json", { data }))).toEqual(data);
+  });
+
+  test("escapes script-breaking characters", () => {
+    const out = renderEscaped("data | json", {
+      data: { motive: "</script><script>alert(1)</script>" },
+    });
+
+    expect(out).not.toContain("</script>");
+    expect(out).not.toContain("<script>");
+    expect(out).toContain(String.raw`\u003c/script\u003e`);
+  });
+
+  test("serializes arrays, including the empty array", () => {
+    expect(renderEscaped("data | json", { data: [] })).toBe("[]");
+    expect(
+      JSON.parse(renderEscaped("data | json", { data: [1, "b"] }))
+    ).toEqual([1, "b"]);
+  });
+});

@@ -144,7 +144,7 @@
     const addBtn = document.getElementById('add-credential-btn');
     let credentialIndex = 0;
 
-    const specialties = {{ specialties | dump | safe }};
+    const specialties = {{ specialties | json }};
 
     /**
      * Las filas de especialidades se generan en el cliente, así que no pasan por
